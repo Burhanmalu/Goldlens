@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import {
-  ShieldCheck, ArrowRight, CheckCircle2, Zap,
-  Info, HelpCircle, Layers, ChevronDown, ChevronUp
+  ArrowRight, CheckCircle2,
+  HelpCircle, Layers, ChevronDown, ChevronUp
 } from 'lucide-react';
 import { Opportunity, OrderBookState } from '@/lib/types';
 

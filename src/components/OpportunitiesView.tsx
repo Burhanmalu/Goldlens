@@ -1,10 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import {
-  Zap, ShieldCheck, AlertTriangle, ArrowRight,
-  Filter, CheckCircle2, XCircle, Search
-} from 'lucide-react';
+import { Zap, ArrowRight } from 'lucide-react';
 import { Opportunity } from '@/lib/types';
 
 interface OpportunitiesViewProps {
@@ -12,11 +9,13 @@ interface OpportunitiesViewProps {
   onInspectOpportunity: (opp: Opportunity) => void;
 }
 
+type FilterType = 'all' | 'survives' | 'gross' | 'high_conf';
+
 export function OpportunitiesView({
   opportunities,
   onInspectOpportunity,
 }: OpportunitiesViewProps) {
-  const [filter, setFilter] = useState<'all' | 'survives' | 'gross' | 'high_conf'>('all');
+  const [filter, setFilter] = useState<FilterType>('all');
 
   const filteredOpps = opportunities.filter((opp) => {
     if (filter === 'survives') return opp.status === 'EDGE_SURVIVES';
@@ -24,6 +23,13 @@ export function OpportunitiesView({
     if (filter === 'high_conf') return opp.confidence >= 80;
     return true;
   });
+
+  const filterOptions: { id: FilterType; label: string }[] = [
+    { id: 'all', label: 'All Opportunities' },
+    { id: 'survives', label: '✓ Edge Survives' },
+    { id: 'gross', label: '⚠ Gross Only' },
+    { id: 'high_conf', label: 'High Confidence (>80%)' },
+  ];
 
   return (
     <div className="flex-1 bg-[#0B0E11] overflow-y-auto p-8 font-sans select-none">
@@ -43,15 +49,10 @@ export function OpportunitiesView({
 
           {/* Filters */}
           <div className="flex items-center gap-2 bg-[#11151A] p-1 rounded-lg border border-[#2B3139]">
-            {[
-              { id: 'all', label: 'All Opportunities' },
-              { id: 'survives', label: '✓ Edge Survives' },
-              { id: 'gross', label: '⚠ Gross Only' },
-              { id: 'high_conf', label: 'High Confidence (>80%)' },
-            ].map((f) => (
+            {filterOptions.map((f) => (
               <button
                 key={f.id}
-                onClick={() => setFilter(f.id as any)}
+                onClick={() => setFilter(f.id)}
                 className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
                   filter === f.id
                     ? 'bg-[#161A1F] text-gold border border-[#2B3139] shadow-sm'

@@ -1,10 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import {
-  ShieldCheck, GitCompareArrows, Layers, Play,
-  Sliders, ArrowRight, Activity, CheckCircle2
-} from 'lucide-react';
+import { ShieldCheck, GitCompareArrows, Layers } from 'lucide-react';
 import { AlphaAuditView } from './AlphaAuditView';
 import { RelativeValueView } from './RelativeValueView';
 import { MarketDepthPanel } from './MarketDepthPanel';

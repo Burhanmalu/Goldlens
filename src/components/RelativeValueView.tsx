@@ -1,23 +1,17 @@
 'use client';
 
 import React from 'react';
-import {
-  GitCompareArrows, Target, TrendingUp, Zap, ArrowRight,
-  ShieldCheck, AlertTriangle, Scale, Activity
-} from 'lucide-react';
+import { GitCompareArrows } from 'lucide-react';
 import { PairSpread, Opportunity } from '@/lib/types';
-import { CONTRACT_REGISTRY } from '@/lib/contracts';
 
 interface RelativeValueViewProps {
-  pairSpreads: PairSpread[];
-  opportunities: Opportunity[];
+  pairSpreads?: PairSpread[];
+  opportunities?: Opportunity[];
   onSelectPair: (pair: string) => void;
   onNavigateAudit: (opp?: Opportunity) => void;
 }
 
 export function RelativeValueView({
-  pairSpreads,
-  opportunities,
   onSelectPair,
   onNavigateAudit,
 }: RelativeValueViewProps) {

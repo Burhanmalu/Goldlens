@@ -1,5 +1,5 @@
 import { MarketDataPoint, ContractSnapshot, OHLCVCandle, OrderBookState, TradeTick, SignalEvent, AuditDetailedStep } from './types';
-import { CONTRACT_REGISTRY, CONTRACT_SYMBOLS } from './contracts';
+import { CONTRACT_REGISTRY } from './contracts';
 
 // ============================================================
 // Seeded Pseudo-Random Number Generator (deterministic)

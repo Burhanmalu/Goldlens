@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import {
-  Star, Search, ChevronDown, Check, ShieldCheck,
-  Scale, Info, ArrowUpRight, ArrowDownRight, Layers
+  Star, Search, ChevronDown, ShieldCheck,
+  Scale, ArrowUpRight, ArrowDownRight
 } from 'lucide-react';
 import { CONTRACT_REGISTRY, CONTRACT_LIST } from '@/lib/contracts';
 import { ContractSnapshot } from '@/lib/types';

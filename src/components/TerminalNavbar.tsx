@@ -2,8 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-  Hexagon, Play, Sparkles, Bell, Settings, User,
-  HelpCircle, CheckCircle2, ChevronRight
+  Hexagon, Sparkles, User, HelpCircle
 } from 'lucide-react';
 import { PageId } from '@/lib/types';
 

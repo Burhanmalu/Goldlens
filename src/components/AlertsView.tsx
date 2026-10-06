@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Bell, Plus, Trash2, CheckCircle, Zap, AlertTriangle } from 'lucide-react';
+import { Bell, Plus, Trash2 } from 'lucide-react';
 import { Alert } from '@/lib/types';
 
 export function AlertsView() {

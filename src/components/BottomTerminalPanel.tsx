@@ -1,13 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import {
-  Activity, ShieldCheck, TrendingUp, FileText, Database,
-  CheckCircle, XCircle, AlertTriangle, ArrowRight, Layers,
-  ChevronRight, Play, RefreshCw
-} from 'lucide-react';
 import { TradeTick, SignalEvent, AuditDetailedStep } from '@/lib/types';
-import { CONTRACT_REGISTRY, CONTRACT_LIST } from '@/lib/contracts';
+import { CONTRACT_LIST } from '@/lib/contracts';
 
 interface BottomTerminalPanelProps {
   trades: TradeTick[];
@@ -18,6 +13,8 @@ interface BottomTerminalPanelProps {
   onNavigatePage: (page: string) => void;
 }
 
+type TabType = 'trades' | 'signals' | 'audit' | 'backtest' | 'contracts' | 'data';
+
 export function BottomTerminalPanel({
   trades,
   signals,
@@ -26,26 +23,26 @@ export function BottomTerminalPanel({
   selectedAuditStep,
   onNavigatePage,
 }: BottomTerminalPanelProps) {
-  const [bottomTab, setBottomTab] = useState<
-    'trades' | 'signals' | 'audit' | 'backtest' | 'contracts' | 'data'
-  >('signals');
+  const [bottomTab, setBottomTab] = useState<TabType>('signals');
+
+  const tabs: { id: TabType; label: string; count?: number; highlight?: boolean }[] = [
+    { id: 'signals', label: 'SIGNALS STREAM', count: signals.length },
+    { id: 'trades', label: 'MARKET TRADES', count: trades.length },
+    { id: 'audit', label: 'ALPHA AUDIT PIPELINE', highlight: true },
+    { id: 'backtest', label: 'WALK-FORWARD BACKTEST' },
+    { id: 'contracts', label: 'MCX CONTRACT SPECS' },
+    { id: 'data', label: 'PIPELINE HEALTH' },
+  ];
 
   return (
     <div className="h-56 bg-secondary border-t border-border flex flex-col select-none text-xs flex-shrink-0">
       {/* Panel Header & Tabs */}
       <div className="h-8 bg-panel border-b border-border flex items-center justify-between px-3 flex-shrink-0">
         <div className="flex items-center gap-1">
-          {[
-            { id: 'signals', label: 'SIGNALS STREAM', count: signals.length },
-            { id: 'trades', label: 'MARKET TRADES', count: trades.length },
-            { id: 'audit', label: 'ALPHA AUDIT PIPELINE', highlight: true },
-            { id: 'backtest', label: 'WALK-FORWARD BACKTEST' },
-            { id: 'contracts', label: 'MCX CONTRACT SPECS' },
-            { id: 'data', label: 'PIPELINE HEALTH' },
-          ].map((tab) => (
+          {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setBottomTab(tab.id as any)}
+              onClick={() => setBottomTab(tab.id)}
               className={`px-2.5 py-1 rounded text-[11px] font-bold tracking-wide transition-colors flex items-center gap-1.5 ${
                 bottomTab === tab.id
                   ? 'bg-secondary text-gold border border-border/80 shadow-sm'
@@ -164,7 +161,7 @@ export function BottomTerminalPanel({
 
           {/* Horizontal 8-Step Pipeline */}
           <div className="grid grid-cols-8 gap-1.5 py-2">
-            {auditSteps.map((st, i) => {
+            {auditSteps.map((st) => {
               const isSelected = selectedAuditStep?.id === st.id;
               return (
                 <button

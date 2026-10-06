@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Target, Zap, AlertTriangle, CheckCircle, Info } from 'lucide-react';
+import { Target, Zap, Info } from 'lucide-react';
 
 interface ZScoreIndicatorProps {
   zScore: number;

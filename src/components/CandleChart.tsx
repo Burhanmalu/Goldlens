@@ -1,19 +1,18 @@
 'use client';
 
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import {
-  Maximize2, Minimize2, TrendingUp, BarChart2, Activity,
-  Sliders, RefreshCw, Eye, EyeOff, Sparkles, Layers,
-  Crosshair as CrosshairIcon, Minus, Plus, Settings
+  Maximize2, Minimize2, Activity,
+  Eye, EyeOff, Layers
 } from 'lucide-react';
-import { OHLCVCandle, MarketDataPoint } from '@/lib/types';
+import { OHLCVCandle } from '@/lib/types';
 import { CONTRACT_REGISTRY } from '@/lib/contracts';
 
 interface CandleChartProps {
   symbol: string;
-  compareSymbol: string;
+  compareSymbol?: string;
   candles: OHLCVCandle[];
-  multiContractData: Record<string, number | string>[];
+  multiContractData?: Record<string, number | string>[];
   timeframe: string;
   setTimeframe: (tf: string) => void;
   chartMode: 'candles' | 'normalized' | 'spread' | 'residual' | 'zscore' | 'line' | 'area';
@@ -41,9 +40,7 @@ interface CandleChartProps {
 
 export function CandleChart({
   symbol,
-  compareSymbol,
   candles,
-  multiContractData,
   timeframe,
   setTimeframe,
   chartMode,

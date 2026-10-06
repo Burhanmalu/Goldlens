@@ -1,11 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import {
-  ShieldCheck, AlertTriangle, XCircle, Zap, Play,
-  Sliders, ArrowUpRight, ArrowDownRight, Check, Activity,
-  Info, Sparkles, Scale
-} from 'lucide-react';
 import { Opportunity } from '@/lib/types';
 
 interface IntelligencePanelProps {

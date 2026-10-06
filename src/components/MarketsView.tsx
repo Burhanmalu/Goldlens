@@ -1,11 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import {
-  Search, Star, TrendingUp, TrendingDown, ArrowUpRight,
-  ArrowDownRight, Layers, Zap, ShieldCheck, Filter, RefreshCw
-} from 'lucide-react';
-import { CONTRACT_LIST, CONTRACT_REGISTRY } from '@/lib/contracts';
+import { Search, Layers } from 'lucide-react';
+import { CONTRACT_LIST } from '@/lib/contracts';
 import { ContractSnapshot } from '@/lib/types';
 
 interface MarketsViewProps {
@@ -115,15 +112,17 @@ export function MarketsView({
 
         {/* Category Tabs */}
         <div className="flex items-center gap-2 border-b border-border pb-2">
-          {[
-            { id: 'all', label: 'All MCX Gold' },
-            { id: 'favorites', label: 'Starred Watchlist' },
-            { id: 'active', label: 'Most Active' },
-            { id: 'movers', label: 'Top Dislocations' },
-          ].map((cat) => (
+          {(
+            [
+              { id: 'all' as const, label: 'All MCX Gold' },
+              { id: 'favorites' as const, label: 'Starred Watchlist' },
+              { id: 'active' as const, label: 'Most Active' },
+              { id: 'movers' as const, label: 'Top Dislocations' },
+            ] as const
+          ).map((cat) => (
             <button
               key={cat.id}
-              onClick={() => setActiveCategory(cat.id as any)}
+              onClick={() => setActiveCategory(cat.id)}
               className={`px-3 py-1.5 rounded font-semibold text-xs transition-colors ${
                 activeCategory === cat.id
                   ? 'bg-panel text-gold border border-border'

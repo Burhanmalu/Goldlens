@@ -3,7 +3,7 @@
 import React from 'react';
 import {
   ArrowUpRight, ArrowDownRight, ShieldCheck,
-  Scale, Droplets, CheckCircle, Info
+  Scale, Droplets
 } from 'lucide-react';
 import { CONTRACT_REGISTRY, CONTRACT_LIST } from '@/lib/contracts';
 import { ContractSnapshot } from '@/lib/types';

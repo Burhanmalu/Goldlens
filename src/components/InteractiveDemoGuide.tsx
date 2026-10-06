@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Sparkles, ChevronRight, Check, X, ArrowRight, Play } from 'lucide-react';
+import { ChevronRight, X } from 'lucide-react';
 
 interface InteractiveDemoGuideProps {
   demoStep: number;

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { BookOpen, Scale, ShieldCheck, Activity, Layers } from 'lucide-react';
+import { BookOpen, Scale, ShieldCheck, Activity } from 'lucide-react';
 
 export function ResearchView() {
   return (

@@ -1,10 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import {
-  Hexagon, Play, ArrowRight, ArrowLeft, X,
-  ShieldCheck, Scale, Activity, Sparkles
-} from 'lucide-react';
+import { Hexagon, Play, ArrowRight, ArrowLeft, X } from 'lucide-react';
 
 interface PitchPresentationModalProps {
   onClose: () => void;

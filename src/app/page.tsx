@@ -1,12 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { PageId, OHLCVCandle, OrderBookState, TradeTick, SignalEvent, Opportunity, ContractSnapshot, AuditDetailedStep } from '@/lib/types';
-import { CONTRACT_REGISTRY, CONTRACT_SYMBOLS } from '@/lib/contracts';
+import { PageId, OHLCVCandle, OrderBookState, ContractSnapshot } from '@/lib/types';
+import { CONTRACT_REGISTRY } from '@/lib/contracts';
 import {
   getMockData, getLatestSnapshots, getCombinedNormalizedSeries,
-  generateCandlestickData, generateOrderBook, generateInitialTrades,
-  generateInitialSignalEvents, getDetailedAuditSteps, BASE_FINE_GOLD_PRICE
+  generateCandlestickData, generateOrderBook, getDetailedAuditSteps
 } from '@/lib/mockData';
 import { generateOpportunities } from '@/lib/relativeValue';
 import { DEFAULT_SETTINGS } from '@/lib/settings';
@@ -50,7 +49,7 @@ export default function GoldLensApp() {
   const [isFullscreenChart, setIsFullscreenChart] = useState(false);
 
   // Simulation & Flash
-  const [isSimulating, setIsSimulating] = useState(true);
+  const isSimulating = true;
   const [priceFlash, setPriceFlash] = useState<'green' | 'red' | null>(null);
 
   // Demo & Onboarding State
@@ -287,7 +286,7 @@ export default function GoldLensApp() {
               snapshots={snapshots}
               selectedSymbol={selectedSymbol}
               onSelectSymbol={setSelectedSymbol}
-              onSelectPair={(pair) => {
+              onSelectPair={() => {
                 setSelectedSymbol('GOLDM');
                 setCompareSymbol('GOLDTEN');
                 setCurrentPage('dashboard');

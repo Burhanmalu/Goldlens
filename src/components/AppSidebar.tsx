@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Hexagon, LayoutDashboard, Layers, Zap, ShieldCheck,
   TrendingUp, BookOpen, Sparkles, HelpCircle, Maximize2,
-  User, Bell, Settings, ChevronLeft, ChevronRight, Activity, Clock
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { PageId } from '@/lib/types';
 

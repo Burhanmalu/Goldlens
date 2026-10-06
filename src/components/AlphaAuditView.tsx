@@ -2,15 +2,14 @@
 
 import React, { useState } from 'react';
 import {
-  ShieldCheck, AlertTriangle, CheckCircle2, XCircle, Play,
-  Sliders, RefreshCw, Layers, ArrowRight, Zap, Target,
+  ShieldCheck, CheckCircle2, Play,
   ChevronDown, ChevronUp
 } from 'lucide-react';
 import { AuditDetailedStep } from '@/lib/types';
 import { getDetailedAuditSteps } from '@/lib/mockData';
 
 export function AlphaAuditView() {
-  const [steps, setSteps] = useState<AuditDetailedStep[]>(getDetailedAuditSteps());
+  const steps = getDetailedAuditSteps();
   const [selectedStep, setSelectedStep] = useState<AuditDetailedStep>(steps[0]);
   const [showTechnicalDetails, setShowTechnicalDetails] = useState(false);
   const [isRunningAudit, setIsRunningAudit] = useState(false);

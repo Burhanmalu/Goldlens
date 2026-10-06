@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import {
   Activity, ShieldCheck, FileText, CheckCircle2,
-  ChevronRight, HelpCircle, ArrowRight, Layers
+  HelpCircle, ArrowRight
 } from 'lucide-react';
 import { CONTRACT_LIST } from '@/lib/contracts';
 import { AuditDetailedStep } from '@/lib/types';

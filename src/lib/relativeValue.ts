@@ -1,5 +1,5 @@
 import { PairSpread, MarketDataPoint, Opportunity, ResearchSettings } from './types';
-import { CONTRACT_REGISTRY, CONTRACT_SYMBOLS } from './contracts';
+import { CONTRACT_SYMBOLS } from './contracts';
 
 // ============================================================
 // Relative Value Engine

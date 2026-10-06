@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Layers, Activity, BarChart2, Info, ArrowRight } from 'lucide-react';
 import { OrderBookState, ContractSnapshot } from '@/lib/types';
 import { CONTRACT_REGISTRY, CONTRACT_SYMBOLS } from '@/lib/contracts';
 
@@ -21,8 +20,6 @@ export function MarketDepthPanel({
   zScores,
 }: MarketDepthPanelProps) {
   const [activeTab, setActiveTab] = useState<'orderbook' | 'cross' | 'depth'>('orderbook');
-
-  const spec = CONTRACT_REGISTRY[selectedSymbol] || CONTRACT_REGISTRY['GOLDM'];
 
   return (
     <div className="h-full bg-secondary border-r border-border flex flex-col select-none text-xs">

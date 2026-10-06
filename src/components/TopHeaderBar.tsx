@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Bell, Settings, User, Search, Sparkles } from 'lucide-react';
+import { Bell, User } from 'lucide-react';
 import { TickerRibbon } from './TickerRibbon';
 
 interface TopHeaderBarProps {

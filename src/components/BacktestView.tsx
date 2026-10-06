@@ -2,16 +2,15 @@
 
 import React, { useState } from 'react';
 import {
-  BarChart3, Play, Sliders, Target, ShieldCheck,
-  TrendingUp, ArrowUpRight, ArrowDownRight, RefreshCw,
-  ChevronDown, ChevronUp, CheckCircle2
+  BarChart3, Play,
+  ChevronDown, ChevronUp
 } from 'lucide-react';
 
 export function BacktestView() {
   const [strategy, setStrategy] = useState('GOLDM / GOLDTEN');
   const [period, setPeriod] = useState('2022 — 2025');
-  const [capital, setCapital] = useState(1000000);
-  const [txCost, setTxCost] = useState(0.08);
+  const capital = 1000000;
+  const txCost = 0.08;
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
 
