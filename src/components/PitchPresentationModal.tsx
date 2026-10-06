@@ -116,36 +116,36 @@ export function PitchPresentationModal({
   const currentSlide = slides[slide];
 
   return (
-    <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-md flex flex-col justify-between p-8 select-none font-sans">
+    <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-md flex flex-col justify-between p-4 sm:p-8 select-none font-sans overflow-y-auto no-scrollbar">
       {/* Top Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-gradient-to-br from-gold to-amber-600 rounded-lg flex items-center justify-center text-background font-black shadow">
+      <div className="flex items-center justify-between mb-4 sm:mb-0">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="w-8 h-8 bg-gradient-to-br from-gold to-amber-600 rounded-lg flex items-center justify-center text-background font-black shadow flex-shrink-0">
             <Hexagon size={18} className="fill-background stroke-background" />
           </div>
           <span className="font-extrabold text-sm tracking-widest text-foreground font-mono">
             GOLD<span className="text-gold">LENS</span>
           </span>
-          <span className="text-xs text-muted font-mono ml-2">
-            PITCH DECK ({slide + 1}/{slides.length})
+          <span className="text-[11px] sm:text-xs text-muted font-mono ml-1 sm:ml-2">
+            PITCH ({slide + 1}/{slides.length})
           </span>
         </div>
 
         <button
           onClick={onClose}
-          className="p-2 text-text-secondary hover:text-foreground hover:bg-panel rounded-full transition-colors"
+          className="p-2 text-text-secondary hover:text-foreground hover:bg-panel rounded-full transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center touch-manipulation"
         >
           <X size={20} />
         </button>
       </div>
 
       {/* Main Slide Content */}
-      <div className="max-w-4xl mx-auto text-center space-y-6 my-auto animate-fade-in">
-        <div className="space-y-2">
-          <h2 className="text-3xl md:text-5xl font-black text-foreground tracking-tight font-serif">
+      <div className="max-w-4xl mx-auto text-center space-y-4 sm:space-y-6 my-auto py-4 animate-fade-in w-full">
+        <div className="space-y-1.5 sm:space-y-2">
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-foreground tracking-tight font-serif">
             {currentSlide.title}
           </h2>
-          <p className="text-lg md:text-xl text-gold font-mono font-bold">
+          <p className="text-base sm:text-lg md:text-xl text-gold font-mono font-bold">
             {currentSlide.subtitle}
           </p>
           <p className="text-xs md:text-sm text-text-secondary font-mono italic">
@@ -153,16 +153,16 @@ export function PitchPresentationModal({
           </p>
         </div>
 
-        <div className="py-4">{currentSlide.content}</div>
+        <div className="py-2 sm:py-4">{currentSlide.content}</div>
       </div>
 
       {/* Bottom Slide Navigation & Demo Launch CTA */}
-      <div className="flex items-center justify-between max-w-4xl mx-auto w-full pt-6 border-t border-border">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row items-center justify-between max-w-4xl mx-auto w-full pt-4 sm:pt-6 border-t border-border gap-3">
+        <div className="flex items-center gap-2 order-2 sm:order-1">
           {slide > 0 && (
             <button
               onClick={() => setSlide(slide - 1)}
-              className="px-4 py-2 bg-panel hover:bg-panel-hover text-foreground rounded-lg font-mono text-xs transition-colors flex items-center gap-1.5"
+              className="px-4 py-2 bg-panel hover:bg-panel-hover text-foreground rounded-lg font-mono text-xs transition-colors flex items-center gap-1.5 min-h-[40px] touch-manipulation"
             >
               <ArrowLeft size={14} />
               <span>Previous</span>
@@ -170,11 +170,11 @@ export function PitchPresentationModal({
           )}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-end order-1 sm:order-2">
           {slide < slides.length - 1 ? (
             <button
               onClick={() => setSlide(slide + 1)}
-              className="px-6 py-2.5 bg-panel hover:bg-panel-hover text-gold border border-gold/40 rounded-lg font-mono text-xs font-bold transition-colors flex items-center gap-1.5"
+              className="px-4 sm:px-6 py-2 sm:py-2.5 bg-panel hover:bg-panel-hover text-gold border border-gold/40 rounded-lg font-mono text-xs font-bold transition-colors flex items-center justify-center gap-1.5 min-h-[40px] flex-1 sm:flex-none touch-manipulation"
             >
               <span>Next Slide</span>
               <ArrowRight size={14} />
@@ -186,10 +186,10 @@ export function PitchPresentationModal({
               onClose();
               onLaunchDemo();
             }}
-            className="px-6 py-2.5 bg-gold hover:bg-gold-hover text-background rounded-lg font-mono text-xs font-black transition-colors flex items-center gap-2 shadow-lg hover:shadow-xl"
+            className="px-4 sm:px-6 py-2 sm:py-2.5 bg-gold hover:bg-gold-hover text-background rounded-lg font-mono text-xs font-black transition-colors flex items-center justify-center gap-2 shadow-lg hover:shadow-xl min-h-[40px] flex-1 sm:flex-none touch-manipulation"
           >
             <Play size={14} className="fill-background" />
-            <span>START LIVE DEMO →</span>
+            <span>START DEMO →</span>
           </button>
         </div>
       </div>

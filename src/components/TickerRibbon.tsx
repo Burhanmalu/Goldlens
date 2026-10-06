@@ -41,8 +41,8 @@ export function TickerRibbon({
   ];
 
   return (
-    <div className="h-10 bg-[#0B0E11] border-b border-[#2B3139] px-4 flex items-center justify-between select-none overflow-x-auto text-xs z-30">
-      <div className="flex items-center gap-1.5 sm:gap-4 w-full justify-start sm:justify-center">
+    <div className="w-full bg-[#0B0E11] border-b border-[#2B3139] px-2 sm:px-4 py-1.5 flex items-center select-none overflow-x-auto no-scrollbar touch-pan-x text-xs z-20">
+      <div className="flex items-center gap-1.5 sm:gap-3 flex-nowrap min-w-max mx-auto sm:mx-0">
         {instruments.map((item) => {
           const isSelected = item.symbol === selectedSymbol;
           const isUp = item.change >= 0;
@@ -51,22 +51,22 @@ export function TickerRibbon({
             <button
               key={item.symbol}
               onClick={() => onSelectSymbol(item.symbol)}
-              className={`flex items-center gap-2.5 px-3 py-1 rounded-md transition-all ${
+              className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg transition-all flex-shrink-0 touch-manipulation min-h-[36px] ${
                 isSelected
-                  ? 'bg-[#161A1F] border border-gold/40 text-gold shadow-sm'
-                  : 'hover:bg-[#161A1F]/70 text-text-secondary hover:text-foreground'
+                  ? 'bg-[#161A1F] border border-gold/50 text-gold shadow-sm ring-1 ring-gold/20'
+                  : 'bg-[#11151A]/60 border border-[#2B3139]/60 hover:bg-[#161A1F] text-text-secondary hover:text-foreground'
               }`}
             >
-              <span className={`font-bold font-mono text-xs ${isSelected ? 'text-gold' : 'text-foreground'}`}>
+              <span className={`font-bold font-mono text-[11px] sm:text-xs ${isSelected ? 'text-gold' : 'text-foreground'}`}>
                 {item.symbol}
               </span>
 
-              <span className="font-mono tabular-nums text-foreground font-semibold">
+              <span className="font-mono tabular-nums text-foreground font-semibold text-[11px] sm:text-xs">
                 ₹{item.price.toLocaleString('en-IN')}
               </span>
 
               <span
-                className={`font-mono tabular-nums text-[11px] font-bold flex items-center ${
+                className={`font-mono tabular-nums text-[10px] sm:text-[11px] font-bold ${
                   isUp ? 'text-buy' : 'text-sell'
                 }`}
               >

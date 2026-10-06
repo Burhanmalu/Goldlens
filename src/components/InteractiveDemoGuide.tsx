@@ -80,37 +80,37 @@ export function InteractiveDemoGuide({
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 max-w-md w-full bg-secondary/95 border border-gold/60 rounded-xl p-4 shadow-2xl backdrop-blur-md text-xs font-mono select-none animate-slide-up">
+    <div className="fixed bottom-20 sm:bottom-4 left-3 right-3 sm:left-auto sm:right-4 z-50 max-w-md bg-[#161A1F]/95 border border-gold/60 rounded-xl p-4 shadow-2xl backdrop-blur-md text-xs font-mono select-none animate-slide-up">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-border pb-2 mb-3">
+      <div className="flex items-center justify-between border-b border-[#2B3139] pb-2 mb-3">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-gold animate-pulse" />
           <span className="text-gold font-bold text-xs uppercase tracking-wider">
-            GOLDLENS GUIDED TOUR ({demoStep + 1}/{steps.length})
+            GOLDLENS TOUR ({demoStep + 1}/{steps.length})
           </span>
         </div>
 
         <button
           onClick={onExit}
-          className="text-muted hover:text-foreground transition-colors p-1"
+          className="text-muted hover:text-foreground transition-colors p-1.5 min-h-[32px] min-w-[32px] flex items-center justify-center touch-manipulation"
           title="Exit Tour"
         >
-          <X size={14} />
+          <X size={16} />
         </button>
       </div>
 
       {/* Body */}
-      <div className="space-y-2 mb-4">
+      <div className="space-y-1.5 mb-3">
         <h3 className="font-bold text-sm text-foreground">{current.title}</h3>
         <p className="text-text-secondary font-sans text-xs leading-relaxed">{current.desc}</p>
       </div>
 
       {/* Footer Controls */}
-      <div className="flex items-center justify-between pt-2 border-t border-border">
+      <div className="flex items-center justify-between pt-2 border-t border-[#2B3139] gap-2">
         {demoStep > 0 ? (
           <button
             onClick={() => setDemoStep(demoStep - 1)}
-            className="px-3 py-1 bg-panel hover:bg-panel-hover text-text-secondary hover:text-foreground rounded border border-border text-[11px] transition-colors"
+            className="px-3 py-1.5 bg-[#11151A] hover:bg-[#1C2128] text-text-secondary hover:text-foreground rounded border border-[#2B3139] text-xs transition-colors min-h-[36px] touch-manipulation"
           >
             Back
           </button>
@@ -120,10 +120,10 @@ export function InteractiveDemoGuide({
 
         <button
           onClick={handleNext}
-          className="px-4 py-1.5 bg-gold hover:bg-gold-hover text-background font-bold rounded text-xs transition-colors flex items-center gap-1.5 shadow"
+          className="px-4 py-1.5 bg-gold hover:bg-gold-hover text-background font-bold rounded text-xs transition-colors flex items-center gap-1.5 shadow min-h-[36px] touch-manipulation"
         >
           <span>{current.actionLabel}</span>
-          <ChevronRight size={13} />
+          <ChevronRight size={14} />
         </button>
       </div>
     </div>

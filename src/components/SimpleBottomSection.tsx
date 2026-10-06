@@ -32,48 +32,48 @@ export function SimpleBottomSection({
   return (
     <div className="bg-[#11151A] border-t border-[#2B3139] p-5 select-none font-sans">
       {/* Tabs Header */}
-      <div className="flex items-center justify-between border-b border-[#2B3139] pb-3 mb-4">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#2B3139] pb-3 mb-4 gap-3">
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar touch-pan-x pb-1 sm:pb-0">
           <button
             onClick={() => setActiveTab('activity')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+            className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap min-h-[38px] touch-manipulation ${
               activeTab === 'activity'
                 ? 'bg-[#161A1F] text-gold border border-[#2B3139] shadow-sm'
                 : 'text-text-secondary hover:text-foreground'
             }`}
           >
-            <Activity size={13} />
+            <Activity size={14} />
             <span>Activity</span>
           </button>
 
           <button
             onClick={() => setActiveTab('validation')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+            className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap min-h-[38px] touch-manipulation ${
               activeTab === 'validation'
                 ? 'bg-[#161A1F] text-gold border border-[#2B3139] shadow-sm'
                 : 'text-text-secondary hover:text-foreground'
             }`}
           >
-            <ShieldCheck size={13} />
+            <ShieldCheck size={14} />
             <span>Validation</span>
           </button>
 
           <button
             onClick={() => setActiveTab('contracts')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+            className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap min-h-[38px] touch-manipulation ${
               activeTab === 'contracts'
                 ? 'bg-[#161A1F] text-gold border border-[#2B3139] shadow-sm'
                 : 'text-text-secondary hover:text-foreground'
             }`}
           >
-            <FileText size={13} />
+            <FileText size={14} />
             <span>Contract Info</span>
           </button>
         </div>
 
         <button
           onClick={onOpenAnalysis}
-          className="text-xs text-text-secondary hover:text-gold flex items-center gap-1 transition-colors font-medium"
+          className="text-xs text-text-secondary hover:text-gold flex items-center gap-1 transition-colors font-medium self-start sm:self-auto py-1"
         >
           <span>Open Full Analysis Studio</span>
           <ArrowRight size={13} />

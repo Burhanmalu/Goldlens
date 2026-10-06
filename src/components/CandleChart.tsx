@@ -135,13 +135,63 @@ export function CandleChart({
     <div
       ref={containerRef}
       className={`bg-[#161A1F] flex flex-col select-none relative ${
-        isFullscreen ? 'fixed inset-0 z-50 bg-[#0B0E11] h-screen w-screen p-4' : 'flex-1 h-full'
+        isFullscreen ? 'fixed inset-0 z-50 bg-[#0B0E11] h-screen w-screen p-2 sm:p-4' : 'flex-1 h-full min-h-[360px] sm:min-h-[400px]'
       }`}
     >
       {/* ── TOP CHART CONTROLS TOOLBAR ── */}
-      <div className="h-11 bg-[#11151A] border-b border-[#2B3139] px-4 flex items-center justify-between gap-3 flex-wrap flex-shrink-0 z-10 text-xs">
-        {/* Left: View Mode Toggles */}
-        <div className="flex items-center gap-1.5">
+      <div className="bg-[#11151A] border-b border-[#2B3139] px-2 sm:px-4 py-2 flex items-center justify-between gap-2 flex-wrap flex-shrink-0 z-10 text-xs">
+        {/* Mobile Compact Controls (< sm) */}
+        <div className="flex sm:hidden items-center justify-between w-full gap-1.5">
+          {/* Mobile Timeframe Dropdown */}
+          <select
+            value={timeframe}
+            onChange={(e) => setTimeframe(e.target.value)}
+            className="bg-[#161A1F] text-gold font-bold font-mono text-xs px-2.5 py-1.5 rounded-lg border border-[#2B3139] focus:outline-none min-h-[38px] touch-manipulation"
+          >
+            <option value="1m">1m</option>
+            <option value="5m">5m</option>
+            <option value="15m">15m</option>
+            <option value="1H">1H</option>
+            <option value="4H">4H</option>
+            <option value="1D">1D</option>
+            <option value="1W">1W</option>
+          </select>
+
+          {/* Mobile Chart Mode Dropdown */}
+          <select
+            value={chartMode}
+            onChange={(e) => setChartMode(e.target.value as any)}
+            className="bg-[#161A1F] text-foreground font-bold text-xs px-2.5 py-1.5 rounded-lg border border-[#2B3139] focus:outline-none min-h-[38px] touch-manipulation"
+          >
+            <option value="candles">Candles</option>
+            <option value="normalized">Normalized (Fine Gold)</option>
+            <option value="spread">Spread Matrix</option>
+            <option value="zscore">Z-Score Sigma</option>
+          </select>
+
+          {/* Indicators Icon Toggle */}
+          <button
+            onClick={() => setIndicatorMenuOpen(!indicatorMenuOpen)}
+            className={`p-2 rounded-lg border text-xs font-semibold transition-colors min-h-[38px] min-w-[38px] flex items-center justify-center ${
+              indicatorMenuOpen ? 'bg-gold/20 text-gold border-gold/40' : 'bg-[#161A1F] text-text-secondary border-[#2B3139]'
+            }`}
+            title="Technical Indicators"
+          >
+            <Activity size={15} className="text-gold" />
+          </button>
+
+          {/* Fullscreen Button */}
+          <button
+            onClick={() => setIsFullscreen(!isFullscreen)}
+            className="p-2 bg-[#161A1F] text-text-secondary hover:text-foreground rounded-lg border border-[#2B3139] transition-colors min-h-[38px] min-w-[38px] flex items-center justify-center"
+            title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+          >
+            {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+          </button>
+        </div>
+
+        {/* Desktop Controls (sm:flex) */}
+        <div className="hidden sm:flex items-center gap-1.5">
           <button
             onClick={() => setChartMode('candles')}
             className={`px-3 py-1.5 rounded-md font-bold text-xs transition-colors ${
@@ -189,8 +239,8 @@ export function CandleChart({
           </button>
         </div>
 
-        {/* Middle: Timeframe & Ranges */}
-        <div className="flex items-center gap-2">
+        {/* Middle: Timeframe & Ranges on Desktop */}
+        <div className="hidden sm:flex items-center gap-2">
           {/* Timeframes */}
           <div className="flex items-center bg-[#161A1F] rounded-lg p-0.5 border border-[#2B3139]">
             {timeframes.map((tf) => (
@@ -209,7 +259,7 @@ export function CandleChart({
           </div>
 
           {/* Ranges */}
-          <div className="hidden sm:flex items-center bg-[#161A1F] rounded-lg p-0.5 border border-[#2B3139]">
+          <div className="hidden md:flex items-center bg-[#161A1F] rounded-lg p-0.5 border border-[#2B3139]">
             {ranges.map((rg) => (
               <button
                 key={rg}
@@ -226,8 +276,8 @@ export function CandleChart({
           </div>
         </div>
 
-        {/* Right: Indicators & Fullscreen */}
-        <div className="flex items-center gap-2 relative">
+        {/* Right: Indicators & Fullscreen on Desktop */}
+        <div className="hidden sm:flex items-center gap-2 relative">
           <div className="relative">
             <button
               onClick={() => setIndicatorMenuOpen(!indicatorMenuOpen)}
@@ -236,7 +286,6 @@ export function CandleChart({
               <Activity size={13} className="text-gold" />
               <span>Indicators</span>
             </button>
-
 
             {indicatorMenuOpen && (
               <div className="absolute right-0 top-full mt-1 w-52 bg-secondary border border-border rounded-lg shadow-2xl p-2 z-50 space-y-1">
@@ -284,8 +333,44 @@ export function CandleChart({
         </div>
       </div>
 
+      {/* Mobile Indicator Dropdown Popover */}
+      {indicatorMenuOpen && (
+        <div className="sm:hidden absolute top-12 left-2 right-2 bg-[#11151A] border border-border rounded-xl shadow-2xl p-3 z-50 space-y-1 animate-slide-up">
+          <div className="flex items-center justify-between border-b border-[#2B3139] pb-2 mb-1">
+            <span className="text-xs font-bold text-gold uppercase font-mono">Technical Overlays</span>
+            <button onClick={() => setIndicatorMenuOpen(false)} className="text-text-secondary text-xs">Close ✕</button>
+          </div>
+          {[
+            { key: 'ma', label: 'Moving Avg (MA 20)' },
+            { key: 'ema', label: 'Exponential MA (EMA)' },
+            { key: 'vwap', label: 'VWAP Benchmark' },
+            { key: 'bollinger', label: 'Bollinger Bands (2σ)' },
+            { key: 'zscore', label: 'Z-Score Oscillator' },
+            { key: 'signals', label: 'Signal Flags (Pass/Fail)' },
+          ].map((item) => (
+            <button
+              key={item.key}
+              onClick={() =>
+                setIndicators((prev) => ({
+                  ...prev,
+                  [item.key]: !prev[item.key as keyof typeof prev],
+                }))
+              }
+              className="w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs text-text-secondary hover:text-foreground hover:bg-panel min-h-[40px] touch-manipulation"
+            >
+              <span>{item.label}</span>
+              {indicators[item.key as keyof typeof indicators] ? (
+                <Eye size={15} className="text-gold" />
+              ) : (
+                <EyeOff size={15} className="text-muted" />
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* ── HOVER STATS BAR / CROSSHAIR READOUT ── */}
-      <div className="h-7 bg-panel px-3 border-b border-border/60 flex items-center gap-4 text-[11px] font-mono select-none overflow-x-auto">
+      <div className="h-7 bg-[#11151A] px-3 border-b border-[#2B3139]/60 flex items-center gap-3 text-[10px] sm:text-[11px] font-mono select-none overflow-x-auto no-scrollbar">
         <span className="text-foreground font-bold">{symbol}</span>
         <span className="text-muted">{activeCandle?.timeStr || '10:30'}</span>
 

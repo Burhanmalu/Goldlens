@@ -48,70 +48,62 @@ export function MarketsView({
   );
 
   return (
-    <div className="flex-1 bg-background overflow-y-auto p-6 font-mono text-xs select-none">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="flex-1 bg-background overflow-y-auto p-4 sm:p-6 lg:p-8 pb-24 lg:pb-8 font-mono text-xs select-none">
+      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">
           <div>
-            <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
-              <Layers size={20} className="text-gold" />
-              MCX GOLD MARKETS OVERVIEW
+            <h1 className="text-lg sm:text-xl font-bold text-foreground flex items-center gap-2">
+              <Layers size={18} className="text-gold" />
+              <span>MCX GOLD MARKETS DIRECTORY</span>
             </h1>
-            <p className="text-text-secondary text-xs mt-1 font-sans">
+            <p className="text-text-secondary text-xs mt-0.5 font-sans">
               All active MCX gold derivatives normalized into a common economic unit (₹/g 999 fine gold).
             </p>
           </div>
 
-          {/* Search & Refresh */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-panel rounded border border-border">
-              <Search size={14} className="text-muted" />
-              <input
-                type="text"
-                placeholder="Search contracts..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-transparent text-xs text-foreground placeholder:text-muted focus:outline-none w-48 font-mono"
-              />
-            </div>
-            <button
-              onClick={onNavigateTerminal}
-              className="px-4 py-2 bg-gold hover:bg-gold-hover text-background font-bold rounded-lg text-xs transition-colors shadow"
-            >
-              Open Dashboard →
-            </button>
+          {/* Search Bar */}
+          <div className="flex items-center gap-2 px-3 py-2 bg-panel rounded-xl border border-border w-full sm:w-64 min-h-[40px]">
+            <Search size={14} className="text-muted" />
+            <input
+              type="text"
+              placeholder="Search contracts..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="bg-transparent text-xs text-foreground placeholder:text-muted focus:outline-none w-full font-mono"
+            />
           </div>
         </div>
 
-        {/* Quick KPI Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="p-4 bg-panel rounded-lg border border-border">
-            <span className="text-[10px] text-muted uppercase block">FAIR FINE GOLD BENCHMARK</span>
-            <div className="text-xl font-black text-gold mt-1">₹12,842.10/g</div>
-            <span className="text-[10px] text-buy block mt-1">+0.42% (24h)</span>
+        {/* Quick KPI Highlights Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+          <div className="p-3 sm:p-4 bg-panel rounded-xl border border-border">
+            <span className="text-[10px] text-muted uppercase block">BENCHMARK FINE GOLD</span>
+            <div className="text-base sm:text-xl font-black text-gold mt-1">₹12,842.10/g</div>
+            <span className="text-[10px] text-buy block mt-0.5">+0.42% (24h)</span>
           </div>
 
-          <div className="p-4 bg-panel rounded-lg border border-border">
+          <div className="p-3 sm:p-4 bg-panel rounded-xl border border-border">
             <span className="text-[10px] text-muted uppercase block">DISLOCATED PAIRS</span>
-            <div className="text-xl font-black text-foreground mt-1">1 Live Pair</div>
-            <span className="text-[10px] text-gold block mt-1">GOLDM / GOLDTEN (+0.33%)</span>
+            <div className="text-base sm:text-xl font-black text-foreground mt-1">1 Live Pair</div>
+            <span className="text-[10px] text-gold block mt-0.5 truncate">GOLDM / GOLDTEN (+0.33%)</span>
           </div>
 
-          <div className="p-4 bg-panel rounded-lg border border-border">
-            <span className="text-[10px] text-muted uppercase block">TOTAL MCX DAILY TURNOVER</span>
-            <div className="text-xl font-black text-foreground mt-1">₹3,420 Cr</div>
-            <span className="text-[10px] text-text-secondary block mt-1">Highest: GOLDM (68%)</span>
+          <div className="p-3 sm:p-4 bg-panel rounded-xl border border-border">
+            <span className="text-[10px] text-muted uppercase block">MCX DAILY TURNOVER</span>
+            <div className="text-base sm:text-xl font-black text-foreground mt-1">₹3,420 Cr</div>
+            <span className="text-[10px] text-text-secondary block mt-0.5">Highest: GOLDM (68%)</span>
           </div>
 
-          <div className="p-4 bg-panel rounded-lg border border-border">
+          <div className="p-3 sm:p-4 bg-panel rounded-xl border border-border">
             <span className="text-[10px] text-muted uppercase block">ALPHA SURVIVAL RATE</span>
-            <div className="text-xl font-black text-buy mt-1">89% Validated</div>
-            <span className="text-[10px] text-text-secondary block mt-1">Walk-Forward Sharpe 1.84</span>
+            <div className="text-base sm:text-xl font-black text-buy mt-1">89% Validated</div>
+            <span className="text-[10px] text-text-secondary block mt-0.5">Sharpe 1.84</span>
           </div>
         </div>
 
-        {/* Category Tabs */}
-        <div className="flex items-center gap-2 border-b border-border pb-2">
+        {/* Category Tabs (Horizontally scrollable) */}
+        <div className="flex items-center gap-1.5 border-b border-border pb-2 overflow-x-auto no-scrollbar touch-pan-x">
           {(
             [
               { id: 'all' as const, label: 'All MCX Gold' },
@@ -123,9 +115,9 @@ export function MarketsView({
             <button
               key={cat.id}
               onClick={() => setActiveCategory(cat.id)}
-              className={`px-3 py-1.5 rounded font-semibold text-xs transition-colors ${
+              className={`px-3 py-2 rounded-lg font-semibold text-xs transition-colors whitespace-nowrap flex-shrink-0 touch-manipulation min-h-[38px] ${
                 activeCategory === cat.id
-                  ? 'bg-panel text-gold border border-border'
+                  ? 'bg-panel text-gold border border-gold/40 shadow-sm ring-1 ring-gold/20'
                   : 'text-text-secondary hover:text-foreground'
               }`}
             >
@@ -134,8 +126,71 @@ export function MarketsView({
           ))}
         </div>
 
-        {/* Markets Table */}
-        <div className="bg-panel rounded-lg border border-border overflow-hidden">
+        {/* ── MOBILE VIEW: STACKED CONTRACT CARDS (< md) ── */}
+        <div className="grid grid-cols-1 gap-3 md:hidden">
+          {marketRows.map((row) => (
+            <div
+              key={row.symbol}
+              onClick={() => {
+                onSelectInstrument(row.symbol);
+                onNavigateTerminal();
+              }}
+              className="p-4 bg-panel rounded-2xl border border-border active:border-gold transition-all space-y-3 touch-manipulation cursor-pointer shadow-sm"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: row.color }} />
+                  <div>
+                    <span className="font-black text-base text-foreground">{row.symbol}</span>
+                    <span className="text-xs text-text-secondary ml-1.5 font-sans">({row.name})</span>
+                  </div>
+                </div>
+
+                <div className="text-right">
+                  <div className="font-mono font-black text-base text-foreground">
+                    ₹{row.lastPrice?.toLocaleString('en-IN')}
+                  </div>
+                  <div className={`font-mono text-xs font-bold ${row.isUp ? 'text-buy' : 'text-sell'}`}>
+                    {row.isUp ? '+' : ''}
+                    {row.change?.toFixed(2)}%
+                  </div>
+                </div>
+              </div>
+
+              {/* Card Meta & Normalization */}
+              <div className="grid grid-cols-2 gap-2 p-2.5 bg-secondary rounded-xl text-xs">
+                <div>
+                  <span className="text-[10px] text-muted block">Contract Spec:</span>
+                  <span className="text-foreground font-semibold">{row.contractSize}g • {row.purity}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-muted block">Normalized Fine Gold:</span>
+                  <span className="text-gold font-bold">₹{Math.round(row.normalizedPrice).toLocaleString('en-IN')}/g</span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-1">
+                <span className="text-[11px] text-muted font-mono">
+                  Vol: {(row.volume || 15000).toLocaleString('en-IN')} lots
+                </span>
+
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSelectInstrument(row.symbol);
+                    onNavigateTerminal();
+                  }}
+                  className="px-3 py-1.5 bg-gold text-background rounded-lg font-bold text-xs shadow min-h-[36px] flex items-center gap-1"
+                >
+                  <span>Trade / Chart →</span>
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* ── DESKTOP VIEW: FULL TABLE (md:block) ── */}
+        <div className="hidden md:block bg-panel rounded-xl border border-border overflow-hidden">
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="bg-secondary text-[10px] text-muted border-b border-border">
@@ -227,7 +282,7 @@ export function MarketsView({
                         onSelectInstrument(row.symbol);
                         onNavigateTerminal();
                       }}
-                      className="px-3 py-1 bg-secondary hover:bg-gold hover:text-background text-foreground border border-border rounded font-bold text-[10px] transition-all"
+                      className="px-3 py-1.5 bg-secondary hover:bg-gold hover:text-background text-foreground border border-border rounded-lg font-bold text-[10px] transition-all"
                     >
                       Trade Terminal →
                     </button>

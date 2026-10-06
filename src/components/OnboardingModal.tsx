@@ -9,12 +9,12 @@ interface OnboardingModalProps {
 
 export function OnboardingModal({ onClose }: OnboardingModalProps) {
   return (
-    <div className="fixed inset-0 z-50 bg-background/85 backdrop-blur-md flex items-center justify-center p-4 select-none font-sans animate-fade-in">
-      <div className="bg-[#161A1F] border border-gold/40 rounded-2xl p-8 max-w-2xl w-full shadow-2xl relative space-y-6">
+    <div className="fixed inset-0 z-50 bg-background/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 select-none font-sans animate-fade-in">
+      <div className="bg-[#161A1F] border border-gold/40 rounded-2xl p-5 sm:p-8 max-w-2xl w-full shadow-2xl relative space-y-4 sm:space-y-6 max-h-[92vh] overflow-y-auto no-scrollbar">
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-1.5 text-text-secondary hover:text-foreground hover:bg-[#1C2128] rounded-full transition-colors"
+          className="absolute top-4 right-4 p-2 text-text-secondary hover:text-foreground hover:bg-[#1C2128] rounded-full transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center touch-manipulation"
         >
           <X size={18} />
         </button>
