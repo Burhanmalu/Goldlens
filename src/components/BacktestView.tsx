@@ -142,10 +142,6 @@ export function BacktestView() {
               </span>
             </div>
           </div>
-                Buy & Hold (+3.2%)
-              </span>
-            </div>
-          </div>
 
           {/* SVG Curve */}
           <div className="h-64 bg-[#11151A] rounded-lg border border-[#2B3139] p-4 relative">
