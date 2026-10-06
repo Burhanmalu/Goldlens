@@ -131,10 +131,6 @@ export function CandleChart({
     return priceChartHeight - ((price - minPrice) / (maxPrice - minPrice || 1)) * priceChartHeight;
   };
 
-  const getVolY = (vol: number) => {
-    return volChartHeight - (vol / (maxVol || 1)) * volChartHeight;
-  };
-
   return (
     <div
       ref={containerRef}
