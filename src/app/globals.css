@@ -59,6 +59,13 @@ html, body {
   border-radius: 2px;
 }
 
+/* Ensure desktop sidebar is completely hidden on mobile viewports */
+@media (max-width: 1023px) {
+  .app-desktop-sidebar {
+    display: none !important;
+  }
+}
+
 ::-webkit-scrollbar-thumb:hover {
   background: #474D57;
 }

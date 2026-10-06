@@ -228,7 +228,7 @@ export function AppSidebar({
     <>
       {/* ── DESKTOP SIDEBAR (1024px+) ── */}
       <aside
-        className={`hidden lg:flex h-screen bg-[#11151A] border-r border-[#2B3139] flex-col justify-between select-none transition-all duration-300 z-30 flex-shrink-0 ${
+        className={`app-desktop-sidebar hidden lg:flex h-screen bg-[#11151A] border-r border-[#2B3139] flex-col justify-between select-none transition-all duration-300 z-30 flex-shrink-0 ${
           isCollapsed ? 'w-16 min-w-[4rem]' : 'w-60 min-w-[15rem]'
         }`}
       >
