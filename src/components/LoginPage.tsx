@@ -2,9 +2,9 @@
 
 import React, { useState } from 'react';
 import {
-  Hexagon, Lock, Mail, Eye, EyeOff, ShieldCheck,
-  ArrowRight, Sparkles, CheckCircle2, AlertCircle, Key,
-  TrendingUp, Terminal, Zap, Shield
+  Hexagon, Lock, Mail, Eye, EyeOff,
+  ArrowRight, Sparkles, CheckCircle2, AlertCircle,
+  Terminal, Zap, Shield
 } from 'lucide-react';
 
 interface LoginPageProps {

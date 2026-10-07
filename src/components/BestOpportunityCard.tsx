@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import {
   ArrowRight, CheckCircle2,
-  HelpCircle, Layers, Sliders, ExternalLink
+  HelpCircle, Layers, Sliders
 } from 'lucide-react';
 import { Opportunity, OrderBookState, ContractSnapshot } from '@/lib/types';
 
