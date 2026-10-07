@@ -72,7 +72,7 @@ export function CandleChart({
     setPanOffset(0);
   };
 
-  // Prevent entire page / screen from zooming when scrolling/pinching on chart
+  // Zoom & Pan Events: Wheel on Desktop, 2-Finger Pinch on Mobile, 1-Finger Natural Scroll
   React.useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -88,9 +88,58 @@ export function CandleChart({
       }
     };
 
+    let initialPinchDistance: number | null = null;
+    let initialZoomCount = 48;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        initialPinchDistance = Math.hypot(dx, dy);
+        setZoomCount((current) => {
+          initialZoomCount = current;
+          return current;
+        });
+      } else {
+        initialPinchDistance = null;
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 2 && initialPinchDistance !== null && initialPinchDistance > 0) {
+        // 2 Thumbs / Fingers: Zoom chart without triggering browser zoom
+        e.preventDefault();
+        e.stopPropagation();
+
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const currentDistance = Math.hypot(dx, dy);
+        const scale = currentDistance / initialPinchDistance;
+
+        // When scale > 1 (spreading fingers): zoom in (fewer candles)
+        // When scale < 1 (pinching fingers): zoom out (more candles)
+        const targetZoom = Math.round(initialZoomCount / Math.max(0.2, scale));
+        setZoomCount(Math.max(20, Math.min(80, targetZoom)));
+      }
+      // 1 Thumb / Finger: do not preventDefault -> page scrolls down smoothly!
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (e.touches.length < 2) {
+        initialPinchDistance = null;
+      }
+    };
+
     el.addEventListener('wheel', handleWheel, { passive: false });
+    el.addEventListener('touchstart', handleTouchStart, { passive: true });
+    el.addEventListener('touchmove', handleTouchMove, { passive: false });
+    el.addEventListener('touchend', handleTouchEnd, { passive: true });
+
     return () => {
       el.removeEventListener('wheel', handleWheel);
+      el.removeEventListener('touchstart', handleTouchStart);
+      el.removeEventListener('touchmove', handleTouchMove);
+      el.removeEventListener('touchend', handleTouchEnd);
     };
   }, [candles.length]);
 
@@ -186,19 +235,19 @@ export function CandleChart({
   return (
     <div
       ref={containerRef}
-      className={`bg-[#161A1F] flex flex-col select-none relative h-full w-full min-h-[440px] sm:min-h-[480px] overscroll-contain touch-pan-x ${
+      className={`bg-[#161A1F] flex flex-col select-none relative h-full w-full min-h-[440px] sm:min-h-[480px] touch-pan-y ${
         isFullscreen ? 'fixed inset-0 z-50 bg-[#0B0E11] h-screen w-screen p-2 sm:p-4' : 'flex-1'
       }`}
     >
       {/* ── TOP CHART CONTROLS TOOLBAR ── */}
-      <div className="bg-[#11151A] border-b border-[#2B3139] px-2 sm:px-4 py-2 flex items-center justify-between gap-2 flex-wrap flex-shrink-0 z-10 text-xs">
-        {/* Mobile Compact Controls (< sm) */}
-        <div className="flex sm:hidden items-center justify-between w-full gap-1.5">
+      <div className="bg-[#11151A] border-b border-[#2B3139] px-2 sm:px-4 py-1.5 sm:py-2 flex items-center justify-between gap-2 flex-shrink-0 z-10 text-xs">
+        {/* Mobile Compact Controls (< sm) with Smooth Horizontal Scroll */}
+        <div className="flex sm:hidden items-center gap-1.5 w-full overflow-x-auto no-scrollbar touch-pan-x py-0.5">
           {/* Mobile Timeframe Dropdown */}
           <select
             value={timeframe}
             onChange={(e) => setTimeframe(e.target.value)}
-            className="bg-[#161A1F] text-gold font-bold font-mono text-xs px-2.5 py-1.5 rounded-lg border border-[#2B3139] focus:outline-none min-h-[38px] touch-manipulation"
+            className="flex-shrink-0 bg-[#161A1F] text-gold font-bold font-mono text-xs px-2 py-1.5 rounded-lg border border-[#2B3139] focus:outline-none min-h-[34px] touch-manipulation"
           >
             <option value="1m">1m</option>
             <option value="5m">5m</option>
@@ -213,29 +262,29 @@ export function CandleChart({
           <select
             value={chartMode}
             onChange={(e) => setChartMode(e.target.value as 'candles' | 'normalized' | 'spread' | 'residual' | 'zscore' | 'line' | 'area')}
-            className="bg-[#161A1F] text-foreground font-bold text-xs px-2.5 py-1.5 rounded-lg border border-[#2B3139] focus:outline-none min-h-[38px] touch-manipulation"
+            className="flex-shrink-0 bg-[#161A1F] text-foreground font-bold text-xs px-2.5 py-1.5 rounded-lg border border-[#2B3139] focus:outline-none min-h-[34px] touch-manipulation"
           >
             <option value="candles">Candles</option>
-            <option value="normalized">Normalized (Fine Gold)</option>
-            <option value="spread">Spread Matrix</option>
-            <option value="zscore">Z-Score Sigma</option>
+            <option value="normalized">Normalized</option>
+            <option value="spread">Spread</option>
+            <option value="zscore">Z-Score</option>
           </select>
 
           {/* Mobile Zoom Controls */}
-          <div className="flex items-center gap-1 bg-[#161A1F] rounded-lg p-0.5 border border-[#2B3139]">
+          <div className="flex-shrink-0 flex items-center gap-0.5 bg-[#161A1F] rounded-lg p-0.5 border border-[#2B3139]">
             <button
               onClick={handleZoomIn}
-              className="p-1.5 text-text-secondary hover:text-gold rounded transition-colors"
+              className="p-1 text-text-secondary hover:text-gold rounded transition-colors"
               title="Zoom In"
             >
-              <ZoomIn size={14} />
+              <ZoomIn size={13} />
             </button>
             <button
               onClick={handleZoomOut}
-              className="p-1.5 text-text-secondary hover:text-gold rounded transition-colors"
+              className="p-1 text-text-secondary hover:text-gold rounded transition-colors"
               title="Zoom Out"
             >
-              <ZoomOut size={14} />
+              <ZoomOut size={13} />
             </button>
             {zoomCount !== 48 && (
               <button
@@ -243,7 +292,7 @@ export function CandleChart({
                 className="p-1 text-gold bg-gold/10 rounded"
                 title="Reset Zoom"
               >
-                <RotateCcw size={12} />
+                <RotateCcw size={11} />
               </button>
             )}
           </div>
@@ -251,21 +300,21 @@ export function CandleChart({
           {/* Indicators Icon Toggle */}
           <button
             onClick={() => setIndicatorMenuOpen(!indicatorMenuOpen)}
-            className={`p-2 rounded-lg border text-xs font-semibold transition-colors min-h-[38px] min-w-[38px] flex items-center justify-center ${
+            className={`flex-shrink-0 p-1.5 rounded-lg border text-xs font-semibold transition-colors min-h-[34px] min-w-[34px] flex items-center justify-center ${
               indicatorMenuOpen ? 'bg-gold/20 text-gold border-gold/40' : 'bg-[#161A1F] text-text-secondary border-[#2B3139]'
             }`}
             title="Technical Indicators"
           >
-            <Activity size={15} className="text-gold" />
+            <Activity size={14} className="text-gold" />
           </button>
 
           {/* Fullscreen Button */}
           <button
             onClick={() => setIsFullscreen(!isFullscreen)}
-            className="p-2 bg-[#161A1F] text-text-secondary hover:text-foreground rounded-lg border border-[#2B3139] transition-colors min-h-[38px] min-w-[38px] flex items-center justify-center"
+            className="flex-shrink-0 p-1.5 bg-[#161A1F] text-text-secondary hover:text-foreground rounded-lg border border-[#2B3139] transition-colors min-h-[34px] min-w-[34px] flex items-center justify-center"
             title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
           >
-            {isFullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+            {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
           </button>
         </div>
 
