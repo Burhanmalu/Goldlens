@@ -318,173 +318,177 @@ export function CandleChart({
           </button>
         </div>
 
-        {/* Desktop Controls (sm:flex) */}
-        <div className="hidden sm:flex items-center gap-1.5 flex-wrap">
-          <button
-            onClick={() => setChartMode('candles')}
-            className={`px-3 py-1.5 rounded-md font-bold text-xs transition-colors ${
-              chartMode === 'candles'
-                ? 'bg-[#161A1F] text-gold border border-[#2B3139] shadow-sm'
-                : 'text-text-secondary hover:text-foreground hover:bg-[#161A1F]/60'
-            }`}
-          >
-            Candles
-          </button>
-
-          <button
-            onClick={() => setChartMode('normalized')}
-            className={`px-3 py-1.5 rounded-md font-bold text-xs transition-colors flex items-center gap-1.5 ${
-              chartMode === 'normalized'
-                ? 'bg-gold/20 text-gold border border-gold/40 shadow-sm'
-                : 'text-text-secondary hover:text-foreground hover:bg-[#161A1F]/60'
-            }`}
-            title="Normalize all MCX contracts to ₹/gram of fine gold"
-          >
-            <Layers size={13} />
-            <span>Normalized</span>
-          </button>
-
-          <button
-            onClick={() => setChartMode('spread')}
-            className={`px-3 py-1.5 rounded-md font-bold text-xs transition-colors ${
-              chartMode === 'spread'
-                ? 'bg-[#161A1F] text-blue border border-[#2B3139] shadow-sm'
-                : 'text-text-secondary hover:text-foreground hover:bg-[#161A1F]/60'
-            }`}
-          >
-            Spread
-          </button>
-
-          <button
-            onClick={() => setChartMode('zscore')}
-            className={`px-3 py-1.5 rounded-md font-bold text-xs transition-colors ${
-              chartMode === 'zscore'
-                ? 'bg-[#161A1F] text-amber-400 border border-[#2B3139] shadow-sm'
-                : 'text-text-secondary hover:text-foreground hover:bg-[#161A1F]/60'
-            }`}
-          >
-            Z-Score
-          </button>
-        </div>
-
-        {/* Middle: Timeframe & Ranges on Desktop */}
-        <div className="hidden sm:flex items-center gap-2">
-          {/* Timeframes */}
-          <div className="flex items-center bg-[#161A1F] rounded-lg p-0.5 border border-[#2B3139]">
-            {timeframes.map((tf) => (
-              <button
-                key={tf}
-                onClick={() => setTimeframe(tf)}
-                className={`px-2.5 py-1 rounded text-[11px] font-mono font-semibold transition-colors ${
-                  timeframe === tf
-                    ? 'bg-[#11151A] text-gold shadow-sm'
-                    : 'text-muted hover:text-text-secondary'
-                }`}
-              >
-                {tf}
-              </button>
-            ))}
-          </div>
-
-          {/* Ranges */}
-          <div className="hidden lg:flex items-center bg-[#161A1F] rounded-lg p-0.5 border border-[#2B3139]">
-            {ranges.map((rg) => (
-              <button
-                key={rg}
-                onClick={() => setSelectedRange(rg)}
-                className={`px-2 py-1 rounded text-[10px] font-mono font-semibold transition-colors ${
-                  selectedRange === rg
-                    ? 'bg-[#11151A] text-foreground font-bold'
-                    : 'text-muted hover:text-text-secondary'
-                }`}
-              >
-                {rg}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Right: Zoom + Indicators & Fullscreen on Desktop */}
-        <div className="hidden sm:flex items-center gap-2 relative">
-          {/* Zoom In/Out & Reset Controls */}
-          <div className="flex items-center gap-0.5 bg-[#161A1F] rounded-md p-0.5 border border-[#2B3139]">
+        {/* Desktop Controls (sm:flex) - Single Tight Row */}
+        <div className="hidden sm:flex items-center justify-between w-full gap-2 flex-nowrap min-w-0">
+          {/* Left: Mode Segmented Control */}
+          <div className="flex items-center p-0.5 bg-[#161A1F] rounded-lg border border-[#2B3139] flex-shrink-0">
             <button
-              onClick={handleZoomIn}
-              className="p-1.5 text-text-secondary hover:text-gold hover:bg-[#11151A] rounded transition-colors"
-              title="Zoom In (+)"
+              onClick={() => setChartMode('candles')}
+              className={`px-2.5 py-1 rounded-md font-bold text-xs transition-colors ${
+                chartMode === 'candles'
+                  ? 'bg-[#11151A] text-gold shadow-sm font-black'
+                  : 'text-text-secondary hover:text-foreground'
+              }`}
             >
-              <ZoomIn size={13} />
-            </button>
-            <button
-              onClick={handleZoomOut}
-              className="p-1.5 text-text-secondary hover:text-gold hover:bg-[#11151A] rounded transition-colors"
-              title="Zoom Out (-)"
-            >
-              <ZoomOut size={13} />
-            </button>
-            {zoomCount !== 48 && (
-              <button
-                onClick={handleResetZoom}
-                className="px-1.5 py-0.5 rounded text-[10px] font-mono text-gold bg-gold/10 hover:bg-gold/20 transition-colors flex items-center gap-1"
-                title="Reset Zoom"
-              >
-                <RotateCcw size={10} />
-                <span>{Math.round((48 / zoomCount) * 100)}%</span>
-              </button>
-            )}
-          </div>
-          <div className="relative">
-            <button
-              onClick={() => setIndicatorMenuOpen(!indicatorMenuOpen)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#161A1F] hover:bg-[#1C2128] border border-[#2B3139] rounded-md text-xs font-semibold text-text-secondary hover:text-foreground transition-colors"
-            >
-              <Activity size={13} className="text-gold" />
-              <span>Indicators</span>
+              Candles
             </button>
 
-            {indicatorMenuOpen && (
-              <div className="absolute right-0 top-full mt-1 w-52 bg-secondary border border-border rounded-lg shadow-2xl p-2 z-50 space-y-1">
-                <div className="text-[10px] text-muted uppercase font-mono font-bold px-1 mb-1">
-                  Technical Overlays
+            <button
+              onClick={() => setChartMode('normalized')}
+              className={`px-2.5 py-1 rounded-md font-bold text-xs transition-colors flex items-center gap-1 ${
+                chartMode === 'normalized'
+                  ? 'bg-[#11151A] text-gold shadow-sm font-black'
+                  : 'text-text-secondary hover:text-foreground'
+              }`}
+              title="Normalize all MCX contracts to ₹/gram of fine gold"
+            >
+              <Layers size={12} />
+              <span>Normalized</span>
+            </button>
+
+            <button
+              onClick={() => setChartMode('spread')}
+              className={`px-2.5 py-1 rounded-md font-bold text-xs transition-colors ${
+                chartMode === 'spread'
+                  ? 'bg-[#11151A] text-blue shadow-sm font-black'
+                  : 'text-text-secondary hover:text-foreground'
+              }`}
+            >
+              Spread
+            </button>
+
+            <button
+              onClick={() => setChartMode('zscore')}
+              className={`px-2.5 py-1 rounded-md font-bold text-xs transition-colors ${
+                chartMode === 'zscore'
+                  ? 'bg-[#11151A] text-amber-400 shadow-sm font-black'
+                  : 'text-text-secondary hover:text-foreground'
+              }`}
+            >
+              Z-Score
+            </button>
+          </div>
+
+          {/* Center: Timeframe & Ranges */}
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            {/* Timeframes */}
+            <div className="flex items-center bg-[#161A1F] rounded-lg p-0.5 border border-[#2B3139]">
+              {timeframes.map((tf) => (
+                <button
+                  key={tf}
+                  onClick={() => setTimeframe(tf)}
+                  className={`px-2 py-0.5 rounded text-[11px] font-mono font-semibold transition-colors ${
+                    timeframe === tf
+                      ? 'bg-[#11151A] text-gold shadow-sm font-bold'
+                      : 'text-muted hover:text-text-secondary'
+                  }`}
+                >
+                  {tf}
+                </button>
+              ))}
+            </div>
+
+            {/* Ranges */}
+            <div className="hidden xl:flex items-center bg-[#161A1F] rounded-lg p-0.5 border border-[#2B3139]">
+              {ranges.map((rg) => (
+                <button
+                  key={rg}
+                  onClick={() => setSelectedRange(rg)}
+                  className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold transition-colors ${
+                    selectedRange === rg
+                      ? 'bg-[#11151A] text-foreground font-bold'
+                      : 'text-muted hover:text-text-secondary'
+                  }`}
+                >
+                  {rg}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Right: Zoom + Indicators & Fullscreen */}
+          <div className="flex items-center gap-1.5 relative flex-shrink-0">
+            {/* Zoom In/Out & Reset Controls */}
+            <div className="flex items-center gap-0.5 bg-[#161A1F] rounded-md p-0.5 border border-[#2B3139]">
+              <button
+                onClick={handleZoomIn}
+                className="p-1 text-text-secondary hover:text-gold hover:bg-[#11151A] rounded transition-colors"
+                title="Zoom In (+)"
+              >
+                <ZoomIn size={12} />
+              </button>
+              <button
+                onClick={handleZoomOut}
+                className="p-1 text-text-secondary hover:text-gold hover:bg-[#11151A] rounded transition-colors"
+                title="Zoom Out (-)"
+              >
+                <ZoomOut size={12} />
+              </button>
+              {zoomCount !== 48 && (
+                <button
+                  onClick={handleResetZoom}
+                  className="px-1.5 py-0.5 rounded text-[10px] font-mono text-gold bg-gold/10 hover:bg-gold/20 transition-colors flex items-center gap-1"
+                  title="Reset Zoom"
+                >
+                  <RotateCcw size={10} />
+                  <span>{Math.round((48 / zoomCount) * 100)}%</span>
+                </button>
+              )}
+            </div>
+
+            <div className="relative">
+              <button
+                onClick={() => setIndicatorMenuOpen(!indicatorMenuOpen)}
+                className="flex items-center gap-1 px-2.5 py-1 bg-[#161A1F] hover:bg-[#1C2128] border border-[#2B3139] rounded-md text-xs font-semibold text-text-secondary hover:text-foreground transition-colors"
+              >
+                <Activity size={12} className="text-gold" />
+                <span>Indicators</span>
+              </button>
+
+              {indicatorMenuOpen && (
+                <div className="absolute right-0 top-full mt-1 w-52 bg-secondary border border-border rounded-lg shadow-2xl p-2 z-50 space-y-1">
+                  <div className="text-[10px] text-muted uppercase font-mono font-bold px-1 mb-1">
+                    Technical Overlays
+                  </div>
+                  {[
+                    { key: 'ma', label: 'Moving Avg (MA 20)' },
+                    { key: 'ema', label: 'Exponential MA (EMA)' },
+                    { key: 'vwap', label: 'VWAP Benchmark' },
+                    { key: 'bollinger', label: 'Bollinger Bands (2σ)' },
+                    { key: 'zscore', label: 'Z-Score Oscillator' },
+                    { key: 'signals', label: 'Signal Flags (Pass/Fail)' },
+                  ].map((item) => (
+                    <button
+                      key={item.key}
+                      onClick={() =>
+                        setIndicators((prev) => ({
+                          ...prev,
+                          [item.key]: !prev[item.key as keyof typeof prev],
+                        }))
+                      }
+                      className="w-full flex items-center justify-between px-2 py-1 rounded text-[11px] text-text-secondary hover:text-foreground hover:bg-panel"
+                    >
+                      <span>{item.label}</span>
+                      {indicators[item.key as keyof typeof indicators] ? (
+                        <Eye size={13} className="text-gold" />
+                      ) : (
+                        <EyeOff size={13} className="text-muted" />
+                      )}
+                    </button>
+                  ))}
                 </div>
-                {[
-                  { key: 'ma', label: 'Moving Avg (MA 20)' },
-                  { key: 'ema', label: 'Exponential MA (EMA)' },
-                  { key: 'vwap', label: 'VWAP Benchmark' },
-                  { key: 'bollinger', label: 'Bollinger Bands (2σ)' },
-                  { key: 'zscore', label: 'Z-Score Oscillator' },
-                  { key: 'signals', label: 'Signal Flags (Pass/Fail)' },
-                ].map((item) => (
-                  <button
-                    key={item.key}
-                    onClick={() =>
-                      setIndicators((prev) => ({
-                        ...prev,
-                        [item.key]: !prev[item.key as keyof typeof prev],
-                      }))
-                    }
-                    className="w-full flex items-center justify-between px-2 py-1 rounded text-[11px] text-text-secondary hover:text-foreground hover:bg-panel"
-                  >
-                    <span>{item.label}</span>
-                    {indicators[item.key as keyof typeof indicators] ? (
-                      <Eye size={13} className="text-gold" />
-                    ) : (
-                      <EyeOff size={13} className="text-muted" />
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+              )}
+            </div>
 
-          {/* Fullscreen Toggle */}
-          <button
-            onClick={() => setIsFullscreen(!isFullscreen)}
-            className="p-1.5 text-text-secondary hover:text-foreground hover:bg-panel rounded border border-border transition-colors"
-            title={isFullscreen ? 'Exit Fullscreen (Esc)' : 'Fullscreen Chart (F)'}
-          >
-            {isFullscreen ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
-          </button>
+            {/* Fullscreen Toggle */}
+            <button
+              onClick={() => setIsFullscreen(!isFullscreen)}
+              className="p-1.5 text-text-secondary hover:text-foreground hover:bg-panel rounded border border-border transition-colors"
+              title={isFullscreen ? 'Exit Fullscreen (Esc)' : 'Fullscreen Chart (F)'}
+            >
+              {isFullscreen ? <Minimize2 size={12} /> : <Maximize2 size={12} />}
+            </button>
+          </div>
         </div>
       </div>
 
