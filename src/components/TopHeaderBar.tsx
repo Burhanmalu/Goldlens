@@ -10,6 +10,9 @@ interface TopHeaderBarProps {
   demoMode?: boolean;
   onToggleDemo?: () => void;
   onNavigateHome?: () => void;
+  onLogout?: () => void;
+  userName?: string;
+  deskId?: string;
 }
 
 export function TopHeaderBar({
@@ -20,6 +23,9 @@ export function TopHeaderBar({
   demoMode = false,
   onToggleDemo,
   onNavigateHome,
+  onLogout,
+  userName = 'Trader',
+  deskId = 'QUANT_DESK',
 }: TopHeaderBarProps) {
   return (
     <div className="flex flex-col flex-shrink-0 z-20 select-none">
@@ -63,12 +69,22 @@ export function TopHeaderBar({
             </button>
           )}
 
-          <div className="flex items-center gap-1.5 pl-1.5 border-l border-[#2B3139]">
-            <span className="w-2 h-2 rounded-full bg-buy animate-pulse" title="MCX Live Feed Active" />
-            <div className="w-6 h-6 rounded-full bg-[#161A1F] border border-[#2B3139] flex items-center justify-center text-text-secondary">
-              <User size={12} />
+          {onLogout ? (
+            <button
+              onClick={onLogout}
+              className="p-1.5 bg-[#161A1F] hover:bg-sell/20 text-text-secondary hover:text-sell rounded-lg border border-[#2B3139] transition-colors"
+              title="Sign Out / Lock Terminal"
+            >
+              <User size={14} />
+            </button>
+          ) : (
+            <div className="flex items-center gap-1.5 pl-1.5 border-l border-[#2B3139]">
+              <span className="w-2 h-2 rounded-full bg-buy animate-pulse" title="MCX Live Feed Active" />
+              <div className="w-6 h-6 rounded-full bg-[#161A1F] border border-[#2B3139] flex items-center justify-center text-text-secondary">
+                <User size={12} />
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </header>
 
@@ -95,13 +111,22 @@ export function TopHeaderBar({
             </span>
           </button>
 
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-[#161A1F] border border-[#2B3139] flex items-center justify-center text-text-secondary">
-              <User size={12} />
+          <div className="flex items-center gap-2 bg-[#161A1F] px-2.5 py-1 rounded-xl border border-[#2B3139]">
+            <div className="w-5 h-5 rounded-full bg-gold/20 flex items-center justify-center text-gold font-mono font-bold text-[10px]">
+              {userName.charAt(0).toUpperCase()}
             </div>
-            <span className="font-mono text-[11px] text-text-secondary font-semibold">
-              QUANT_DESK
+            <span className="font-mono text-[11px] text-foreground font-semibold">
+              {deskId}
             </span>
+            {onLogout && (
+              <button
+                onClick={onLogout}
+                className="ml-1 text-[10px] text-muted hover:text-sell transition-colors font-mono"
+                title="Sign Out"
+              >
+                Logout
+              </button>
+            )}
           </div>
         </div>
       </header>

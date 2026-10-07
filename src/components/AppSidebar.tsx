@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Hexagon, LayoutDashboard, Layers, Zap, ShieldCheck,
   TrendingUp, BookOpen, Sparkles, HelpCircle, Maximize2,
-  ChevronLeft, ChevronRight
+  ChevronLeft, ChevronRight, LogOut
 } from 'lucide-react';
 import { PageId } from '@/lib/types';
 
@@ -19,6 +19,7 @@ interface AppSidebarProps {
   setIsCollapsed: (val: boolean) => void;
   isMobileOpen?: boolean;
   onCloseMobile?: () => void;
+  onLogout?: () => void;
 }
 
 export function AppSidebar({
@@ -32,6 +33,7 @@ export function AppSidebar({
   setIsCollapsed,
   isMobileOpen = false,
   onCloseMobile,
+  onLogout,
 }: AppSidebarProps) {
   const [timeStr, setTimeStr] = useState('');
 
@@ -209,6 +211,21 @@ export function AppSidebar({
           <Maximize2 size={16} className="flex-shrink-0" />
           {(!isCollapsed || isMobile) && <span>Pitch Deck</span>}
         </button>
+
+        {/* Lock Terminal / Logout Button */}
+        {onLogout && (
+          <button
+            onClick={() => {
+              if (onCloseMobile) onCloseMobile();
+              onLogout();
+            }}
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-text-secondary hover:text-sell hover:bg-sell/10 transition-colors min-h-[40px] touch-manipulation"
+            title="Lock Terminal & Sign Out"
+          >
+            <LogOut size={16} className="text-muted group-hover:text-sell flex-shrink-0" />
+            {(!isCollapsed || isMobile) && <span>Lock Terminal</span>}
+          </button>
+        )}
 
         {/* Live Feed Status Pill */}
         {(!isCollapsed || isMobile) && (

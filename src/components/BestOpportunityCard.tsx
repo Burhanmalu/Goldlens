@@ -3,15 +3,23 @@
 import React, { useState } from 'react';
 import {
   ArrowRight, CheckCircle2,
-  HelpCircle, Layers, ChevronDown, ChevronUp
+  HelpCircle, Layers, Sliders, ExternalLink
 } from 'lucide-react';
-import { Opportunity, OrderBookState } from '@/lib/types';
+import { Opportunity, OrderBookState, ContractSnapshot } from '@/lib/types';
 
 interface BestOpportunityCardProps {
   opportunity: Opportunity;
   onViewDetails: () => void;
   onViewAllOpportunities: () => void;
   orderBook: OrderBookState;
+  selectedSymbol?: string;
+  setSelectedSymbol?: (s: string) => void;
+  compareSymbol?: string;
+  setCompareSymbol?: (s: string) => void;
+  selectedSnapshot?: ContractSnapshot;
+  compareSnapshot?: ContractSnapshot;
+  normDiffPercent?: string;
+  onViewSpreadOnChart?: () => void;
 }
 
 export function BestOpportunityCard({
@@ -19,19 +27,26 @@ export function BestOpportunityCard({
   onViewDetails,
   onViewAllOpportunities,
   orderBook,
+  selectedSymbol = 'GOLDM',
+  setSelectedSymbol,
+  compareSymbol = 'GOLDTEN',
+  setCompareSymbol,
+  selectedSnapshot,
+  compareSnapshot,
+  normDiffPercent = '+0.33',
+  onViewSpreadOnChart,
 }: BestOpportunityCardProps) {
-  const [showDepth, setShowDepth] = useState(false);
+  const [activeTab, setActiveTab] = useState<'why' | 'compare' | 'depth'>('why');
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   return (
-    <div className="space-y-4 font-sans select-none">
-      {/* ── CARD 1: BEST OPPORTUNITY ── */}
-      <div className="p-4 sm:p-5 bg-[#161A1F] rounded-2xl border border-gold/40 shadow-lg relative overflow-hidden">
-        {/* Subtle background glow */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-full blur-2xl pointer-events-none" />
+    <div className="bg-[#161A1F] rounded-2xl border border-gold/40 shadow-lg p-3.5 sm:p-4 flex flex-col justify-between select-none font-sans relative overflow-hidden min-h-[460px]">
+      {/* Subtle glow background */}
+      <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-full blur-2xl pointer-events-none" />
 
-        {/* Top Tag & Status */}
-        <div className="flex items-center justify-between mb-3 border-b border-[#2B3139] pb-3">
+      {/* ── TOP: OPPORTUNITY HEADER & BADGE ── */}
+      <div>
+        <div className="flex items-center justify-between mb-2 border-b border-[#2B3139] pb-2">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-gold animate-pulse" />
             <span className="text-xs font-bold text-gold uppercase tracking-wider font-mono">
@@ -39,138 +54,196 @@ export function BestOpportunityCard({
             </span>
           </div>
 
-          <span className="px-2.5 py-0.5 rounded-full bg-buy/15 text-buy border border-buy/30 text-xs font-bold font-mono flex items-center gap-1">
-            <CheckCircle2 size={13} />
+          <span className="px-2 py-0.5 rounded-full bg-buy/15 text-buy border border-buy/30 text-[11px] font-bold font-mono flex items-center gap-1">
+            <CheckCircle2 size={12} />
             <span>✓ EDGE SURVIVES</span>
           </span>
         </div>
 
         {/* Pair Name & Strategy */}
-        <div className="mb-4">
-          <h3 className="text-lg sm:text-xl font-black text-foreground tracking-tight font-mono">
+        <div className="mb-2">
+          <h3 className="text-base sm:text-lg font-black text-foreground tracking-tight font-mono">
             {opportunity.pair || 'GOLDM / GOLDTEN'}
           </h3>
-          <div className="text-xs font-bold text-gold mt-0.5 font-mono">
+          <div className="text-[11px] sm:text-xs font-bold text-gold font-mono">
             {opportunity.direction || 'LONG GOLDM / SHORT GOLDTEN'}
           </div>
         </div>
 
         {/* Core Clean Metrics Grid */}
-        <div className="grid grid-cols-3 gap-2 sm:gap-3 p-3 bg-[#11151A] rounded-xl border border-[#2B3139] mb-4 text-center font-mono">
+        <div className="grid grid-cols-3 gap-2 p-2.5 bg-[#11151A] rounded-xl border border-[#2B3139] mb-2.5 text-center font-mono">
           <div>
-            <span className="text-[10px] sm:text-[11px] text-muted block mb-0.5">Expected Edge</span>
-            <span className="text-sm sm:text-base font-black text-buy">
+            <span className="text-[10px] text-muted block mb-0.5">Expected Edge</span>
+            <span className="text-xs sm:text-sm font-black text-buy">
               +{opportunity.netEdge || 0.15}%
             </span>
           </div>
 
           <div>
-            <span className="text-[10px] sm:text-[11px] text-muted block mb-0.5">Confidence</span>
-            <span className="text-sm sm:text-base font-black text-foreground">
+            <span className="text-[10px] text-muted block mb-0.5">Confidence</span>
+            <span className="text-xs sm:text-sm font-black text-foreground">
               {opportunity.confidence || 87}%
             </span>
           </div>
 
           <div>
-            <span className="text-[10px] sm:text-[11px] text-muted block mb-0.5" title="Z-Score">
+            <span className="text-[10px] text-muted block mb-0.5" title="Z-Score">
               Z-Score
             </span>
-            <span className="text-sm sm:text-base font-black text-gold">
+            <span className="text-xs sm:text-sm font-black text-gold">
               +{opportunity.zScore || 2.41}σ
             </span>
           </div>
         </div>
 
-        {/* Trust & Validation Checkmarks */}
-        <div className="space-y-1.5 mb-5 text-xs text-text-secondary">
+        {/* Validation Checkpoints */}
+        <div className="space-y-1 mb-3 text-[11px] text-text-secondary">
           <div className="flex items-center gap-2 text-foreground font-medium">
-            <CheckCircle2 size={14} className="text-buy flex-shrink-0" />
+            <CheckCircle2 size={13} className="text-buy flex-shrink-0" />
             <span>Survives all transaction costs & STT</span>
           </div>
           <div className="flex items-center gap-2 text-foreground font-medium">
-            <CheckCircle2 size={14} className="text-buy flex-shrink-0" />
+            <CheckCircle2 size={13} className="text-buy flex-shrink-0" />
             <span>Passed walk-forward out-of-sample validation</span>
           </div>
           <div className="flex items-center gap-2 text-foreground font-medium">
-            <CheckCircle2 size={14} className="text-buy flex-shrink-0" />
+            <CheckCircle2 size={13} className="text-buy flex-shrink-0" />
             <span>High executable top-of-book liquidity</span>
           </div>
         </div>
 
-        {/* Action Button */}
+        {/* View Details & Audit Button */}
         <button
           onClick={() => setShowDetailsModal(true)}
-          className="w-full py-3 bg-gold hover:bg-gold-hover text-background font-bold text-xs sm:text-sm rounded-xl transition-all flex items-center justify-center gap-2 shadow-md min-h-[44px] touch-manipulation"
+          className="w-full py-2.5 bg-gold hover:bg-gold-hover text-background font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-2 shadow-md min-h-[38px] touch-manipulation mb-3"
         >
           <span>VIEW DETAILS & AUDIT</span>
-          <ArrowRight size={15} />
+          <ArrowRight size={14} />
         </button>
       </div>
 
-      {/* ── CARD 2: "WHY THIS OPPORTUNITY?" ── */}
-      <div className="p-4 bg-[#161A1F] rounded-2xl border border-[#2B3139] space-y-2">
-        <div className="flex items-center gap-1.5 text-xs font-bold text-foreground">
-          <HelpCircle size={14} className="text-gold" />
-          <span>WHY THIS OPPORTUNITY?</span>
+      {/* ── BOTTOM TABBED TOOLBAR (Why | Comparator | Depth) ── */}
+      <div className="border-t border-[#2B3139] pt-2.5 flex-1 flex flex-col justify-between min-h-[140px]">
+        {/* Tab Selector Buttons */}
+        <div className="flex items-center gap-1 bg-[#11151A] p-1 rounded-xl border border-[#2B3139] mb-2 text-xs font-mono">
+          <button
+            onClick={() => setActiveTab('why')}
+            className={`flex-1 py-1 rounded-lg font-bold transition-all flex items-center justify-center gap-1 text-[11px] ${
+              activeTab === 'why' ? 'bg-[#161A1F] text-gold border border-[#2B3139] shadow-sm' : 'text-muted hover:text-foreground'
+            }`}
+          >
+            <HelpCircle size={12} />
+            <span>Why</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('compare')}
+            className={`flex-1 py-1 rounded-lg font-bold transition-all flex items-center justify-center gap-1 text-[11px] ${
+              activeTab === 'compare' ? 'bg-[#161A1F] text-gold border border-[#2B3139] shadow-sm' : 'text-muted hover:text-foreground'
+            }`}
+          >
+            <Sliders size={12} />
+            <span>Comparator</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('depth')}
+            className={`flex-1 py-1 rounded-lg font-bold transition-all flex items-center justify-center gap-1 text-[11px] ${
+              activeTab === 'depth' ? 'bg-[#161A1F] text-gold border border-[#2B3139] shadow-sm' : 'text-muted hover:text-foreground'
+            }`}
+          >
+            <Layers size={12} />
+            <span>Depth</span>
+          </button>
         </div>
 
-        <p className="text-xs text-text-secondary leading-relaxed">
-          <strong className="text-foreground">GoldM</strong> is currently cheaper than{' '}
-          <strong className="text-foreground">GoldTen</strong> after adjusting for contract size and purity.
-        </p>
-
-        <p className="text-xs text-text-secondary leading-relaxed">
-          The difference is wider than normal historical ranges. Estimated remaining edge after friction is{' '}
-          <span className="text-buy font-bold font-mono">+{opportunity.netEdge || 0.15}%</span> with{' '}
-          <span className="text-foreground font-bold font-mono">{opportunity.confidence || 87}%</span> confidence.
-        </p>
-      </div>
-
-      {/* ── MORE OPPORTUNITIES CALLOUT ── */}
-      <div className="p-3 bg-[#11151A] rounded-xl border border-[#2B3139] flex items-center justify-between text-xs">
-        <span className="text-text-secondary font-medium">2 more opportunities available</span>
-        <button
-          onClick={onViewAllOpportunities}
-          className="text-gold hover:text-gold-hover font-bold flex items-center gap-1 transition-colors min-h-[36px] px-2 touch-manipulation"
-        >
-          <span>View All</span>
-          <ArrowRight size={13} />
-        </button>
-      </div>
-
-      {/* ── COLLAPSIBLE POWER-USER MARKET DEPTH ── */}
-      <div className="border border-[#2B3139] rounded-2xl overflow-hidden bg-[#161A1F]">
-        <button
-          onClick={() => setShowDepth(!showDepth)}
-          className="w-full px-4 py-3 flex items-center justify-between text-xs font-semibold text-text-secondary hover:text-foreground transition-colors min-h-[44px] touch-manipulation"
-        >
-          <div className="flex items-center gap-2">
-            <Layers size={14} className="text-gold" />
-            <span>Market Depth & Order Book</span>
+        {/* TAB 1: WHY THIS OPPORTUNITY */}
+        {activeTab === 'why' && (
+          <div className="bg-[#11151A] p-2.5 rounded-xl border border-[#2B3139] space-y-2 text-xs">
+            <p className="text-[11px] text-text-secondary leading-relaxed">
+              <strong className="text-foreground">GoldM</strong> is trading below fair value vs{' '}
+              <strong className="text-foreground">GoldTen</strong> after adjusting for purity & DTE carry.
+            </p>
+            <div className="flex items-center justify-between pt-1 border-t border-[#2B3139]/50 text-[11px]">
+              <span className="text-muted">2 more opportunities</span>
+              <button
+                onClick={onViewAllOpportunities}
+                className="text-gold hover:text-gold-hover font-bold flex items-center gap-1"
+              >
+                <span>View All</span>
+                <ArrowRight size={11} />
+              </button>
+            </div>
           </div>
-          {showDepth ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
-        </button>
+        )}
 
-        {showDepth && (
-          <div className="p-3 border-t border-[#2B3139] font-mono text-xs bg-[#11151A] space-y-1.5 animate-slide-up">
-            <div className="grid grid-cols-3 text-[10px] text-muted pb-1 border-b border-[#2B3139]">
+        {/* TAB 2: QUICK CROSS-CONTRACT COMPARATOR */}
+        {activeTab === 'compare' && (
+          <div className="bg-[#11151A] p-2.5 rounded-xl border border-[#2B3139] space-y-2 text-xs font-mono">
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-muted block text-[9px] mb-0.5 font-sans">A</label>
+                <select
+                  value={selectedSymbol}
+                  onChange={(e) => setSelectedSymbol && setSelectedSymbol(e.target.value)}
+                  className="w-full bg-[#161A1F] text-foreground font-bold px-2 py-1 rounded-lg border border-[#2B3139] text-xs focus:outline-none"
+                >
+                  <option value="GOLDM">GOLDM (100g)</option>
+                  <option value="GOLDTEN">GOLDTEN (10g)</option>
+                  <option value="GOLDGUINEA">GOLDGUINEA (8g)</option>
+                  <option value="GOLDPETAL">GOLDPETAL (1g)</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-muted block text-[9px] mb-0.5 font-sans">B</label>
+                <select
+                  value={compareSymbol}
+                  onChange={(e) => setCompareSymbol && setCompareSymbol(e.target.value)}
+                  className="w-full bg-[#161A1F] text-foreground font-bold px-2 py-1 rounded-lg border border-[#2B3139] text-xs focus:outline-none"
+                >
+                  <option value="GOLDTEN">GOLDTEN (10g)</option>
+                  <option value="GOLDM">GOLDM (100g)</option>
+                  <option value="GOLDGUINEA">GOLDGUINEA (8g)</option>
+                  <option value="GOLDPETAL">GOLDPETAL (1g)</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex items-center justify-between pt-1 border-t border-[#2B3139] text-[11px]">
+              <span className="text-muted">Spread:</span>
+              <span className={Number(normDiffPercent) >= 0 ? 'text-buy font-bold' : 'text-sell font-bold'}>
+                {Number(normDiffPercent) >= 0 ? '+' : ''}{normDiffPercent}%
+              </span>
+              {onViewSpreadOnChart && (
+                <button
+                  onClick={onViewSpreadOnChart}
+                  className="text-gold hover:text-gold-hover text-[10px] font-bold underline ml-2"
+                >
+                  View on Chart →
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: ORDER BOOK DEPTH */}
+        {activeTab === 'depth' && (
+          <div className="bg-[#11151A] p-2 rounded-xl border border-[#2B3139] font-mono text-[10px] space-y-1">
+            <div className="grid grid-cols-3 text-muted pb-0.5 border-b border-[#2B3139]">
               <span>PRICE</span>
               <span className="text-right">SIZE</span>
               <span className="text-right">SIDE</span>
             </div>
-            {orderBook.asks.slice(-3).map((a, i) => (
-              <div key={`a-${i}`} className="grid grid-cols-3 text-[11px] text-sell">
+            {orderBook.asks.slice(-2).map((a, i) => (
+              <div key={`a-${i}`} className="grid grid-cols-3 text-sell">
                 <span>₹{a.price.toLocaleString('en-IN')}</span>
                 <span className="text-right text-text-secondary">{a.size}</span>
                 <span className="text-right uppercase font-bold">Ask</span>
               </div>
             ))}
-            <div className="py-1 my-1 px-2 bg-[#161A1F] rounded border border-[#2B3139] flex justify-between text-[11px]">
+            <div className="py-0.5 px-1 bg-[#161A1F] rounded flex justify-between text-muted text-[9px]">
               <span className="text-foreground font-bold">Mid: ₹{orderBook.lastPrice.toLocaleString('en-IN')}</span>
-              <span className="text-muted">Spread: ₹{orderBook.spread}</span>
+              <span>Spread: ₹{orderBook.spread}</span>
             </div>
-            {orderBook.bids.slice(0, 3).map((b, i) => (
-              <div key={`b-${i}`} className="grid grid-cols-3 text-[11px] text-buy">
+            {orderBook.bids.slice(0, 2).map((b, i) => (
+              <div key={`b-${i}`} className="grid grid-cols-3 text-buy">
                 <span>₹{b.price.toLocaleString('en-IN')}</span>
                 <span className="text-right text-text-secondary">{b.size}</span>
                 <span className="text-right uppercase font-bold">Bid</span>

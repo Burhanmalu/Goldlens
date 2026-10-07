@@ -1,9 +1,17 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "GoldLens — MCX Gold Cross-Contract Intelligence",
   description: "Normalize. Compare. Validate. Trade only what survives. GoldLens converts fragmented MCX gold contracts into defensible market intelligence.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
+  themeColor: "#0B0E11",
 };
 
 export default function RootLayout({

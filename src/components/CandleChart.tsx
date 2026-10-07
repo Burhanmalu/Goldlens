@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useRef } from 'react';
 import {
   Maximize2, Minimize2, Activity,
-  Eye, EyeOff, Layers
+  Eye, EyeOff, Layers, ZoomIn, ZoomOut, RotateCcw
 } from 'lucide-react';
 import { OHLCVCandle } from '@/lib/types';
 import { CONTRACT_REGISTRY } from '@/lib/contracts';
@@ -55,6 +55,45 @@ export function CandleChart({
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const [indicatorMenuOpen, setIndicatorMenuOpen] = useState(false);
 
+  // Synchronized Zoom & Pan State (Applied across all 4 chart modes)
+  const [zoomCount, setZoomCount] = useState<number>(48);
+  const [panOffset, setPanOffset] = useState<number>(0);
+
+  const handleZoomIn = () => {
+    setZoomCount((prev) => Math.max(20, Math.round(prev * 0.8)));
+  };
+
+  const handleZoomOut = () => {
+    setZoomCount((prev) => Math.min(80, Math.round(prev * 1.25)));
+  };
+
+  const handleResetZoom = () => {
+    setZoomCount(48);
+    setPanOffset(0);
+  };
+
+  // Prevent entire page / screen from zooming when scrolling/pinching on chart
+  React.useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (e.deltaY < 0) {
+        setZoomCount((prev) => Math.max(20, prev - 3));
+      } else {
+        setZoomCount((prev) => Math.min(80, prev + 3));
+      }
+    };
+
+    el.addEventListener('wheel', handleWheel, { passive: false });
+    return () => {
+      el.removeEventListener('wheel', handleWheel);
+    };
+  }, [candles.length]);
+
   // Timeframes list
   const timeframes = ['1m', '5m', '15m', '1H', '4H', '1D', '1W'];
   const ranges = ['1M', '3M', '6M', '1Y', 'MAX'];
@@ -101,11 +140,20 @@ export function CandleChart({
     ? enrichedCandles[hoverIndex]
     : enrichedCandles[enrichedCandles.length - 1] || null;
 
-  // Chart Dimensions & Scales
-  const visibleCandles = enrichedCandles.slice(-60); // Show last 60 candles in main viewport
+  // Chart Dimensions & Scales - Dynamically slice based on synchronized zoomCount and panOffset (Applied to all 4 graphs)
+  const visibleCandles = useMemo(() => {
+    const total = enrichedCandles.length;
+    if (total === 0) return [];
+    const count = Math.min(total, Math.max(20, Math.min(80, zoomCount)));
+    const maxOffset = Math.max(0, total - count);
+    const clampedOffset = Math.min(maxOffset, Math.max(0, panOffset));
+    const endIndex = total - clampedOffset;
+    const startIndex = Math.max(0, endIndex - count);
+    return enrichedCandles.slice(startIndex, endIndex);
+  }, [enrichedCandles, zoomCount, panOffset]);
 
   const { minPrice, maxPrice, maxVol } = useMemo(() => {
-    if (visibleCandles.length === 0) return { minPrice: 120000, maxPrice: 130000, maxVol: 10000 };
+    if (visibleCandles.length === 0) return { minPrice: 10000, maxPrice: 140000, maxVol: 10000 };
     let min = Infinity;
     let max = -Infinity;
     let vMax = 0;
@@ -116,26 +164,30 @@ export function CandleChart({
       vMax = Math.max(vMax, c.volume);
     });
 
-    const padding = (max - min) * 0.08 || 100;
-    return { minPrice: min - padding, maxPrice: max + padding, maxVol: vMax || 1 };
+    const diff = max - min || (max * 0.01) || 100;
+    const padding = diff * 0.15;
+    return { minPrice: Math.max(0, min - padding), maxPrice: max + padding, maxVol: vMax || 1 };
   }, [visibleCandles, indicators]);
 
-  // Coordinate mapping helpers
+  // Coordinate mapping helpers (Large, clear height for full visual readability)
   const svgWidth = 900;
-  const priceChartHeight = 320;
-  const volChartHeight = 70;
-  const candleSlotWidth = svgWidth / (visibleCandles.length || 1);
-  const candleBodyWidth = Math.max(2, candleSlotWidth * 0.65);
+  const priceChartHeight = 310;
+  const volChartHeight = 56;
+  const chartRightMargin = 72; // Dedicated right margin for price scale
+  const plotWidth = svgWidth - chartRightMargin;
+  const candleSlotWidth = plotWidth / (visibleCandles.length || 1);
+  const candleBodyWidth = Math.max(3, candleSlotWidth * 0.65);
 
   const getY = (price: number) => {
-    return priceChartHeight - ((price - minPrice) / (maxPrice - minPrice || 1)) * priceChartHeight;
+    const range = maxPrice - minPrice || 1;
+    return priceChartHeight - ((price - minPrice) / range) * (priceChartHeight - 34) - 17;
   };
 
   return (
     <div
       ref={containerRef}
-      className={`bg-[#161A1F] flex flex-col select-none relative ${
-        isFullscreen ? 'fixed inset-0 z-50 bg-[#0B0E11] h-screen w-screen p-2 sm:p-4' : 'flex-1 h-full min-h-[360px] sm:min-h-[400px]'
+      className={`bg-[#161A1F] flex flex-col select-none relative h-full w-full min-h-[440px] sm:min-h-[480px] overscroll-contain touch-pan-x ${
+        isFullscreen ? 'fixed inset-0 z-50 bg-[#0B0E11] h-screen w-screen p-2 sm:p-4' : 'flex-1'
       }`}
     >
       {/* ── TOP CHART CONTROLS TOOLBAR ── */}
@@ -160,7 +212,7 @@ export function CandleChart({
           {/* Mobile Chart Mode Dropdown */}
           <select
             value={chartMode}
-            onChange={(e) => setChartMode(e.target.value as any)}
+            onChange={(e) => setChartMode(e.target.value as 'candles' | 'normalized' | 'spread' | 'residual' | 'zscore' | 'line' | 'area')}
             className="bg-[#161A1F] text-foreground font-bold text-xs px-2.5 py-1.5 rounded-lg border border-[#2B3139] focus:outline-none min-h-[38px] touch-manipulation"
           >
             <option value="candles">Candles</option>
@@ -168,6 +220,33 @@ export function CandleChart({
             <option value="spread">Spread Matrix</option>
             <option value="zscore">Z-Score Sigma</option>
           </select>
+
+          {/* Mobile Zoom Controls */}
+          <div className="flex items-center gap-1 bg-[#161A1F] rounded-lg p-0.5 border border-[#2B3139]">
+            <button
+              onClick={handleZoomIn}
+              className="p-1.5 text-text-secondary hover:text-gold rounded transition-colors"
+              title="Zoom In"
+            >
+              <ZoomIn size={14} />
+            </button>
+            <button
+              onClick={handleZoomOut}
+              className="p-1.5 text-text-secondary hover:text-gold rounded transition-colors"
+              title="Zoom Out"
+            >
+              <ZoomOut size={14} />
+            </button>
+            {zoomCount !== 48 && (
+              <button
+                onClick={handleResetZoom}
+                className="p-1 text-gold bg-gold/10 rounded"
+                title="Reset Zoom"
+              >
+                <RotateCcw size={12} />
+              </button>
+            )}
+          </div>
 
           {/* Indicators Icon Toggle */}
           <button
@@ -191,7 +270,7 @@ export function CandleChart({
         </div>
 
         {/* Desktop Controls (sm:flex) */}
-        <div className="hidden sm:flex items-center gap-1.5">
+        <div className="hidden sm:flex items-center gap-1.5 flex-wrap">
           <button
             onClick={() => setChartMode('candles')}
             className={`px-3 py-1.5 rounded-md font-bold text-xs transition-colors ${
@@ -259,7 +338,7 @@ export function CandleChart({
           </div>
 
           {/* Ranges */}
-          <div className="hidden md:flex items-center bg-[#161A1F] rounded-lg p-0.5 border border-[#2B3139]">
+          <div className="hidden lg:flex items-center bg-[#161A1F] rounded-lg p-0.5 border border-[#2B3139]">
             {ranges.map((rg) => (
               <button
                 key={rg}
@@ -276,8 +355,35 @@ export function CandleChart({
           </div>
         </div>
 
-        {/* Right: Indicators & Fullscreen on Desktop */}
+        {/* Right: Zoom + Indicators & Fullscreen on Desktop */}
         <div className="hidden sm:flex items-center gap-2 relative">
+          {/* Zoom In/Out & Reset Controls */}
+          <div className="flex items-center gap-0.5 bg-[#161A1F] rounded-md p-0.5 border border-[#2B3139]">
+            <button
+              onClick={handleZoomIn}
+              className="p-1.5 text-text-secondary hover:text-gold hover:bg-[#11151A] rounded transition-colors"
+              title="Zoom In (+)"
+            >
+              <ZoomIn size={13} />
+            </button>
+            <button
+              onClick={handleZoomOut}
+              className="p-1.5 text-text-secondary hover:text-gold hover:bg-[#11151A] rounded transition-colors"
+              title="Zoom Out (-)"
+            >
+              <ZoomOut size={13} />
+            </button>
+            {zoomCount !== 48 && (
+              <button
+                onClick={handleResetZoom}
+                className="px-1.5 py-0.5 rounded text-[10px] font-mono text-gold bg-gold/10 hover:bg-gold/20 transition-colors flex items-center gap-1"
+                title="Reset Zoom"
+              >
+                <RotateCcw size={10} />
+                <span>{Math.round((48 / zoomCount) * 100)}%</span>
+              </button>
+            )}
+          </div>
           <div className="relative">
             <button
               onClick={() => setIndicatorMenuOpen(!indicatorMenuOpen)}
@@ -417,148 +523,188 @@ export function CandleChart({
       <div className="flex-1 relative overflow-hidden bg-background">
         {/* VIEW 1: CANDLESTICK CHART */}
         {chartMode === 'candles' && (
-          <div className="w-full h-full relative flex flex-col justify-between p-2">
-            <svg
-              className="w-full h-[320px] overflow-visible cursor-crosshair"
-              viewBox={`0 0 ${svgWidth} ${priceChartHeight}`}
-              preserveAspectRatio="none"
-              onMouseMove={(e) => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const ratio = x / rect.width;
-                const idx = Math.min(
-                  visibleCandles.length - 1,
-                  Math.max(0, Math.floor(ratio * visibleCandles.length))
-                );
-                setHoverIndex(enrichedCandles.length - visibleCandles.length + idx);
-              }}
-              onMouseLeave={() => setHoverIndex(null)}
-            >
-              {/* Horizontal Price Grid Lines */}
-              {[0.2, 0.4, 0.6, 0.8].map((ratio) => {
-                const y = priceChartHeight * ratio;
-                const priceLevel = Math.round(maxPrice - ratio * (maxPrice - minPrice));
-                return (
-                  <g key={ratio}>
-                    <line x1="0" y1={y} x2={svgWidth} y2={y} stroke="#2A3038" strokeDasharray="3 3" />
-                    <text x={svgWidth - 6} y={y - 4} fill="#5E6673" fontSize="10" textAnchor="end" fontFamily="monospace">
-                      ₹{priceLevel.toLocaleString('en-IN')}
-                    </text>
-                  </g>
-                );
-              })}
+          <div className="w-full h-full relative flex flex-col p-2 overflow-hidden">
+            <div className="flex-1 w-full min-h-0 relative overflow-hidden">
+              <svg
+                className="w-full h-full overflow-hidden cursor-crosshair"
+                viewBox={`0 0 ${svgWidth} ${priceChartHeight}`}
+                preserveAspectRatio="none"
+                onMouseMove={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const x = e.clientX - rect.left;
+                  const plotPixelWidth = rect.width * (plotWidth / svgWidth);
+                  const ratio = Math.min(1, Math.max(0, x / plotPixelWidth));
+                  const idx = Math.min(
+                    visibleCandles.length - 1,
+                    Math.max(0, Math.floor(ratio * visibleCandles.length))
+                  );
+                  setHoverIndex(enrichedCandles.length - visibleCandles.length + idx);
+                }}
+                onMouseLeave={() => setHoverIndex(null)}
+              >
+                {/* Horizontal Price Grid Lines */}
+                {[0.15, 0.38, 0.62, 0.85].map((ratio) => {
+                  const y = priceChartHeight * ratio;
+                  const priceLevel = Math.round(maxPrice - ratio * (maxPrice - minPrice));
+                  return (
+                    <g key={ratio}>
+                      <line x1="0" y1={y} x2={plotWidth} y2={y} stroke="#2A3038" strokeDasharray="3 3" />
+                      <text x={plotWidth + 6} y={y + 3} fill="#5E6673" fontSize="10" textAnchor="start" fontFamily="monospace">
+                        ₹{priceLevel.toLocaleString('en-IN')}
+                      </text>
+                    </g>
+                  );
+                })}
 
-              {/* Bollinger Bands Shading */}
-              {indicators.bollinger && (
-                <path
-                  d={visibleCandles
-                    .map((c, i) => `${i === 0 ? 'M' : 'L'} ${i * candleSlotWidth + candleSlotWidth / 2} ${getY(c.upperBB)}`)
-                    .concat(
-                      visibleCandles
-                        .slice()
-                        .reverse()
-                        .map((c, i) => `L ${(visibleCandles.length - 1 - i) * candleSlotWidth + candleSlotWidth / 2} ${getY(c.lowerBB)}`)
-                    )
-                    .join(' ') + ' Z'}
-                  fill="rgba(56, 97, 251, 0.06)"
-                  stroke="rgba(56, 97, 251, 0.2)"
-                  strokeWidth="1"
-                />
-              )}
+                {/* Right Y-Axis Divider Line */}
+                <line x1={plotWidth} y1="0" x2={plotWidth} y2={priceChartHeight} stroke="#2B3139" strokeWidth="1" />
 
-              {/* Moving Average Line (MA 20) */}
-              {indicators.ma && (
-                <path
-                  d={visibleCandles
-                    .map((c, i) => `${i === 0 ? 'M' : 'L'} ${i * candleSlotWidth + candleSlotWidth / 2} ${getY(c.ma)}`)
-                    .join(' ')}
-                  fill="none"
-                  stroke="#F0B90B"
-                  strokeWidth="1.5"
-                  opacity="0.85"
-                />
-              )}
-
-              {/* VWAP Benchmark */}
-              {indicators.vwap && (
-                <path
-                  d={visibleCandles
-                    .map((c, i) => `${i === 0 ? 'M' : 'L'} ${i * candleSlotWidth + candleSlotWidth / 2} ${getY(c.vwap)}`)
-                    .join(' ')}
-                  fill="none"
-                  stroke="#3861FB"
-                  strokeWidth="1.5"
-                  strokeDasharray="4 2"
-                />
-              )}
-
-              {/* Candlestick Wicks & Bodies */}
-              {visibleCandles.map((c, i) => {
-                const isGreen = c.close >= c.open;
-                const x = i * candleSlotWidth + candleSlotWidth / 2;
-                const bodyY = getY(Math.max(c.open, c.close));
-                const bodyHeight = Math.max(2, Math.abs(getY(c.open) - getY(c.close)));
-                const wickHighY = getY(c.high);
-                const wickLowY = getY(c.low);
-                const color = isGreen ? '#0ECB81' : '#F6465D';
-
-                return (
-                  <g key={i} className="transition-opacity">
-                    {/* Upper/Lower Wick */}
-                    <line x1={x} y1={wickHighY} x2={x} y2={wickLowY} stroke={color} strokeWidth="1.2" />
-
-                    {/* Candle Body */}
-                    <rect
-                      x={x - candleBodyWidth / 2}
-                      y={bodyY}
-                      width={candleBodyWidth}
-                      height={bodyHeight}
-                      fill={color}
-                      rx="0.5"
-                    />
-
-                    {/* Signal Marker if opportunity detected */}
-                    {indicators.signals && c.signal === 'AUDIT_PASS' && (
-                      <g>
-                        <circle cx={x} cy={wickHighY - 12} r="4" fill="#F0B90B" className="animate-pulse" />
-                        <text x={x} y={wickHighY - 18} fill="#F0B90B" fontSize="9" fontWeight="bold" textAnchor="middle" fontFamily="monospace">
-                          OPP
-                        </text>
-                      </g>
-                    )}
-                  </g>
-                );
-              })}
-
-              {/* Hover Crosshair */}
-              {hoverIndex !== null && (
-                <g>
-                  {/* Vertical Crosshair Line */}
-                  <line
-                    x1={
-                      (hoverIndex - (enrichedCandles.length - visibleCandles.length)) * candleSlotWidth +
-                      candleSlotWidth / 2
-                    }
-                    y1="0"
-                    x2={
-                      (hoverIndex - (enrichedCandles.length - visibleCandles.length)) * candleSlotWidth +
-                      candleSlotWidth / 2
-                    }
-                    y2={priceChartHeight}
-                    stroke="#848E9C"
-                    strokeDasharray="2 2"
+                {/* Bollinger Bands Shading */}
+                {indicators.bollinger && (
+                  <path
+                    d={visibleCandles
+                      .map((c, i) => `${i === 0 ? 'M' : 'L'} ${i * candleSlotWidth + candleSlotWidth / 2} ${getY(c.upperBB)}`)
+                      .concat(
+                        visibleCandles
+                          .slice()
+                          .reverse()
+                          .map((c, i) => `L ${(visibleCandles.length - 1 - i) * candleSlotWidth + candleSlotWidth / 2} ${getY(c.lowerBB)}`)
+                      )
+                      .join(' ') + ' Z'}
+                    fill="rgba(56, 97, 251, 0.06)"
+                    stroke="rgba(56, 97, 251, 0.2)"
                     strokeWidth="1"
                   />
-                </g>
-              )}
-            </svg>
+                )}
+
+                {/* Moving Average Line (MA 20) */}
+                {indicators.ma && (
+                  <path
+                    d={visibleCandles
+                      .map((c, i) => `${i === 0 ? 'M' : 'L'} ${i * candleSlotWidth + candleSlotWidth / 2} ${getY(c.ma)}`)
+                      .join(' ')}
+                    fill="none"
+                    stroke="#F0B90B"
+                    strokeWidth="1.5"
+                    opacity="0.85"
+                  />
+                )}
+
+                {/* VWAP Benchmark */}
+                {indicators.vwap && (
+                  <path
+                    d={visibleCandles
+                      .map((c, i) => `${i === 0 ? 'M' : 'L'} ${i * candleSlotWidth + candleSlotWidth / 2} ${getY(c.vwap)}`)
+                      .join(' ')}
+                    fill="none"
+                    stroke="#3861FB"
+                    strokeWidth="1.5"
+                    strokeDasharray="4 2"
+                  />
+                )}
+
+                {/* Candlestick Wicks & Bodies */}
+                {visibleCandles.map((c, i) => {
+                  const isGreen = c.close >= c.open;
+                  const x = i * candleSlotWidth + candleSlotWidth / 2;
+                  const bodyY = getY(Math.max(c.open, c.close));
+                  const bodyHeight = Math.max(2, Math.abs(getY(c.open) - getY(c.close)));
+                  const wickHighY = getY(c.high);
+                  const wickLowY = getY(c.low);
+                  const color = isGreen ? '#0ECB81' : '#F6465D';
+
+                  return (
+                    <g key={i} className="transition-opacity">
+                      {/* Upper/Lower Wick */}
+                      <line x1={x} y1={wickHighY} x2={x} y2={wickLowY} stroke={color} strokeWidth="1.2" />
+
+                      {/* Candle Body */}
+                      <rect
+                        x={x - candleBodyWidth / 2}
+                        y={bodyY}
+                        width={candleBodyWidth}
+                        height={bodyHeight}
+                        fill={color}
+                        rx="0.5"
+                      />
+
+                      {/* Signal Marker if opportunity detected */}
+                      {indicators.signals && c.signal === 'AUDIT_PASS' && (
+                        <g>
+                          <circle cx={x} cy={wickHighY - 12} r="4" fill="#F0B90B" className="animate-pulse" />
+                          <text x={x} y={wickHighY - 18} fill="#F0B90B" fontSize="9" fontWeight="bold" textAnchor="middle" fontFamily="monospace">
+                            OPP
+                          </text>
+                        </g>
+                      )}
+                    </g>
+                  );
+                })}
+
+                {/* Active Latest Price Line & Tag on Y-Axis */}
+                {activeCandle && (
+                  <g>
+                    <line
+                      x1="0"
+                      y1={getY(activeCandle.close)}
+                      x2={plotWidth}
+                      y2={getY(activeCandle.close)}
+                      stroke={activeCandle.close >= activeCandle.open ? '#0ECB81' : '#F6465D'}
+                      strokeDasharray="2 2"
+                      strokeWidth="1"
+                    />
+                    <rect
+                      x={plotWidth + 1}
+                      y={getY(activeCandle.close) - 8}
+                      width={chartRightMargin - 2}
+                      height={16}
+                      fill={activeCandle.close >= activeCandle.open ? '#0ECB81' : '#F6465D'}
+                      rx="2"
+                    />
+                    <text
+                      x={plotWidth + 4}
+                      y={getY(activeCandle.close) + 4}
+                      fill="#FFFFFF"
+                      fontSize="9"
+                      fontWeight="bold"
+                      textAnchor="start"
+                      fontFamily="monospace"
+                    >
+                      ₹{activeCandle.close.toLocaleString('en-IN')}
+                    </text>
+                  </g>
+                )}
+
+                {/* Hover Crosshair */}
+                {hoverIndex !== null && (
+                  <g>
+                    {/* Vertical Crosshair Line */}
+                    <line
+                      x1={
+                        (hoverIndex - (enrichedCandles.length - visibleCandles.length)) * candleSlotWidth +
+                        candleSlotWidth / 2
+                      }
+                      y1="0"
+                      x2={
+                        (hoverIndex - (enrichedCandles.length - visibleCandles.length)) * candleSlotWidth +
+                        candleSlotWidth / 2
+                      }
+                      y2={priceChartHeight}
+                      stroke="#848E9C"
+                      strokeDasharray="2 2"
+                      strokeWidth="1"
+                    />
+                  </g>
+                )}
+              </svg>
+            </div>
 
             {/* Volume Panel Below Price Chart */}
-            <div className="h-[70px] border-t border-border/50 pt-1 relative">
-              <span className="absolute top-1 left-2 text-[9px] font-mono text-muted uppercase">
+            <div className="h-[46px] sm:h-[50px] border-t border-border/50 pt-0.5 relative flex-shrink-0 overflow-hidden">
+              <span className="absolute top-0.5 left-2 text-[8px] sm:text-[9px] font-mono text-muted uppercase">
                 VOLUME / OI
               </span>
-              <svg className="w-full h-full overflow-visible" viewBox={`0 0 ${svgWidth} ${volChartHeight}`} preserveAspectRatio="none">
+              <svg className="w-full h-full overflow-hidden" viewBox={`0 0 ${svgWidth} ${volChartHeight}`} preserveAspectRatio="none">
                 {visibleCandles.map((c, i) => {
                   const isGreen = c.close >= c.open;
                   const x = i * candleSlotWidth + candleSlotWidth / 2;
@@ -581,52 +727,65 @@ export function CandleChart({
 
         {/* VIEW 2: FINE GOLD NORMALIZED (Multi-Contract Convergence) */}
         {chartMode === 'normalized' && (
-          <div className="w-full h-full p-4 flex flex-col justify-between font-mono">
-            <div className="flex items-center justify-between mb-2">
-              <div>
-                <div className="text-sm font-bold text-foreground flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-gold animate-pulse" />
-                  All MCX Contracts Normalized to ₹/g Fine Gold
-                </div>
-                <div className="text-[11px] text-muted">
-                  Different Contract Sizes & Purity Factors Converged into a Single Unit
-                </div>
+          <div className="w-full h-full p-2.5 sm:p-3 flex flex-col justify-between font-mono select-none min-h-0 overflow-hidden">
+            {/* Header & Legend */}
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5 flex-shrink-0">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-gold animate-pulse" />
+                <span className="text-xs font-bold text-foreground">Normalized ₹/g Fine Gold</span>
+                <span className="text-[10px] text-muted hidden sm:inline">(All Contracts Converged)</span>
               </div>
 
               {/* Legend */}
-              <div className="flex items-center gap-3 text-xs">
+              <div className="flex items-center gap-2 sm:gap-3 text-xs flex-wrap">
                 {Object.keys(CONTRACT_REGISTRY).map((cKey) => {
                   const spec = CONTRACT_REGISTRY[cKey];
                   return (
-                    <div key={cKey} className="flex items-center gap-1.5">
+                    <div key={cKey} className="flex items-center gap-1">
                       <span className="w-2 h-2 rounded-full" style={{ backgroundColor: spec.color }} />
-                      <span className="font-bold text-foreground">{cKey}</span>
-                      <span className="text-[10px] text-muted">({spec.purity})</span>
+                      <span className="font-bold text-[11px] text-foreground">{cKey}</span>
                     </div>
                   );
                 })}
               </div>
             </div>
 
-            {/* Multi-Line Normalized Chart */}
-            <div className="flex-1 relative bg-secondary/50 rounded border border-border p-3 flex items-center justify-center">
-              <svg className="w-full h-full overflow-visible" viewBox="0 0 900 240" preserveAspectRatio="none">
-                {/* Horizontal reference for ₹12,842 */}
-                <line x1="0" y1="120" x2="900" y2="120" stroke="#F0B90B" strokeDasharray="3 3" strokeWidth="1" />
-                <text x="890" y="115" fill="#F0B90B" fontSize="10" textAnchor="end">
-                  Fair Fine Gold: ₹12,842/g
+            {/* Multi-Line Normalized Chart SVG Canvas */}
+            <div className="flex-1 w-full min-h-0 relative bg-[#11151A] rounded-xl border border-[#2B3139] p-2 overflow-hidden">
+              <svg className="w-full h-full overflow-hidden cursor-crosshair" viewBox={`0 0 ${svgWidth} ${priceChartHeight}`} preserveAspectRatio="none">
+                {/* Horizontal Grid Lines */}
+                {[0.15, 0.38, 0.62, 0.85].map((ratio) => {
+                  const y = priceChartHeight * ratio;
+                  const priceLevel = Math.round(12880 - ratio * 80);
+                  return (
+                    <g key={ratio}>
+                      <line x1="0" y1={y} x2={plotWidth} y2={y} stroke="#2A3038" strokeDasharray="3 3" />
+                      <text x={plotWidth + 6} y={y + 3} fill="#5E6673" fontSize="10" textAnchor="start" fontFamily="monospace">
+                        ₹{priceLevel}/g
+                      </text>
+                    </g>
+                  );
+                })}
+
+                {/* Right Y-Axis Divider Line */}
+                <line x1={plotWidth} y1="0" x2={plotWidth} y2={priceChartHeight} stroke="#2B3139" strokeWidth="1" />
+
+                {/* Fair Fine Gold Benchmark Line (₹12,842) */}
+                <line x1="0" y1={priceChartHeight * 0.5} x2={plotWidth} y2={priceChartHeight * 0.5} stroke="#F0B90B" strokeDasharray="4 3" strokeWidth="1.2" opacity="0.6" />
+                <rect x={plotWidth + 1} y={priceChartHeight * 0.5 - 7} width={chartRightMargin - 2} height={14} fill="#F0B90B" opacity="0.2" rx="2" />
+                <text x={plotWidth + 4} y={priceChartHeight * 0.5 + 3} fill="#F0B90B" fontSize="9" fontWeight="bold" textAnchor="start">
+                  ₹12,842
                 </text>
 
                 {/* Draw 4 contract normalized curves */}
                 {['GOLDM', 'GOLDTEN', 'GOLDGUINEA', 'GOLDPETAL'].map((cKey, idx) => {
                   const spec = CONTRACT_REGISTRY[cKey];
-                  const offset = (idx - 1.5) * 6;
+                  const offset = (idx - 1.5) * 20;
                   const points = visibleCandles
                     .map((c, i) => {
-                      const x = (i / (visibleCandles.length - 1)) * 900;
-                      // Simulated minor spread dislocation around fair
-                      const wave = Math.sin((i + idx * 4) * 0.2) * 22 + offset;
-                      const y = 120 - wave;
+                      const x = (i / Math.max(1, visibleCandles.length - 1)) * plotWidth;
+                      const wave = Math.sin((i + idx * 4) * 0.22) * 50 + offset;
+                      const y = priceChartHeight * 0.5 - wave;
                       return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
                     })
                     .join(' ');
@@ -637,7 +796,7 @@ export function CandleChart({
                       d={points}
                       fill="none"
                       stroke={spec.color}
-                      strokeWidth={cKey === symbol ? '2.5' : '1.5'}
+                      strokeWidth={cKey === symbol ? '3' : '1.8'}
                       opacity={cKey === symbol ? 1 : 0.75}
                     />
                   );
@@ -645,13 +804,14 @@ export function CandleChart({
               </svg>
             </div>
 
-            <div className="mt-2 p-2 bg-panel rounded border border-border flex items-center justify-between text-xs">
-              <span className="text-text-secondary">
-                Dislocation Highlight: <span className="text-gold font-bold">GOLDM vs GOLDTEN</span> is currently +0.33% wider than carrying cost.
+            {/* Compact Bottom Summary */}
+            <div className="mt-1.5 px-2.5 py-1.5 bg-[#161A1F] rounded-lg border border-[#2B3139] flex items-center justify-between text-[11px] flex-shrink-0">
+              <span className="text-text-secondary truncate">
+                Dislocation: <strong className="text-gold">GOLDM vs GOLDTEN</strong> is +0.33% wider than carrying cost.
               </span>
               <button
                 onClick={onOpenAudit}
-                className="px-3 py-1 bg-gold text-background rounded font-bold text-[11px] hover:bg-gold-hover transition-colors shadow"
+                className="px-2.5 py-1 bg-gold text-background rounded-md font-bold text-[10px] hover:bg-gold-hover transition-colors flex-shrink-0 ml-2"
               >
                 Inspect Alpha Audit →
               </button>
@@ -661,98 +821,140 @@ export function CandleChart({
 
         {/* VIEW 3: RELATIVE SPREAD & RESIDUAL (Spread A/B) */}
         {chartMode === 'spread' && (
-          <div className="w-full h-full p-4 flex flex-col justify-between font-mono">
-            <div className="flex items-center justify-between mb-2">
+          <div className="w-full h-full p-2.5 sm:p-3 flex flex-col justify-between font-mono select-none min-h-0 overflow-hidden">
+            {/* Header */}
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5 flex-shrink-0">
               <div>
-                <div className="text-sm font-bold text-foreground">
-                  Relative Spread & Residual Engine: GOLDM / GOLDTEN
-                </div>
-                <div className="text-[11px] text-muted">
-                  Observed Spread (+0.42%) - Expected Carry (+0.09%) = <span className="text-gold font-bold">Residual (+0.33%)</span>
-                </div>
+                <span className="text-xs font-bold text-foreground">Spread & Residual Engine: GOLDM / GOLDTEN</span>
+                <span className="text-[10px] text-muted block sm:inline sm:ml-2">
+                  Observed (+0.42%) - Carry (+0.09%) = <strong className="text-gold">+0.33% Residual</strong>
+                </span>
               </div>
 
-              <div className="px-3 py-1 bg-buy/10 border border-buy/30 rounded text-buy text-xs font-bold">
-                ● OPPORTUNITY DETECTED (Z-Score: +2.41σ)
+              <div className="px-2 py-0.5 bg-buy/15 border border-buy/30 rounded text-buy text-[10px] font-bold">
+                ● OPPORTUNITY DETECTED (+2.41σ)
               </div>
             </div>
 
-            {/* Spread and Residual Curves */}
-            <div className="flex-1 bg-secondary/50 rounded border border-border p-3 relative">
-              <svg className="w-full h-full overflow-visible" viewBox="0 0 900 220" preserveAspectRatio="none">
-                {/* 0% Line */}
-                <line x1="0" y1="110" x2="900" y2="110" stroke="#5E6673" strokeWidth="1" />
-                <text x="890" y="105" fill="#848E9C" fontSize="10" textAnchor="end">0.00%</text>
+            {/* Spread and Residual Curves Canvas */}
+            <div className="flex-1 w-full min-h-0 relative bg-[#11151A] rounded-xl border border-[#2B3139] p-2 overflow-hidden">
+              <svg className="w-full h-full overflow-hidden cursor-crosshair" viewBox={`0 0 ${svgWidth} ${priceChartHeight}`} preserveAspectRatio="none">
+                {/* Upper Barrier (+0.40%) */}
+                <line x1="0" y1={priceChartHeight * 0.18} x2={plotWidth} y2={priceChartHeight * 0.18} stroke="#F0B90B" strokeDasharray="4 3" strokeWidth="1.2" opacity="0.8" />
+                <text x={plotWidth + 6} y={priceChartHeight * 0.18 + 3} fill="#F0B90B" fontSize="9" fontWeight="bold" textAnchor="start">+0.40%</text>
 
-                {/* +2σ Threshold Upper */}
-                <line x1="0" y1="45" x2="900" y2="45" stroke="#F0B90B" strokeDasharray="4 4" strokeWidth="1.2" />
-                <text x="890" y="40" fill="#F0B90B" fontSize="10" textAnchor="end">+2.00σ Barrier</text>
+                {/* 0.00% Center Baseline */}
+                <line x1="0" y1={priceChartHeight * 0.5} x2={plotWidth} y2={priceChartHeight * 0.5} stroke="#5E6673" strokeWidth="1.2" />
+                <text x={plotWidth + 6} y={priceChartHeight * 0.5 + 3} fill="#848E9C" fontSize="9" textAnchor="start">0.00%</text>
 
-                {/* -2σ Threshold Lower */}
-                <line x1="0" y1="175" x2="900" y2="175" stroke="#F0B90B" strokeDasharray="4 4" strokeWidth="1.2" />
-                <text x="890" y="170" fill="#F0B90B" fontSize="10" textAnchor="end">-2.00σ Barrier</text>
+                {/* Lower Barrier (-0.40%) */}
+                <line x1="0" y1={priceChartHeight * 0.82} x2={plotWidth} y2={priceChartHeight * 0.82} stroke="#F0B90B" strokeDasharray="4 3" strokeWidth="1.2" opacity="0.8" />
+                <text x={plotWidth + 6} y={priceChartHeight * 0.82 + 3} fill="#F0B90B" fontSize="9" fontWeight="bold" textAnchor="start">-0.40%</text>
 
-                {/* Residual Curve */}
+                {/* Right Y-Axis Divider Line */}
+                <line x1={plotWidth} y1="0" x2={plotWidth} y2={priceChartHeight} stroke="#2B3139" strokeWidth="1" />
+
+                {/* Residual Curve Shading Area */}
                 <path
                   d={visibleCandles
                     .map((c, i) => {
-                      const x = (i / (visibleCandles.length - 1)) * 900;
+                      const x = (i / Math.max(1, visibleCandles.length - 1)) * plotWidth;
                       const z = c.zScore || 2.41;
-                      const y = 110 - z * 32;
+                      const y = priceChartHeight * 0.5 - (z / 3) * (priceChartHeight * 0.4);
+                      return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
+                    })
+                    .concat(`L ${plotWidth} ${priceChartHeight * 0.5} L 0 ${priceChartHeight * 0.5} Z`)
+                    .join(' ')}
+                  fill="rgba(56, 97, 251, 0.12)"
+                />
+
+                {/* Residual Curve Stroke */}
+                <path
+                  d={visibleCandles
+                    .map((c, i) => {
+                      const x = (i / Math.max(1, visibleCandles.length - 1)) * plotWidth;
+                      const z = c.zScore || 2.41;
+                      const y = priceChartHeight * 0.5 - (z / 3) * (priceChartHeight * 0.4);
                       return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
                     })
                     .join(' ')}
                   fill="none"
                   stroke="#3861FB"
-                  strokeWidth="2.5"
+                  strokeWidth="2.8"
                 />
               </svg>
             </div>
 
-            <div className="mt-2 flex items-center justify-between text-xs">
-              <span className="text-text-secondary">
-                Model: ln(P_GOLDM) - ln(P_GOLDTEN) - r_f × (DTE_A - DTE_B) / 365
+            {/* Compact Bottom Summary */}
+            <div className="mt-1.5 px-2.5 py-1 bg-[#161A1F] rounded-lg border border-[#2B3139] flex items-center justify-between text-[11px] flex-shrink-0">
+              <span className="text-text-secondary truncate">
+                Model: ln(P_A) - ln(P_B) - r_f × ΔDTE / 365
               </span>
-              <span className="text-buy font-bold">Confidence: 89% Walk-Forward Validated</span>
+              <span className="text-buy font-bold text-[10px] flex-shrink-0 ml-2">89% Walk-Forward Validated</span>
             </div>
           </div>
         )}
 
         {/* VIEW 4: Z-SCORE OSCILLATOR */}
         {chartMode === 'zscore' && (
-          <div className="w-full h-full p-4 flex flex-col justify-between font-mono">
-            <div className="flex items-center justify-between mb-2">
-              <div className="text-sm font-bold text-foreground">
-                Statistical Z-Score Oscillator (Rolling 60-Day Window)
+          <div className="w-full h-full p-2.5 sm:p-3 flex flex-col justify-between font-mono select-none min-h-0 overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between gap-2 mb-1.5 flex-shrink-0">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-gold animate-pulse" />
+                <span className="text-xs font-bold text-foreground">Statistical Z-Score Oscillator</span>
+                <span className="text-[10px] text-muted hidden sm:inline">(Rolling 60-Day Window)</span>
               </div>
-              <span className="text-gold font-extrabold text-lg">+2.41σ</span>
+              <span className="text-gold font-extrabold text-sm sm:text-base">+2.41σ</span>
             </div>
 
-            <div className="flex-1 bg-secondary/50 rounded border border-border p-3 relative">
-              <svg className="w-full h-full overflow-visible" viewBox="0 0 900 200" preserveAspectRatio="none">
-                {/* 0σ Center */}
-                <line x1="0" y1="100" x2="900" y2="100" stroke="#848E9C" strokeWidth="1" />
-                {/* +2σ */}
-                <line x1="0" y1="40" x2="900" y2="40" stroke="#F6465D" strokeDasharray="3 3" strokeWidth="1" />
-                <text x="890" y="35" fill="#F6465D" fontSize="10" textAnchor="end">+2.00σ (Overpriced)</text>
-                {/* -2σ */}
-                <line x1="0" y1="160" x2="900" y2="160" stroke="#0ECB81" strokeDasharray="3 3" strokeWidth="1" />
-                <text x="890" y="155" fill="#0ECB81" fontSize="10" textAnchor="end">-2.00σ (Underpriced)</text>
+            {/* Z-Score Canvas */}
+            <div className="flex-1 w-full min-h-0 relative bg-[#11151A] rounded-xl border border-[#2B3139] p-2 overflow-hidden">
+              <svg className="w-full h-full overflow-hidden cursor-crosshair" viewBox={`0 0 ${svgWidth} ${priceChartHeight}`} preserveAspectRatio="none">
+                {/* Overbought Shading (+2σ to top) */}
+                <rect x="0" y="0" width={plotWidth} height={priceChartHeight * 0.2} fill="rgba(246, 70, 93, 0.1)" />
 
-                {/* Z-Score path */}
+                {/* Oversold Shading (-2σ to bottom) */}
+                <rect x="0" y={priceChartHeight * 0.8} width={plotWidth} height={priceChartHeight * 0.2} fill="rgba(14, 203, 129, 0.1)" />
+
+                {/* +2.0σ Barrier */}
+                <line x1="0" y1={priceChartHeight * 0.2} x2={plotWidth} y2={priceChartHeight * 0.2} stroke="#F6465D" strokeDasharray="3 3" strokeWidth="1.2" />
+                <text x={plotWidth + 6} y={priceChartHeight * 0.2 + 3} fill="#F6465D" fontSize="9" fontWeight="bold" textAnchor="start">+2.00σ</text>
+
+                {/* 0.0σ Center Line */}
+                <line x1="0" y1={priceChartHeight * 0.5} x2={plotWidth} y2={priceChartHeight * 0.5} stroke="#848E9C" strokeWidth="1.2" />
+                <text x={plotWidth + 6} y={priceChartHeight * 0.5 + 3} fill="#848E9C" fontSize="9" textAnchor="start">0.00σ</text>
+
+                {/* -2.0σ Barrier */}
+                <line x1="0" y1={priceChartHeight * 0.8} x2={plotWidth} y2={priceChartHeight * 0.8} stroke="#0ECB81" strokeDasharray="3 3" strokeWidth="1.2" />
+                <text x={plotWidth + 6} y={priceChartHeight * 0.8 + 3} fill="#0ECB81" fontSize="9" fontWeight="bold" textAnchor="start">-2.00σ</text>
+
+                {/* Right Y-Axis Divider Line */}
+                <line x1={plotWidth} y1="0" x2={plotWidth} y2={priceChartHeight} stroke="#2B3139" strokeWidth="1" />
+
+                {/* Z-Score Curve */}
                 <path
                   d={visibleCandles
                     .map((c, i) => {
-                      const x = (i / (visibleCandles.length - 1)) * 900;
-                      const y = 100 - (c.zScore || 0) * 30;
+                      const x = (i / Math.max(1, visibleCandles.length - 1)) * plotWidth;
+                      const z = c.zScore || 2.41;
+                      const y = priceChartHeight * 0.5 - (z / 3) * (priceChartHeight * 0.4);
                       return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
                     })
                     .join(' ')}
                   fill="none"
                   stroke="#F0B90B"
-                  strokeWidth="2"
+                  strokeWidth="2.8"
                 />
               </svg>
+            </div>
+
+            {/* Compact Bottom Summary */}
+            <div className="mt-1.5 px-2.5 py-1 bg-[#161A1F] rounded-lg border border-[#2B3139] flex items-center justify-between text-[11px] flex-shrink-0">
+              <span className="text-text-secondary truncate">
+                Status: <strong className="text-sell">Overbought (+2.41σ)</strong> — Statistical mean reversion expected.
+              </span>
+              <span className="text-gold font-bold text-[10px] flex-shrink-0 ml-2">Confidence: 87%</span>
             </div>
           </div>
         )}

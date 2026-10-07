@@ -144,8 +144,8 @@ export function BacktestView() {
           </div>
 
           {/* SVG Curve */}
-          <div className="h-64 bg-[#11151A] rounded-lg border border-[#2B3139] p-4 relative">
-            <svg className="w-full h-full overflow-visible" viewBox="0 0 900 200" preserveAspectRatio="none">
+          <div className="h-64 bg-[#11151A] rounded-lg border border-[#2B3139] p-4 relative overflow-hidden">
+            <svg className="w-full h-full overflow-hidden" viewBox="0 0 900 200" preserveAspectRatio="none">
               <line x1="0" y1="160" x2="900" y2="160" stroke="#2B3139" strokeDasharray="3 3" />
 
               {/* Benchmark */}

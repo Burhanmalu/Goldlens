@@ -141,7 +141,7 @@ export function generateCandlestickData(symbol: string = 'GOLDM', timeframe: str
     const delta = (rng() - 0.495) * vol;
     currentFineGold = currentFineGold * (1 + delta);
     
-    const fairRaw = currentFineGold * spec.quoteBasis * spec.purityFactor;
+    const fairRaw = Math.round(currentFineGold * spec.quoteBasis * spec.purityFactor);
     const candleNoise = (rng() - 0.5) * (fairRaw * 0.0015);
     
     const open = Math.round(fairRaw + candleNoise);
@@ -150,8 +150,6 @@ export function generateCandlestickData(symbol: string = 'GOLDM', timeframe: str
     const close = Math.round(low + rng() * (high - low));
     
     const normalizedPrice = Math.round(((close / spec.quoteBasis) / spec.purityFactor) * 100) / 100;
-    
-    // Spread & Residual relative to theoretical basket
     const theoreticalBasket = currentFineGold * 0.9995;
     const spread = Math.round(((normalizedPrice - theoreticalBasket) / theoreticalBasket) * 10000) / 100;
     spreadHistory.push(spread);
