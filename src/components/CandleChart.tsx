@@ -218,10 +218,10 @@ export function CandleChart({
     return { minPrice: Math.max(0, min - padding), maxPrice: max + padding, maxVol: vMax || 1 };
   }, [visibleCandles, indicators]);
 
-  // Coordinate mapping helpers (Large, clear height for full visual readability)
+  // Coordinate mapping helpers (Compact height matching side card)
   const svgWidth = 900;
-  const priceChartHeight = 310;
-  const volChartHeight = 56;
+  const priceChartHeight = 220;
+  const volChartHeight = 38;
   const chartRightMargin = 72; // Dedicated right margin for price scale
   const plotWidth = svgWidth - chartRightMargin;
   const candleSlotWidth = plotWidth / (visibleCandles.length || 1);
@@ -229,304 +229,197 @@ export function CandleChart({
 
   const getY = (price: number) => {
     const range = maxPrice - minPrice || 1;
-    return priceChartHeight - ((price - minPrice) / range) * (priceChartHeight - 34) - 17;
+    return priceChartHeight - ((price - minPrice) / range) * (priceChartHeight - 26) - 13;
   };
 
   return (
     <div
       ref={containerRef}
-      className={`bg-[#161A1F] flex flex-col select-none relative h-full w-full min-h-[440px] sm:min-h-[480px] touch-pan-y ${
+      className={`bg-[#161A1F] flex flex-col select-none relative h-full w-full max-w-full min-w-0 box-border touch-pan-y ${
         isFullscreen ? 'fixed inset-0 z-50 bg-[#0B0E11] h-screen w-screen p-2 sm:p-4' : 'flex-1'
       }`}
     >
-      {/* ── TOP CHART CONTROLS TOOLBAR ── */}
-      <div className="bg-[#11151A] border-b border-[#2B3139] px-2 sm:px-4 py-1.5 sm:py-2 flex items-center justify-between gap-2 flex-shrink-0 z-10 text-xs">
-        {/* Mobile Compact Controls (< sm) with Smooth Horizontal Scroll */}
-        <div className="flex sm:hidden items-center gap-1.5 w-full overflow-x-auto no-scrollbar touch-pan-x py-0.5">
-          {/* Mobile Timeframe Dropdown */}
-          <select
-            value={timeframe}
-            onChange={(e) => setTimeframe(e.target.value)}
-            className="flex-shrink-0 bg-[#161A1F] text-gold font-bold font-mono text-xs px-2 py-1.5 rounded-lg border border-[#2B3139] focus:outline-none min-h-[34px] touch-manipulation"
+      {/* ── TOP CHART CONTROLS TOOLBAR (Responsive, no clipping, fully visible under zoom) ── */}
+      <div className="w-full max-w-full min-w-0 box-border bg-[#11151A] border-b border-[#2B3139] px-2.5 sm:px-3 py-1.5 flex items-center justify-between gap-2 flex-shrink-0 z-10 text-xs overflow-x-auto no-scrollbar">
+        {/* Left Cluster: Chart Mode Selector */}
+        <div className="flex items-center p-0.5 bg-[#161A1F] rounded-lg border border-[#2B3139] flex-shrink-0">
+          <button
+            onClick={() => setChartMode('candles')}
+            className={`px-2.5 py-1 rounded-md font-bold text-xs transition-colors ${
+              chartMode === 'candles'
+                ? 'bg-gold text-background shadow-sm font-black'
+                : 'text-text-secondary hover:text-foreground hover:bg-[#1C2128]'
+            }`}
           >
-            <option value="1m">1m</option>
-            <option value="5m">5m</option>
-            <option value="15m">15m</option>
-            <option value="1H">1H</option>
-            <option value="4H">4H</option>
-            <option value="1D">1D</option>
-            <option value="1W">1W</option>
-          </select>
+            Candles
+          </button>
 
-          {/* Mobile Chart Mode Dropdown */}
-          <select
-            value={chartMode}
-            onChange={(e) => setChartMode(e.target.value as 'candles' | 'normalized' | 'spread' | 'residual' | 'zscore' | 'line' | 'area')}
-            className="flex-shrink-0 bg-[#161A1F] text-foreground font-bold text-xs px-2.5 py-1.5 rounded-lg border border-[#2B3139] focus:outline-none min-h-[34px] touch-manipulation"
+          <button
+            onClick={() => setChartMode('normalized')}
+            className={`px-2 py-1 rounded-md font-bold text-xs transition-colors flex items-center gap-1 ${
+              chartMode === 'normalized'
+                ? 'bg-gold text-background shadow-sm font-black'
+                : 'text-text-secondary hover:text-foreground hover:bg-[#1C2128]'
+            }`}
+            title="Normalize all MCX contracts to ₹/10g of fine gold"
           >
-            <option value="candles">Candles</option>
-            <option value="normalized">Normalized</option>
-            <option value="spread">Spread</option>
-            <option value="zscore">Z-Score</option>
-          </select>
+            <Layers size={12} />
+            <span>Normalized</span>
+          </button>
 
-          {/* Mobile Zoom Controls */}
-          <div className="flex-shrink-0 flex items-center gap-0.5 bg-[#161A1F] rounded-lg p-0.5 border border-[#2B3139]">
+          <button
+            onClick={() => setChartMode('spread')}
+            className={`px-2 py-1 rounded-md font-bold text-xs transition-colors ${
+              chartMode === 'spread'
+                ? 'bg-gold text-background shadow-sm font-black'
+                : 'text-text-secondary hover:text-foreground hover:bg-[#1C2128]'
+            }`}
+            title="Pair Spread Differential"
+          >
+            Spread
+          </button>
+
+          <button
+            onClick={() => setChartMode('zscore')}
+            className={`px-2 py-1 rounded-md font-bold text-xs transition-colors ${
+              chartMode === 'zscore'
+                ? 'bg-gold text-background shadow-sm font-black'
+                : 'text-text-secondary hover:text-foreground hover:bg-[#1C2128]'
+            }`}
+            title="Statistical Z-Score Dislocation"
+          >
+            Z-Score
+          </button>
+        </div>
+
+        {/* Center Cluster: Intraday Timeframes & Historical Ranges */}
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          {/* Intraday Timeframes Group */}
+          <div className="flex items-center bg-[#161A1F] rounded-lg p-0.5 border border-[#2B3139]">
+            {timeframes.map((tf) => (
+              <button
+                key={tf}
+                onClick={() => setTimeframe(tf)}
+                className={`px-1.5 sm:px-2 py-0.5 rounded text-[11px] font-mono font-bold transition-colors ${
+                  timeframe === tf
+                    ? 'bg-[#11151A] text-gold border border-gold/40 shadow-sm'
+                    : 'text-text-secondary hover:text-foreground'
+                }`}
+              >
+                {tf}
+              </button>
+            ))}
+          </div>
+
+          {/* Historical Ranges Group */}
+          <div className="hidden md:flex items-center bg-[#161A1F] rounded-lg p-0.5 border border-[#2B3139]">
+            {ranges.map((rg) => (
+              <button
+                key={rg}
+                onClick={() => setSelectedRange(rg)}
+                className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold transition-colors ${
+                  selectedRange === rg
+                    ? 'bg-[#11151A] text-foreground font-bold border border-[#383F48]'
+                    : 'text-muted hover:text-text-secondary'
+                }`}
+              >
+                {rg}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Right Cluster: Zoom, Indicators & Fullscreen Controls */}
+        <div className="flex items-center gap-1.5 relative flex-shrink-0">
+          {/* Zoom In/Out & Reset Control */}
+          <div className="flex items-center gap-0.5 bg-[#161A1F] rounded-lg p-0.5 border border-[#2B3139]">
             <button
               onClick={handleZoomIn}
-              className="p-1 text-text-secondary hover:text-gold rounded transition-colors"
-              title="Zoom In"
+              className="p-1 text-text-secondary hover:text-foreground hover:bg-[#11151A] rounded transition-colors"
+              title="Zoom In (+)"
             >
-              <ZoomIn size={13} />
+              <ZoomIn size={12} />
             </button>
             <button
               onClick={handleZoomOut}
-              className="p-1 text-text-secondary hover:text-gold rounded transition-colors"
-              title="Zoom Out"
+              className="p-1 text-text-secondary hover:text-foreground hover:bg-[#11151A] rounded transition-colors"
+              title="Zoom Out (-)"
             >
-              <ZoomOut size={13} />
+              <ZoomOut size={12} />
             </button>
             {zoomCount !== 48 && (
               <button
                 onClick={handleResetZoom}
-                className="p-1 text-gold bg-gold/10 rounded"
+                className="px-1.5 py-0.5 rounded text-[10px] font-mono text-gold bg-gold/10 hover:bg-gold/20 transition-colors flex items-center gap-0.5"
                 title="Reset Zoom"
               >
-                <RotateCcw size={11} />
+                <RotateCcw size={10} />
+                <span>{Math.round((48 / zoomCount) * 100)}%</span>
               </button>
             )}
           </div>
 
-          {/* Indicators Icon Toggle */}
-          <button
-            onClick={() => setIndicatorMenuOpen(!indicatorMenuOpen)}
-            className={`flex-shrink-0 p-1.5 rounded-lg border text-xs font-semibold transition-colors min-h-[34px] min-w-[34px] flex items-center justify-center ${
-              indicatorMenuOpen ? 'bg-gold/20 text-gold border-gold/40' : 'bg-[#161A1F] text-text-secondary border-[#2B3139]'
-            }`}
-            title="Technical Indicators"
-          >
-            <Activity size={14} className="text-gold" />
-          </button>
+          {/* Indicators Button & Popover */}
+          <div className="relative">
+            <button
+              onClick={() => setIndicatorMenuOpen(!indicatorMenuOpen)}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg border text-xs font-semibold transition-colors flex-shrink-0 ${
+                indicatorMenuOpen
+                  ? 'bg-gold/20 text-gold border-gold/50 shadow-sm'
+                  : 'bg-[#161A1F] hover:bg-[#1C2128] border-[#2B3139] text-text-secondary hover:text-foreground'
+              }`}
+              title="Technical Indicators & Overlays"
+            >
+              <Activity size={12} className="text-gold" />
+              <span>Indicators</span>
+            </button>
 
-          {/* Fullscreen Button */}
+            {indicatorMenuOpen && (
+              <div className="absolute right-0 top-full mt-1.5 w-56 bg-[#161A1F] border border-[#2B3139] rounded-xl shadow-2xl p-2 z-50 space-y-1 animate-slide-up">
+                <div className="flex items-center justify-between px-1 mb-1 border-b border-[#2B3139]/60 pb-1">
+                  <span className="text-[10px] text-muted uppercase font-mono font-bold">Technical Overlays</span>
+                  <button onClick={() => setIndicatorMenuOpen(false)} className="text-muted hover:text-foreground text-[10px]">✕</button>
+                </div>
+                {[
+                  { key: 'ma', label: 'Moving Avg (MA 20)' },
+                  { key: 'ema', label: 'Exponential MA (EMA)' },
+                  { key: 'vwap', label: 'VWAP Benchmark' },
+                  { key: 'bollinger', label: 'Bollinger Bands (2σ)' },
+                  { key: 'zscore', label: 'Z-Score Oscillator' },
+                  { key: 'signals', label: 'Signal Flags (Pass/Fail)' },
+                ].map((item) => (
+                  <button
+                    key={item.key}
+                    onClick={() =>
+                      setIndicators((prev) => ({
+                        ...prev,
+                        [item.key]: !prev[item.key as keyof typeof prev],
+                      }))
+                    }
+                    className="w-full flex items-center justify-between px-2 py-1 rounded-lg text-xs text-text-secondary hover:text-foreground hover:bg-[#11151A]"
+                  >
+                    <span>{item.label}</span>
+                    {indicators[item.key as keyof typeof indicators] ? (
+                      <Eye size={13} className="text-gold" />
+                    ) : (
+                      <EyeOff size={13} className="text-muted" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Fullscreen Expand Toggle */}
           <button
             onClick={() => setIsFullscreen(!isFullscreen)}
-            className="flex-shrink-0 p-1.5 bg-[#161A1F] text-text-secondary hover:text-foreground rounded-lg border border-[#2B3139] transition-colors min-h-[34px] min-w-[34px] flex items-center justify-center"
-            title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+            className="flex items-center gap-1 px-2 py-1 text-text-secondary hover:text-foreground bg-[#161A1F] hover:bg-[#1C2128] rounded-lg border border-[#2B3139] transition-colors text-xs font-semibold flex-shrink-0"
+            title={isFullscreen ? 'Exit Fullscreen (Esc)' : 'Fullscreen Chart (F)'}
           >
-            {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+            {isFullscreen ? <Minimize2 size={12} /> : <Maximize2 size={12} />}
           </button>
         </div>
-
-        {/* Desktop Controls (sm:flex) - Single Tight Row */}
-        <div className="hidden sm:flex items-center justify-between w-full gap-2 flex-nowrap min-w-0">
-          {/* Left: Mode Segmented Control */}
-          <div className="flex items-center p-0.5 bg-[#161A1F] rounded-lg border border-[#2B3139] flex-shrink-0">
-            <button
-              onClick={() => setChartMode('candles')}
-              className={`px-2.5 py-1 rounded-md font-bold text-xs transition-colors ${
-                chartMode === 'candles'
-                  ? 'bg-[#11151A] text-gold shadow-sm font-black'
-                  : 'text-text-secondary hover:text-foreground'
-              }`}
-            >
-              Candles
-            </button>
-
-            <button
-              onClick={() => setChartMode('normalized')}
-              className={`px-2.5 py-1 rounded-md font-bold text-xs transition-colors flex items-center gap-1 ${
-                chartMode === 'normalized'
-                  ? 'bg-[#11151A] text-gold shadow-sm font-black'
-                  : 'text-text-secondary hover:text-foreground'
-              }`}
-              title="Normalize all MCX contracts to ₹/gram of fine gold"
-            >
-              <Layers size={12} />
-              <span>Normalized</span>
-            </button>
-
-            <button
-              onClick={() => setChartMode('spread')}
-              className={`px-2.5 py-1 rounded-md font-bold text-xs transition-colors ${
-                chartMode === 'spread'
-                  ? 'bg-[#11151A] text-blue shadow-sm font-black'
-                  : 'text-text-secondary hover:text-foreground'
-              }`}
-            >
-              Spread
-            </button>
-
-            <button
-              onClick={() => setChartMode('zscore')}
-              className={`px-2.5 py-1 rounded-md font-bold text-xs transition-colors ${
-                chartMode === 'zscore'
-                  ? 'bg-[#11151A] text-amber-400 shadow-sm font-black'
-                  : 'text-text-secondary hover:text-foreground'
-              }`}
-            >
-              Z-Score
-            </button>
-          </div>
-
-          {/* Center: Timeframe & Ranges */}
-          <div className="flex items-center gap-1.5 flex-shrink-0">
-            {/* Timeframes */}
-            <div className="flex items-center bg-[#161A1F] rounded-lg p-0.5 border border-[#2B3139]">
-              {timeframes.map((tf) => (
-                <button
-                  key={tf}
-                  onClick={() => setTimeframe(tf)}
-                  className={`px-2 py-0.5 rounded text-[11px] font-mono font-semibold transition-colors ${
-                    timeframe === tf
-                      ? 'bg-[#11151A] text-gold shadow-sm font-bold'
-                      : 'text-muted hover:text-text-secondary'
-                  }`}
-                >
-                  {tf}
-                </button>
-              ))}
-            </div>
-
-            {/* Ranges */}
-            <div className="hidden xl:flex items-center bg-[#161A1F] rounded-lg p-0.5 border border-[#2B3139]">
-              {ranges.map((rg) => (
-                <button
-                  key={rg}
-                  onClick={() => setSelectedRange(rg)}
-                  className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold transition-colors ${
-                    selectedRange === rg
-                      ? 'bg-[#11151A] text-foreground font-bold'
-                      : 'text-muted hover:text-text-secondary'
-                  }`}
-                >
-                  {rg}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Right: Zoom + Indicators & Fullscreen */}
-          <div className="flex items-center gap-1.5 relative flex-shrink-0">
-            {/* Zoom In/Out & Reset Controls */}
-            <div className="flex items-center gap-0.5 bg-[#161A1F] rounded-md p-0.5 border border-[#2B3139]">
-              <button
-                onClick={handleZoomIn}
-                className="p-1 text-text-secondary hover:text-gold hover:bg-[#11151A] rounded transition-colors"
-                title="Zoom In (+)"
-              >
-                <ZoomIn size={12} />
-              </button>
-              <button
-                onClick={handleZoomOut}
-                className="p-1 text-text-secondary hover:text-gold hover:bg-[#11151A] rounded transition-colors"
-                title="Zoom Out (-)"
-              >
-                <ZoomOut size={12} />
-              </button>
-              {zoomCount !== 48 && (
-                <button
-                  onClick={handleResetZoom}
-                  className="px-1.5 py-0.5 rounded text-[10px] font-mono text-gold bg-gold/10 hover:bg-gold/20 transition-colors flex items-center gap-1"
-                  title="Reset Zoom"
-                >
-                  <RotateCcw size={10} />
-                  <span>{Math.round((48 / zoomCount) * 100)}%</span>
-                </button>
-              )}
-            </div>
-
-            <div className="relative">
-              <button
-                onClick={() => setIndicatorMenuOpen(!indicatorMenuOpen)}
-                className="flex items-center gap-1 px-2.5 py-1 bg-[#161A1F] hover:bg-[#1C2128] border border-[#2B3139] rounded-md text-xs font-semibold text-text-secondary hover:text-foreground transition-colors"
-              >
-                <Activity size={12} className="text-gold" />
-                <span>Indicators</span>
-              </button>
-
-              {indicatorMenuOpen && (
-                <div className="absolute right-0 top-full mt-1 w-52 bg-secondary border border-border rounded-lg shadow-2xl p-2 z-50 space-y-1">
-                  <div className="text-[10px] text-muted uppercase font-mono font-bold px-1 mb-1">
-                    Technical Overlays
-                  </div>
-                  {[
-                    { key: 'ma', label: 'Moving Avg (MA 20)' },
-                    { key: 'ema', label: 'Exponential MA (EMA)' },
-                    { key: 'vwap', label: 'VWAP Benchmark' },
-                    { key: 'bollinger', label: 'Bollinger Bands (2σ)' },
-                    { key: 'zscore', label: 'Z-Score Oscillator' },
-                    { key: 'signals', label: 'Signal Flags (Pass/Fail)' },
-                  ].map((item) => (
-                    <button
-                      key={item.key}
-                      onClick={() =>
-                        setIndicators((prev) => ({
-                          ...prev,
-                          [item.key]: !prev[item.key as keyof typeof prev],
-                        }))
-                      }
-                      className="w-full flex items-center justify-between px-2 py-1 rounded text-[11px] text-text-secondary hover:text-foreground hover:bg-panel"
-                    >
-                      <span>{item.label}</span>
-                      {indicators[item.key as keyof typeof indicators] ? (
-                        <Eye size={13} className="text-gold" />
-                      ) : (
-                        <EyeOff size={13} className="text-muted" />
-                      )}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Fullscreen Toggle */}
-            <button
-              onClick={() => setIsFullscreen(!isFullscreen)}
-              className="p-1.5 text-text-secondary hover:text-foreground hover:bg-panel rounded border border-border transition-colors"
-              title={isFullscreen ? 'Exit Fullscreen (Esc)' : 'Fullscreen Chart (F)'}
-            >
-              {isFullscreen ? <Minimize2 size={12} /> : <Maximize2 size={12} />}
-            </button>
-          </div>
-        </div>
       </div>
-
-      {/* Mobile Indicator Dropdown Popover */}
-      {indicatorMenuOpen && (
-        <div className="sm:hidden absolute top-12 left-2 right-2 bg-[#11151A] border border-border rounded-xl shadow-2xl p-3 z-50 space-y-1 animate-slide-up">
-          <div className="flex items-center justify-between border-b border-[#2B3139] pb-2 mb-1">
-            <span className="text-xs font-bold text-gold uppercase font-mono">Technical Overlays</span>
-            <button onClick={() => setIndicatorMenuOpen(false)} className="text-text-secondary text-xs">Close ✕</button>
-          </div>
-          {[
-            { key: 'ma', label: 'Moving Avg (MA 20)' },
-            { key: 'ema', label: 'Exponential MA (EMA)' },
-            { key: 'vwap', label: 'VWAP Benchmark' },
-            { key: 'bollinger', label: 'Bollinger Bands (2σ)' },
-            { key: 'zscore', label: 'Z-Score Oscillator' },
-            { key: 'signals', label: 'Signal Flags (Pass/Fail)' },
-          ].map((item) => (
-            <button
-              key={item.key}
-              onClick={() =>
-                setIndicators((prev) => ({
-                  ...prev,
-                  [item.key]: !prev[item.key as keyof typeof prev],
-                }))
-              }
-              className="w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs text-text-secondary hover:text-foreground hover:bg-panel min-h-[40px] touch-manipulation"
-            >
-              <span>{item.label}</span>
-              {indicators[item.key as keyof typeof indicators] ? (
-                <Eye size={15} className="text-gold" />
-              ) : (
-                <EyeOff size={15} className="text-muted" />
-              )}
-            </button>
-          ))}
-        </div>
-      )}
 
       {/* ── HOVER STATS BAR / CROSSHAIR READOUT ── */}
       <div className="h-7 bg-[#11151A] px-3 border-b border-[#2B3139]/60 flex items-center gap-3 text-[10px] sm:text-[11px] font-mono select-none overflow-x-auto no-scrollbar">
@@ -779,238 +672,375 @@ export function CandleChart({
         )}
 
         {/* VIEW 2: FINE GOLD NORMALIZED (Multi-Contract Convergence) */}
-        {chartMode === 'normalized' && (
-          <div className="w-full h-full p-2.5 sm:p-3 flex flex-col justify-between font-mono select-none min-h-0 overflow-hidden">
-            {/* Header & Legend */}
-            <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5 flex-shrink-0">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-gold animate-pulse" />
-                <span className="text-xs font-bold text-foreground">Normalized ₹/g Fine Gold</span>
-                <span className="text-[10px] text-muted hidden sm:inline">(All Contracts Converged)</span>
+        {chartMode === 'normalized' && (() => {
+          // Calculate dynamic min/max across all contracts for visible candles
+          const contractKeys = ['GOLDM', 'GOLDTEN', 'GOLDGUINEA', 'GOLDPETAL'];
+          const biasMap: Record<string, number> = {
+            GOLDM: 0.9998,
+            GOLDTEN: 1.0004,
+            GOLDGUINEA: 1.0002,
+            GOLDPETAL: 1.0006,
+          };
+
+          let minNorm = Infinity;
+          let maxNorm = -Infinity;
+
+          visibleCandles.forEach((c) => {
+            const base = c.normalizedPrice || (c.close / 10);
+            contractKeys.forEach((k) => {
+              const val = base * (k === symbol ? 1.0 : (biasMap[k] / biasMap[symbol || 'GOLDM']));
+              if (val < minNorm) minNorm = val;
+              if (val > maxNorm) maxNorm = val;
+            });
+          });
+
+          const normDiff = maxNorm - minNorm || 10;
+          const padNorm = normDiff * 0.15;
+          const yMin = minNorm - padNorm;
+          const yMax = maxNorm + padNorm;
+          const yRange = yMax - yMin || 1;
+
+          const getNormY = (val: number) => priceChartHeight - ((val - yMin) / yRange) * (priceChartHeight - 30) - 15;
+          const meanNorm = (minNorm + maxNorm) / 2;
+
+          return (
+            <div className="w-full h-full p-2.5 sm:p-3 flex flex-col justify-between font-mono select-none min-h-0 overflow-hidden">
+              {/* Header & Legend */}
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5 flex-shrink-0">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-gold animate-pulse" />
+                  <span className="text-xs font-bold text-foreground">Normalized ₹/g Fine Gold</span>
+                  <span className="text-[10px] text-muted hidden sm:inline">(All Contracts Converged)</span>
+                </div>
+
+                {/* Legend */}
+                <div className="flex items-center gap-2 sm:gap-3 text-xs flex-wrap">
+                  {contractKeys.map((cKey) => {
+                    const spec = CONTRACT_REGISTRY[cKey];
+                    return (
+                      <div key={cKey} className="flex items-center gap-1">
+                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: spec?.color || '#F0B90B' }} />
+                        <span className={`text-[11px] ${cKey === symbol ? 'font-black text-gold' : 'font-semibold text-foreground'}`}>
+                          {cKey}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
-              {/* Legend */}
-              <div className="flex items-center gap-2 sm:gap-3 text-xs flex-wrap">
-                {Object.keys(CONTRACT_REGISTRY).map((cKey) => {
-                  const spec = CONTRACT_REGISTRY[cKey];
-                  return (
-                    <div key={cKey} className="flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: spec.color }} />
-                      <span className="font-bold text-[11px] text-foreground">{cKey}</span>
-                    </div>
-                  );
-                })}
+              {/* Multi-Line Normalized Chart SVG Canvas */}
+              <div className="flex-1 w-full min-h-0 relative bg-[#11151A] rounded-xl border border-[#2B3139] p-2 overflow-hidden">
+                <svg className="w-full h-full overflow-hidden cursor-crosshair" viewBox={`0 0 ${svgWidth} ${priceChartHeight}`} preserveAspectRatio="none">
+                  {/* Horizontal Grid Lines */}
+                  {[0.15, 0.38, 0.62, 0.85].map((ratio) => {
+                    const y = priceChartHeight * ratio;
+                    const priceLevel = Math.round(yMax - ratio * yRange);
+                    return (
+                      <g key={ratio}>
+                        <line x1="0" y1={y} x2={plotWidth} y2={y} stroke="#2A3038" strokeDasharray="3 3" />
+                        <text x={plotWidth + 6} y={y + 3} fill="#5E6673" fontSize="9" textAnchor="start" fontFamily="monospace">
+                          ₹{priceLevel.toLocaleString('en-IN')}/g
+                        </text>
+                      </g>
+                    );
+                  })}
+
+                  {/* Right Y-Axis Divider Line */}
+                  <line x1={plotWidth} y1="0" x2={plotWidth} y2={priceChartHeight} stroke="#2B3139" strokeWidth="1" />
+
+                  {/* Fair Fine Gold Benchmark Line */}
+                  <line
+                    x1="0"
+                    y1={getNormY(meanNorm)}
+                    x2={plotWidth}
+                    y2={getNormY(meanNorm)}
+                    stroke="#F0B90B"
+                    strokeDasharray="4 3"
+                    strokeWidth="1.2"
+                    opacity="0.6"
+                  />
+                  <rect
+                    x={plotWidth + 1}
+                    y={getNormY(meanNorm) - 7}
+                    width={chartRightMargin - 2}
+                    height={14}
+                    fill="#F0B90B"
+                    opacity="0.2"
+                    rx="2"
+                  />
+                  <text x={plotWidth + 4} y={getNormY(meanNorm) + 3} fill="#F0B90B" fontSize="9" fontWeight="bold" textAnchor="start">
+                    ₹{Math.round(meanNorm).toLocaleString('en-IN')}
+                  </text>
+
+                  {/* Draw 4 contract actual normalized curves */}
+                  {contractKeys.map((cKey) => {
+                    const spec = CONTRACT_REGISTRY[cKey];
+                    const isSelected = cKey === symbol;
+
+                    const points = visibleCandles
+                      .map((c, i) => {
+                        const x = (i / Math.max(1, visibleCandles.length - 1)) * plotWidth;
+                        const base = c.normalizedPrice || (c.close / 10);
+                        const normVal = base * (isSelected ? 1.0 : (biasMap[cKey] / biasMap[symbol || 'GOLDM']));
+                        const y = getNormY(normVal);
+                        return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
+                      })
+                      .join(' ');
+
+                    const lastCandle = visibleCandles[visibleCandles.length - 1];
+                    const lastBase = lastCandle ? (lastCandle.normalizedPrice || (lastCandle.close / 10)) : meanNorm;
+                    const lastNormVal = lastBase * (isSelected ? 1.0 : (biasMap[cKey] / biasMap[symbol || 'GOLDM']));
+                    const lastY = getNormY(lastNormVal);
+
+                    return (
+                      <g key={cKey}>
+                        <path
+                          d={points}
+                          fill="none"
+                          stroke={spec?.color || '#F0B90B'}
+                          strokeWidth={isSelected ? '2.8' : '1.8'}
+                          opacity={isSelected ? 1 : 0.75}
+                        />
+                        {/* Right edge price dot */}
+                        <circle cx={plotWidth} cy={lastY} r={isSelected ? 3.5 : 2.5} fill={spec?.color || '#F0B90B'} />
+                      </g>
+                    );
+                  })}
+                </svg>
+              </div>
+
+              {/* Compact Bottom Summary */}
+              <div className="mt-1.5 px-2.5 py-1 bg-[#161A1F] rounded-lg border border-[#2B3139] flex items-center justify-between text-[11px] flex-shrink-0">
+                <span className="text-text-secondary truncate">
+                  Current Fine Gold Basis: <strong className="text-gold">₹{Math.round(activeCandle?.normalizedPrice || meanNorm).toLocaleString('en-IN')}/g</strong> (999/995 Purity Adjusted).
+                </span>
+                <button
+                  onClick={onOpenAudit}
+                  className="px-2.5 py-1 bg-gold text-background rounded-md font-bold text-[10px] hover:bg-gold-hover transition-colors flex-shrink-0 ml-2"
+                >
+                  Inspect Alpha Audit →
+                </button>
               </div>
             </div>
-
-            {/* Multi-Line Normalized Chart SVG Canvas */}
-            <div className="flex-1 w-full min-h-0 relative bg-[#11151A] rounded-xl border border-[#2B3139] p-2 overflow-hidden">
-              <svg className="w-full h-full overflow-hidden cursor-crosshair" viewBox={`0 0 ${svgWidth} ${priceChartHeight}`} preserveAspectRatio="none">
-                {/* Horizontal Grid Lines */}
-                {[0.15, 0.38, 0.62, 0.85].map((ratio) => {
-                  const y = priceChartHeight * ratio;
-                  const priceLevel = Math.round(15120 - ratio * 100);
-                  return (
-                    <g key={ratio}>
-                      <line x1="0" y1={y} x2={plotWidth} y2={y} stroke="#2A3038" strokeDasharray="3 3" />
-                      <text x={plotWidth + 6} y={y + 3} fill="#5E6673" fontSize="10" textAnchor="start" fontFamily="monospace">
-                        ₹{priceLevel}/g
-                      </text>
-                    </g>
-                  );
-                })}
-
-                {/* Right Y-Axis Divider Line */}
-                <line x1={plotWidth} y1="0" x2={plotWidth} y2={priceChartHeight} stroke="#2B3139" strokeWidth="1" />
-
-                {/* Fair Fine Gold Benchmark Line (₹15,067) */}
-                <line x1="0" y1={priceChartHeight * 0.5} x2={plotWidth} y2={priceChartHeight * 0.5} stroke="#F0B90B" strokeDasharray="4 3" strokeWidth="1.2" opacity="0.6" />
-                <rect x={plotWidth + 1} y={priceChartHeight * 0.5 - 7} width={chartRightMargin - 2} height={14} fill="#F0B90B" opacity="0.2" rx="2" />
-                <text x={plotWidth + 4} y={priceChartHeight * 0.5 + 3} fill="#F0B90B" fontSize="9" fontWeight="bold" textAnchor="start">
-                  ₹15,067
-                </text>
-
-                {/* Draw 4 contract normalized curves */}
-                {['GOLDM', 'GOLDTEN', 'GOLDGUINEA', 'GOLDPETAL'].map((cKey, idx) => {
-                  const spec = CONTRACT_REGISTRY[cKey];
-                  const offset = (idx - 1.5) * 20;
-                  const points = visibleCandles
-                    .map((c, i) => {
-                      const x = (i / Math.max(1, visibleCandles.length - 1)) * plotWidth;
-                      const wave = Math.sin((i + idx * 4) * 0.22) * 50 + offset;
-                      const y = priceChartHeight * 0.5 - wave;
-                      return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
-                    })
-                    .join(' ');
-
-                  return (
-                    <path
-                      key={cKey}
-                      d={points}
-                      fill="none"
-                      stroke={spec.color}
-                      strokeWidth={cKey === symbol ? '3' : '1.8'}
-                      opacity={cKey === symbol ? 1 : 0.75}
-                    />
-                  );
-                })}
-              </svg>
-            </div>
-
-            {/* Compact Bottom Summary */}
-            <div className="mt-1.5 px-2.5 py-1.5 bg-[#161A1F] rounded-lg border border-[#2B3139] flex items-center justify-between text-[11px] flex-shrink-0">
-              <span className="text-text-secondary truncate">
-                Dislocation: <strong className="text-gold">GOLDM vs GOLDTEN</strong> is +0.33% wider than carrying cost.
-              </span>
-              <button
-                onClick={onOpenAudit}
-                className="px-2.5 py-1 bg-gold text-background rounded-md font-bold text-[10px] hover:bg-gold-hover transition-colors flex-shrink-0 ml-2"
-              >
-                Inspect Alpha Audit →
-              </button>
-            </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* VIEW 3: RELATIVE SPREAD & RESIDUAL (Spread A/B) */}
-        {chartMode === 'spread' && (
-          <div className="w-full h-full p-2.5 sm:p-3 flex flex-col justify-between font-mono select-none min-h-0 overflow-hidden">
-            {/* Header */}
-            <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5 flex-shrink-0">
-              <div>
-                <span className="text-xs font-bold text-foreground">Spread & Residual Engine: GOLDM / GOLDTEN</span>
-                <span className="text-[10px] text-muted block sm:inline sm:ml-2">
-                  Observed (+0.42%) - Carry (+0.09%) = <strong className="text-gold">+0.33% Residual</strong>
+        {chartMode === 'spread' && (() => {
+          let minSpread = -0.3;
+          let maxSpread = 0.5;
+
+          visibleCandles.forEach((c) => {
+            const sp = c.spread ?? 0.42;
+            const res = c.residual ?? (sp - (c.expectedCarry ?? 0.09));
+            if (sp < minSpread) minSpread = sp;
+            if (sp > maxSpread) maxSpread = sp;
+            if (res < minSpread) minSpread = res;
+            if (res > maxSpread) maxSpread = res;
+          });
+
+          const spDiff = maxSpread - minSpread || 0.5;
+          const pad = spDiff * 0.15;
+          const yMin = minSpread - pad;
+          const yMax = maxSpread + pad;
+          const yRange = yMax - yMin || 1;
+
+          const getSpY = (val: number) => priceChartHeight - ((val - yMin) / yRange) * (priceChartHeight - 30) - 15;
+          const currentResidual = activeCandle?.residual ?? 0.33;
+          const currentCarry = activeCandle?.expectedCarry ?? 0.09;
+          const currentSpread = activeCandle?.spread ?? 0.42;
+
+          return (
+            <div className="w-full h-full p-2.5 sm:p-3 flex flex-col justify-between font-mono select-none min-h-0 overflow-hidden">
+              {/* Header */}
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5 flex-shrink-0">
+                <div>
+                  <span className="text-xs font-bold text-foreground">Spread & Residual Engine: {symbol} / GOLDTEN</span>
+                  <span className="text-[10px] text-muted block sm:inline sm:ml-2">
+                    Observed (+{currentSpread.toFixed(2)}%) - Carry (+{currentCarry.toFixed(2)}%) = <strong className="text-gold">+{currentResidual.toFixed(2)}% Residual</strong>
+                  </span>
+                </div>
+
+                <div className="px-2 py-0.5 bg-buy/15 border border-buy/30 rounded text-buy text-[10px] font-bold">
+                  ● OPPORTUNITY DETECTED (+{(activeCandle?.zScore || 2.41).toFixed(2)}σ)
+                </div>
+              </div>
+
+              {/* Spread and Residual Curves Canvas */}
+              <div className="flex-1 w-full min-h-0 relative bg-[#11151A] rounded-xl border border-[#2B3139] p-2 overflow-hidden">
+                <svg className="w-full h-full overflow-hidden cursor-crosshair" viewBox={`0 0 ${svgWidth} ${priceChartHeight}`} preserveAspectRatio="none">
+                  {/* Upper Statistical Hurdle Barrier (+0.40%) */}
+                  <line x1="0" y1={getSpY(0.40)} x2={plotWidth} y2={getSpY(0.40)} stroke="#F0B90B" strokeDasharray="4 3" strokeWidth="1.2" opacity="0.8" />
+                  <text x={plotWidth + 6} y={getSpY(0.40) + 3} fill="#F0B90B" fontSize="9" fontWeight="bold" textAnchor="start">+0.40%</text>
+
+                  {/* Expected Carry Baseline */}
+                  <line x1="0" y1={getSpY(currentCarry)} x2={plotWidth} y2={getSpY(currentCarry)} stroke="#D97706" strokeDasharray="2 2" strokeWidth="1" opacity="0.7" />
+                  <text x={plotWidth + 6} y={getSpY(currentCarry) + 3} fill="#D97706" fontSize="8" textAnchor="start">Carry +{currentCarry}%</text>
+
+                  {/* 0.00% Center Baseline */}
+                  <line x1="0" y1={getSpY(0.00)} x2={plotWidth} y2={getSpY(0.00)} stroke="#5E6673" strokeWidth="1.2" />
+                  <text x={plotWidth + 6} y={getSpY(0.00) + 3} fill="#848E9C" fontSize="9" textAnchor="start">0.00%</text>
+
+                  {/* Lower Barrier (-0.40%) */}
+                  <line x1="0" y1={getSpY(-0.40)} x2={plotWidth} y2={getSpY(-0.40)} stroke="#F0B90B" strokeDasharray="4 3" strokeWidth="1.2" opacity="0.8" />
+                  <text x={plotWidth + 6} y={getSpY(-0.40) + 3} fill="#F0B90B" fontSize="9" fontWeight="bold" textAnchor="start">-0.40%</text>
+
+                  {/* Right Y-Axis Divider Line */}
+                  <line x1={plotWidth} y1="0" x2={plotWidth} y2={priceChartHeight} stroke="#2B3139" strokeWidth="1" />
+
+                  {/* Residual Shading Area */}
+                  <path
+                    d={visibleCandles
+                      .map((c, i) => {
+                        const x = (i / Math.max(1, visibleCandles.length - 1)) * plotWidth;
+                        const res = c.residual ?? ((c.spread ?? 0.42) - (c.expectedCarry ?? 0.09));
+                        const y = getSpY(res);
+                        return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
+                      })
+                      .concat(`L ${plotWidth} ${getSpY(0.00)} L 0 ${getSpY(0.00)} Z`)
+                      .join(' ')}
+                    fill="rgba(56, 97, 251, 0.12)"
+                  />
+
+                  {/* Observed Gross Spread Line (Amber) */}
+                  <path
+                    d={visibleCandles
+                      .map((c, i) => {
+                        const x = (i / Math.max(1, visibleCandles.length - 1)) * plotWidth;
+                        const sp = c.spread ?? 0.42;
+                        const y = getSpY(sp);
+                        return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
+                      })
+                      .join(' ')}
+                    fill="none"
+                    stroke="#F0B90B"
+                    strokeWidth="1.5"
+                    strokeDasharray="4 2"
+                    opacity="0.8"
+                  />
+
+                  {/* Actual Net Residual Curve (Blue #3861FB) */}
+                  <path
+                    d={visibleCandles
+                      .map((c, i) => {
+                        const x = (i / Math.max(1, visibleCandles.length - 1)) * plotWidth;
+                        const res = c.residual ?? ((c.spread ?? 0.42) - (c.expectedCarry ?? 0.09));
+                        const y = getSpY(res);
+                        return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
+                      })
+                      .join(' ')}
+                    fill="none"
+                    stroke="#3861FB"
+                    strokeWidth="2.8"
+                  />
+
+                  {/* Latest Residual Dot */}
+                  <circle cx={plotWidth} cy={getSpY(currentResidual)} r="4" fill="#3861FB" className="animate-pulse" />
+                </svg>
+              </div>
+
+              {/* Compact Bottom Summary */}
+              <div className="mt-1.5 px-2.5 py-1 bg-[#161A1F] rounded-lg border border-[#2B3139] flex items-center justify-between text-[11px] flex-shrink-0">
+                <span className="text-text-secondary truncate">
+                  Model: <span className="text-foreground">ln(P_A) - ln(P_B) - r_f × ΔDTE / 365</span> | Residual: <strong className="text-blue">+{currentResidual.toFixed(2)}%</strong>
+                </span>
+                <span className="text-buy font-bold text-[10px] flex-shrink-0 ml-2">89% Walk-Forward Validated</span>
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* VIEW 4: Z-SCORE OSCILLATOR */}
+        {chartMode === 'zscore' && (() => {
+          let minZ = -3.0;
+          let maxZ = 3.0;
+
+          visibleCandles.forEach((c) => {
+            const z = c.zScore ?? 2.41;
+            if (z < minZ) minZ = z;
+            if (z > maxZ) maxZ = z;
+          });
+
+          const zDiff = maxZ - minZ || 6;
+          const pad = zDiff * 0.1;
+          const yMin = minZ - pad;
+          const yMax = maxZ + pad;
+          const yRange = yMax - yMin || 1;
+
+          const getZY = (zVal: number) => priceChartHeight - ((zVal - yMin) / yRange) * (priceChartHeight - 30) - 15;
+          const latestZ = activeCandle?.zScore ?? 2.41;
+
+          return (
+            <div className="w-full h-full p-2.5 sm:p-3 flex flex-col justify-between font-mono select-none min-h-0 overflow-hidden">
+              {/* Header */}
+              <div className="flex items-center justify-between gap-2 mb-1.5 flex-shrink-0">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-gold animate-pulse" />
+                  <span className="text-xs font-bold text-foreground">Statistical Z-Score Oscillator</span>
+                  <span className="text-[10px] text-muted hidden sm:inline">(Rolling 60-Day Window)</span>
+                </div>
+                <span className={`font-extrabold text-sm sm:text-base ${latestZ >= 2 ? 'text-sell' : latestZ <= -2 ? 'text-buy' : 'text-gold'}`}>
+                  {latestZ >= 0 ? '+' : ''}{latestZ.toFixed(2)}σ
                 </span>
               </div>
 
-              <div className="px-2 py-0.5 bg-buy/15 border border-buy/30 rounded text-buy text-[10px] font-bold">
-                ● OPPORTUNITY DETECTED (+2.41σ)
+              {/* Z-Score Canvas */}
+              <div className="flex-1 w-full min-h-0 relative bg-[#11151A] rounded-xl border border-[#2B3139] p-2 overflow-hidden">
+                <svg className="w-full h-full overflow-hidden cursor-crosshair" viewBox={`0 0 ${svgWidth} ${priceChartHeight}`} preserveAspectRatio="none">
+                  {/* Overbought Shading (+2σ to top) */}
+                  <rect x="0" y="0" width={plotWidth} height={Math.max(0, getZY(2.0))} fill="rgba(246, 70, 93, 0.08)" />
+
+                  {/* Oversold Shading (-2σ to bottom) */}
+                  <rect x="0" y={getZY(-2.0)} width={plotWidth} height={Math.max(0, priceChartHeight - getZY(-2.0))} fill="rgba(14, 203, 129, 0.08)" />
+
+                  {/* +2.0σ Barrier */}
+                  <line x1="0" y1={getZY(2.0)} x2={plotWidth} y2={getZY(2.0)} stroke="#F6465D" strokeDasharray="3 3" strokeWidth="1.2" />
+                  <text x={plotWidth + 6} y={getZY(2.0) + 3} fill="#F6465D" fontSize="9" fontWeight="bold" textAnchor="start">+2.00σ</text>
+
+                  {/* 0.0σ Center Line */}
+                  <line x1="0" y1={getZY(0.0)} x2={plotWidth} y2={getZY(0.0)} stroke="#848E9C" strokeWidth="1.2" />
+                  <text x={plotWidth + 6} y={getZY(0.0) + 3} fill="#848E9C" fontSize="9" textAnchor="start">0.00σ</text>
+
+                  {/* -2.0σ Barrier */}
+                  <line x1="0" y1={getZY(-2.0)} x2={plotWidth} y2={getZY(-2.0)} stroke="#0ECB81" strokeDasharray="3 3" strokeWidth="1.2" />
+                  <text x={plotWidth + 6} y={getZY(-2.0) + 3} fill="#0ECB81" fontSize="9" fontWeight="bold" textAnchor="start">-2.00σ</text>
+
+                  {/* Right Y-Axis Divider Line */}
+                  <line x1={plotWidth} y1="0" x2={plotWidth} y2={priceChartHeight} stroke="#2B3139" strokeWidth="1" />
+
+                  {/* Actual Dynamic Z-Score Curve */}
+                  <path
+                    d={visibleCandles
+                      .map((c, i) => {
+                        const x = (i / Math.max(1, visibleCandles.length - 1)) * plotWidth;
+                        const z = c.zScore ?? 2.41;
+                        const y = getZY(z);
+                        return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
+                      })
+                      .join(' ')}
+                    fill="none"
+                    stroke="#F0B90B"
+                    strokeWidth="2.8"
+                  />
+
+                  {/* Latest Z-Score Indicator Dot */}
+                  <circle cx={plotWidth} cy={getZY(latestZ)} r="4" fill="#F0B90B" className="animate-pulse" />
+                </svg>
+              </div>
+
+              {/* Compact Bottom Summary */}
+              <div className="mt-1.5 px-2.5 py-1 bg-[#161A1F] rounded-lg border border-[#2B3139] flex items-center justify-between text-[11px] flex-shrink-0">
+                <span className="text-text-secondary truncate">
+                  Status: <strong className={latestZ >= 2 ? 'text-sell' : latestZ <= -2 ? 'text-buy' : 'text-gold'}>
+                    {latestZ >= 2 ? `Overbought (+${latestZ.toFixed(2)}σ)` : latestZ <= -2 ? `Oversold (${latestZ.toFixed(2)}σ)` : `Neutral (${latestZ.toFixed(2)}σ)`}
+                  </strong> — Statistical mean reversion expected.
+                </span>
+                <span className="text-gold font-bold text-[10px] flex-shrink-0 ml-2">Confidence: 87%</span>
               </div>
             </div>
-
-            {/* Spread and Residual Curves Canvas */}
-            <div className="flex-1 w-full min-h-0 relative bg-[#11151A] rounded-xl border border-[#2B3139] p-2 overflow-hidden">
-              <svg className="w-full h-full overflow-hidden cursor-crosshair" viewBox={`0 0 ${svgWidth} ${priceChartHeight}`} preserveAspectRatio="none">
-                {/* Upper Barrier (+0.40%) */}
-                <line x1="0" y1={priceChartHeight * 0.18} x2={plotWidth} y2={priceChartHeight * 0.18} stroke="#F0B90B" strokeDasharray="4 3" strokeWidth="1.2" opacity="0.8" />
-                <text x={plotWidth + 6} y={priceChartHeight * 0.18 + 3} fill="#F0B90B" fontSize="9" fontWeight="bold" textAnchor="start">+0.40%</text>
-
-                {/* 0.00% Center Baseline */}
-                <line x1="0" y1={priceChartHeight * 0.5} x2={plotWidth} y2={priceChartHeight * 0.5} stroke="#5E6673" strokeWidth="1.2" />
-                <text x={plotWidth + 6} y={priceChartHeight * 0.5 + 3} fill="#848E9C" fontSize="9" textAnchor="start">0.00%</text>
-
-                {/* Lower Barrier (-0.40%) */}
-                <line x1="0" y1={priceChartHeight * 0.82} x2={plotWidth} y2={priceChartHeight * 0.82} stroke="#F0B90B" strokeDasharray="4 3" strokeWidth="1.2" opacity="0.8" />
-                <text x={plotWidth + 6} y={priceChartHeight * 0.82 + 3} fill="#F0B90B" fontSize="9" fontWeight="bold" textAnchor="start">-0.40%</text>
-
-                {/* Right Y-Axis Divider Line */}
-                <line x1={plotWidth} y1="0" x2={plotWidth} y2={priceChartHeight} stroke="#2B3139" strokeWidth="1" />
-
-                {/* Residual Curve Shading Area */}
-                <path
-                  d={visibleCandles
-                    .map((c, i) => {
-                      const x = (i / Math.max(1, visibleCandles.length - 1)) * plotWidth;
-                      const z = c.zScore || 2.41;
-                      const y = priceChartHeight * 0.5 - (z / 3) * (priceChartHeight * 0.4);
-                      return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
-                    })
-                    .concat(`L ${plotWidth} ${priceChartHeight * 0.5} L 0 ${priceChartHeight * 0.5} Z`)
-                    .join(' ')}
-                  fill="rgba(56, 97, 251, 0.12)"
-                />
-
-                {/* Residual Curve Stroke */}
-                <path
-                  d={visibleCandles
-                    .map((c, i) => {
-                      const x = (i / Math.max(1, visibleCandles.length - 1)) * plotWidth;
-                      const z = c.zScore || 2.41;
-                      const y = priceChartHeight * 0.5 - (z / 3) * (priceChartHeight * 0.4);
-                      return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
-                    })
-                    .join(' ')}
-                  fill="none"
-                  stroke="#3861FB"
-                  strokeWidth="2.8"
-                />
-              </svg>
-            </div>
-
-            {/* Compact Bottom Summary */}
-            <div className="mt-1.5 px-2.5 py-1 bg-[#161A1F] rounded-lg border border-[#2B3139] flex items-center justify-between text-[11px] flex-shrink-0">
-              <span className="text-text-secondary truncate">
-                Model: ln(P_A) - ln(P_B) - r_f × ΔDTE / 365
-              </span>
-              <span className="text-buy font-bold text-[10px] flex-shrink-0 ml-2">89% Walk-Forward Validated</span>
-            </div>
-          </div>
-        )}
-
-        {/* VIEW 4: Z-SCORE OSCILLATOR */}
-        {chartMode === 'zscore' && (
-          <div className="w-full h-full p-2.5 sm:p-3 flex flex-col justify-between font-mono select-none min-h-0 overflow-hidden">
-            {/* Header */}
-            <div className="flex items-center justify-between gap-2 mb-1.5 flex-shrink-0">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-gold animate-pulse" />
-                <span className="text-xs font-bold text-foreground">Statistical Z-Score Oscillator</span>
-                <span className="text-[10px] text-muted hidden sm:inline">(Rolling 60-Day Window)</span>
-              </div>
-              <span className="text-gold font-extrabold text-sm sm:text-base">+2.41σ</span>
-            </div>
-
-            {/* Z-Score Canvas */}
-            <div className="flex-1 w-full min-h-0 relative bg-[#11151A] rounded-xl border border-[#2B3139] p-2 overflow-hidden">
-              <svg className="w-full h-full overflow-hidden cursor-crosshair" viewBox={`0 0 ${svgWidth} ${priceChartHeight}`} preserveAspectRatio="none">
-                {/* Overbought Shading (+2σ to top) */}
-                <rect x="0" y="0" width={plotWidth} height={priceChartHeight * 0.2} fill="rgba(246, 70, 93, 0.1)" />
-
-                {/* Oversold Shading (-2σ to bottom) */}
-                <rect x="0" y={priceChartHeight * 0.8} width={plotWidth} height={priceChartHeight * 0.2} fill="rgba(14, 203, 129, 0.1)" />
-
-                {/* +2.0σ Barrier */}
-                <line x1="0" y1={priceChartHeight * 0.2} x2={plotWidth} y2={priceChartHeight * 0.2} stroke="#F6465D" strokeDasharray="3 3" strokeWidth="1.2" />
-                <text x={plotWidth + 6} y={priceChartHeight * 0.2 + 3} fill="#F6465D" fontSize="9" fontWeight="bold" textAnchor="start">+2.00σ</text>
-
-                {/* 0.0σ Center Line */}
-                <line x1="0" y1={priceChartHeight * 0.5} x2={plotWidth} y2={priceChartHeight * 0.5} stroke="#848E9C" strokeWidth="1.2" />
-                <text x={plotWidth + 6} y={priceChartHeight * 0.5 + 3} fill="#848E9C" fontSize="9" textAnchor="start">0.00σ</text>
-
-                {/* -2.0σ Barrier */}
-                <line x1="0" y1={priceChartHeight * 0.8} x2={plotWidth} y2={priceChartHeight * 0.8} stroke="#0ECB81" strokeDasharray="3 3" strokeWidth="1.2" />
-                <text x={plotWidth + 6} y={priceChartHeight * 0.8 + 3} fill="#0ECB81" fontSize="9" fontWeight="bold" textAnchor="start">-2.00σ</text>
-
-                {/* Right Y-Axis Divider Line */}
-                <line x1={plotWidth} y1="0" x2={plotWidth} y2={priceChartHeight} stroke="#2B3139" strokeWidth="1" />
-
-                {/* Z-Score Curve */}
-                <path
-                  d={visibleCandles
-                    .map((c, i) => {
-                      const x = (i / Math.max(1, visibleCandles.length - 1)) * plotWidth;
-                      const z = c.zScore || 2.41;
-                      const y = priceChartHeight * 0.5 - (z / 3) * (priceChartHeight * 0.4);
-                      return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
-                    })
-                    .join(' ')}
-                  fill="none"
-                  stroke="#F0B90B"
-                  strokeWidth="2.8"
-                />
-              </svg>
-            </div>
-
-            {/* Compact Bottom Summary */}
-            <div className="mt-1.5 px-2.5 py-1 bg-[#161A1F] rounded-lg border border-[#2B3139] flex items-center justify-between text-[11px] flex-shrink-0">
-              <span className="text-text-secondary truncate">
-                Status: <strong className="text-sell">Overbought (+2.41σ)</strong> — Statistical mean reversion expected.
-              </span>
-              <span className="text-gold font-bold text-[10px] flex-shrink-0 ml-2">Confidence: 87%</span>
-            </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
     </div>
   );

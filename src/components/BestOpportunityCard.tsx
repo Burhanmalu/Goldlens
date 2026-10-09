@@ -41,7 +41,7 @@ export function BestOpportunityCard({
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   return (
-    <div className="bg-[#161A1F] rounded-2xl border border-gold/40 shadow-lg p-3.5 sm:p-4 flex flex-col justify-between select-none font-sans relative overflow-hidden min-h-[460px]">
+    <div className="bg-[#161A1F] rounded-2xl border border-gold/40 shadow-lg p-3.5 sm:p-4 flex flex-col justify-between select-none font-sans relative overflow-hidden h-full min-h-[400px] w-full max-w-full min-w-0 box-border">
       {/* Subtle glow background */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-full blur-2xl pointer-events-none" />
 

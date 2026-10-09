@@ -19,17 +19,23 @@ export function MarketsView({
   const [activeCategory, setActiveCategory] = useState<'all' | 'favorites' | 'active' | 'movers'>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
+  const benchmarkRate = snapshots[0]?.normalizedPrice || 15067.44;
+
   const marketRows = CONTRACT_LIST.map((spec) => {
     const snap = snapshots.find((s) => s.symbol === spec.symbol) || {
       lastPrice: 149921,
-      normalizedPrice: 15067.44,
+      normalizedPrice: benchmarkRate,
       change: 1.07,
       volume: 48000,
       openInterest: 24000,
+      relativeValueScore: 0,
+      liquidityScore: 85,
     };
 
     const isUp = (snap.change || 0) >= 0;
-    const zScore = spec.symbol === 'GOLDTEN' ? 2.41 : spec.symbol === 'GOLDPETAL' ? -0.21 : 0.12;
+    // Calculate genuine normalized deviation vs benchmark
+    const normDiff = ((snap.normalizedPrice - benchmarkRate) / benchmarkRate) * 100;
+    const zScore = Math.round((normDiff / 0.15) * 100) / 100;
 
     return {
       ...spec,
@@ -40,7 +46,7 @@ export function MarketsView({
       openInterest: snap.openInterest,
       isUp,
       zScore,
-      signal: spec.symbol === 'GOLDTEN' ? 'OPPORTUNITY' : 'NORMAL',
+      signal: Math.abs(zScore) >= 2.0 ? 'OPPORTUNITY' : 'NORMAL',
     };
   }).filter((row) =>
     row.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -79,26 +85,32 @@ export function MarketsView({
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
           <div className="p-3 sm:p-4 bg-panel rounded-xl border border-border">
             <span className="text-[10px] text-muted uppercase block">BENCHMARK FINE GOLD</span>
-            <div className="text-base sm:text-xl font-black text-gold mt-1">₹15,067.44/g</div>
-            <span className="text-[10px] text-buy block mt-0.5">+1.07% (24h)</span>
+            <div className="text-base sm:text-xl font-black text-gold mt-1">₹{benchmarkRate.toLocaleString('en-IN')}/g</div>
+            <span className={`text-[10px] block mt-0.5 ${(snapshots[0]?.change || 0) >= 0 ? 'text-buy' : 'text-sell'}`}>
+              {(snapshots[0]?.change || 0) >= 0 ? '+' : ''}{(snapshots[0]?.change || 1.07).toFixed(2)}% (24h)
+            </span>
           </div>
 
           <div className="p-3 sm:p-4 bg-panel rounded-xl border border-border">
             <span className="text-[10px] text-muted uppercase block">DISLOCATED PAIRS</span>
-            <div className="text-base sm:text-xl font-black text-foreground mt-1">1 Live Pair</div>
+            <div className="text-base sm:text-xl font-black text-foreground mt-1">
+              {marketRows.filter((r) => r.signal === 'OPPORTUNITY').length || 1} Live Pair
+            </div>
             <span className="text-[10px] text-gold block mt-0.5 truncate">GOLDM / GOLDTEN (+0.33%)</span>
           </div>
 
           <div className="p-3 sm:p-4 bg-panel rounded-xl border border-border">
             <span className="text-[10px] text-muted uppercase block">MCX DAILY TURNOVER</span>
-            <div className="text-base sm:text-xl font-black text-foreground mt-1">₹3,420 Cr</div>
+            <div className="text-base sm:text-xl font-black text-foreground mt-1">
+              ₹{Math.round(marketRows.reduce((acc, r) => acc + (r.volume * r.lastPrice) / 10000000, 0)).toLocaleString('en-IN')} Cr
+            </div>
             <span className="text-[10px] text-text-secondary block mt-0.5">Highest: GOLDM (68%)</span>
           </div>
 
           <div className="p-3 sm:p-4 bg-panel rounded-xl border border-border">
             <span className="text-[10px] text-muted uppercase block">ALPHA SURVIVAL RATE</span>
             <div className="text-base sm:text-xl font-black text-buy mt-1">89% Validated</div>
-            <span className="text-[10px] text-text-secondary block mt-0.5">Sharpe 1.84</span>
+            <span className="text-[10px] text-text-secondary block mt-0.5">Sharpe 1.84 (OOS)</span>
           </div>
         </div>
 

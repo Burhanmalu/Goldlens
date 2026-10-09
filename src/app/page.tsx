@@ -246,9 +246,9 @@ export default function GoldLensApp() {
               />
 
               {/* 2-Column Desktop / 1-Column Stacked Mobile Dashboard */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 lg:gap-4 p-2.5 sm:p-3 lg:p-4 pb-2 items-stretch">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 lg:gap-4 p-2.5 sm:p-3 lg:p-4 pb-2 items-stretch w-full max-w-full min-w-0 box-border">
                 {/* FINANCIAL CHART (8 cols on desktop) */}
-                <div className="lg:col-span-8 flex flex-col bg-[#161A1F] rounded-2xl border border-[#2B3139] overflow-hidden shadow-lg min-h-[460px]">
+                <div className="lg:col-span-8 min-w-0 w-full max-w-full box-border flex flex-col bg-[#161A1F] rounded-2xl border border-[#2B3139] overflow-hidden shadow-lg h-full">
                   <CandleChart
                     symbol={selectedSymbol}
                     compareSymbol={compareSymbol}
@@ -267,7 +267,7 @@ export default function GoldLensApp() {
                 </div>
 
                 {/* BEST OPPORTUNITY & UNIFIED COMPARATOR/DEPTH PANEL (4 cols on desktop) */}
-                <div className="lg:col-span-4 flex flex-col min-h-[460px]">
+                <div className="lg:col-span-4 min-w-0 w-full max-w-full box-border flex flex-col h-full">
                   <BestOpportunityCard
                     opportunity={bestOpportunity}
                     onViewDetails={() => setCurrentPage('analysis')}

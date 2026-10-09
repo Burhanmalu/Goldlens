@@ -122,66 +122,72 @@ export function ExecutionHubView() {
         </div>
       </div>
 
-      {/* ── 6-TAB ROADMAP NAVIGATION ── */}
-      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar touch-pan-x bg-[#11151A] p-1.5 rounded-2xl border border-[#2B3139] text-xs font-mono">
+      {/* ── 6-TAB ROADMAP NAVIGATION (Responsive, no truncation) ── */}
+      <div className="w-full max-w-full min-w-0 box-border grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-1 sm:gap-1.5 bg-[#11151A] p-1 sm:p-1.5 rounded-2xl border border-[#2B3139] text-xs font-mono">
         <button
           onClick={() => setActiveTab('broker')}
-          className={`px-3.5 py-2 rounded-xl font-bold transition-all flex items-center gap-2 whitespace-nowrap min-h-[38px] ${
-            activeTab === 'broker' ? 'bg-[#161A1F] text-gold border border-gold/40 shadow-sm' : 'text-muted hover:text-foreground'
+          className={`px-2 sm:px-2.5 py-2 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 whitespace-nowrap min-h-[36px] text-[11px] sm:text-xs ${
+            activeTab === 'broker' ? 'bg-[#161A1F] text-gold border border-gold/40 shadow-sm' : 'text-muted hover:text-foreground hover:bg-[#161A1F]/50'
           }`}
+          title="1. Multi-Leg Algo Execution Ticket"
         >
-          <Zap size={14} />
-          <span>1. 1-Click Multi-Leg Algo</span>
+          <Zap size={13} className="flex-shrink-0" />
+          <span className="truncate">1. Multi-Leg Algo</span>
         </button>
 
         <button
           onClick={() => setActiveTab('models')}
-          className={`px-3.5 py-2 rounded-xl font-bold transition-all flex items-center gap-2 whitespace-nowrap min-h-[38px] ${
-            activeTab === 'models' ? 'bg-[#161A1F] text-gold border border-gold/40 shadow-sm' : 'text-muted hover:text-foreground'
+          className={`px-2 sm:px-2.5 py-2 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 whitespace-nowrap min-h-[36px] text-[11px] sm:text-xs ${
+            activeTab === 'models' ? 'bg-[#161A1F] text-gold border border-gold/40 shadow-sm' : 'text-muted hover:text-foreground hover:bg-[#161A1F]/50'
           }`}
+          title="2. Econometric Models & OU Mean Reversion"
         >
-          <Cpu size={14} />
-          <span>2. Quant Models & OU</span>
+          <Cpu size={13} className="flex-shrink-0" />
+          <span className="truncate">2. Models & OU</span>
         </button>
 
         <button
           onClick={() => setActiveTab('margin')}
-          className={`px-3.5 py-2 rounded-xl font-bold transition-all flex items-center gap-2 whitespace-nowrap min-h-[38px] ${
-            activeTab === 'margin' ? 'bg-[#161A1F] text-gold border border-gold/40 shadow-sm' : 'text-muted hover:text-foreground'
+          className={`px-2 sm:px-2.5 py-2 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 whitespace-nowrap min-h-[36px] text-[11px] sm:text-xs ${
+            activeTab === 'margin' ? 'bg-[#161A1F] text-gold border border-gold/40 shadow-sm' : 'text-muted hover:text-foreground hover:bg-[#161A1F]/50'
           }`}
+          title="3. MCX SPAN Margin Relief & Margin Optimizer"
         >
-          <Shield size={14} />
-          <span>3. SPAN Margin Relief</span>
+          <Shield size={13} className="flex-shrink-0" />
+          <span className="truncate">3. SPAN Relief</span>
         </button>
 
         <button
           onClick={() => setActiveTab('global')}
-          className={`px-3.5 py-2 rounded-xl font-bold transition-all flex items-center gap-2 whitespace-nowrap min-h-[38px] ${
-            activeTab === 'global' ? 'bg-[#161A1F] text-gold border border-gold/40 shadow-sm' : 'text-muted hover:text-foreground'
+          className={`px-2 sm:px-2.5 py-2 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 whitespace-nowrap min-h-[36px] text-[11px] sm:text-xs ${
+            activeTab === 'global' ? 'bg-[#161A1F] text-gold border border-gold/40 shadow-sm' : 'text-muted hover:text-foreground hover:bg-[#161A1F]/50'
           }`}
+          title="4. COMEX Parity & SGB Arbitrage Engine"
         >
-          <Globe size={14} />
-          <span>4. COMEX & SGB Parity</span>
+          <Globe size={13} className="flex-shrink-0" />
+          <span className="truncate">4. COMEX Parity</span>
         </button>
 
         <button
           onClick={() => setActiveTab('alerts')}
-          className={`px-3.5 py-2 rounded-xl font-bold transition-all flex items-center gap-2 whitespace-nowrap min-h-[38px] ${
-            activeTab === 'alerts' ? 'bg-[#161A1F] text-gold border border-gold/40 shadow-sm' : 'text-muted hover:text-foreground'
+          className={`px-2 sm:px-2.5 py-2 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 whitespace-nowrap min-h-[36px] text-[11px] sm:text-xs ${
+            activeTab === 'alerts' ? 'bg-[#161A1F] text-gold border border-gold/40 shadow-sm' : 'text-muted hover:text-foreground hover:bg-[#161A1F]/50'
           }`}
+          title="5. Telegram Live Signal & Quant Alert Bot"
         >
-          <Bell size={14} />
-          <span>5. Telegram Quant Bot</span>
+          <Bell size={13} className="flex-shrink-0" />
+          <span className="truncate">5. Telegram Bot</span>
         </button>
 
         <button
           onClick={() => setActiveTab('paper')}
-          className={`px-3.5 py-2 rounded-xl font-bold transition-all flex items-center gap-2 whitespace-nowrap min-h-[38px] ${
-            activeTab === 'paper' ? 'bg-[#161A1F] text-gold border border-gold/40 shadow-sm' : 'text-muted hover:text-foreground'
+          className={`px-2 sm:px-2.5 py-2 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 whitespace-nowrap min-h-[36px] text-[11px] sm:text-xs ${
+            activeTab === 'paper' ? 'bg-[#161A1F] text-gold border border-gold/40 shadow-sm' : 'text-muted hover:text-foreground hover:bg-[#161A1F]/50'
           }`}
+          title="6. Simulated Paper Trading & Audit Blotter"
         >
-          <Award size={14} />
-          <span>6. Paper Trading Blotter</span>
+          <Award size={13} className="flex-shrink-0" />
+          <span className="truncate">6. Paper Blotter</span>
         </button>
       </div>
 

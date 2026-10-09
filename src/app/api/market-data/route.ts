@@ -289,7 +289,10 @@ export async function GET(request: NextRequest) {
   let candles: OHLCVCandle[] = [];
 
   if (marketData.candlesRaw.length > 0) {
-    candles = marketData.candlesRaw.slice(-60).map((c, idx) => {
+    const rawSlice = marketData.candlesRaw.slice(-60);
+    const spreadHistory: number[] = [];
+
+    candles = rawSlice.map((c) => {
       const candlePerGram = ((c.close * marketData.usdInr) / TROY_OUNCE_TO_GRAMS) * DOMESTIC_DUTY_MULTIPLIER * (1 + currentMult.basisDrift);
       const ratio = candlePerGram / c.close;
 
@@ -303,6 +306,28 @@ export async function GET(request: NextRequest) {
       const timeStr = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false });
       const dateStr = d.toISOString().split('T')[0];
 
+      // Relative spread & carry vs baseline
+      const theoreticalBasket = baseRatePerGram;
+      const spread = Math.round(((normClose - theoreticalBasket) / theoreticalBasket) * 10000) / 100;
+      spreadHistory.push(spread);
+
+      const carry = Math.round((6.5 / 100 * (currentMult.expiryDays / 365)) * 10000) / 100;
+      const residual = Math.round((spread - carry) * 100) / 100;
+
+      // Real rolling statistical Z-Score
+      let zScore = 0;
+      if (spreadHistory.length >= 5) {
+        const slice = spreadHistory.slice(-20);
+        const mean = slice.reduce((a, b) => a + b, 0) / slice.length;
+        const variance = slice.reduce((a, b) => a + (b - mean) ** 2, 0) / Math.max(1, slice.length - 1);
+        const stdDev = Math.sqrt(variance) || 0.1;
+        zScore = Math.round(((spread - mean) / stdDev) * 100) / 100;
+      }
+
+      let signal: 'BUY' | 'SELL' | 'AUDIT_PASS' | null = null;
+      if (zScore > 2.0) signal = 'AUDIT_PASS';
+      else if (zScore < -2.0) signal = 'BUY';
+
       return {
         timestamp: c.time,
         timeStr,
@@ -314,26 +339,46 @@ export async function GET(request: NextRequest) {
         volume: Math.round(c.volume * currentMult.volumeMult),
         openInterest: currentMult.oi,
         normalizedPrice: normClose,
-        zScore: Math.round((Math.sin(idx / 5) * 1.5 + (symbol === 'GOLDM' ? 1.2 : -0.8)) * 100) / 100,
+        spread,
+        expectedCarry: carry,
+        residual,
+        zScore,
+        signal,
       };
     });
   }
 
-  // Fallback candles
+  // Fallback candles (Generated with strict relative value physics)
   if (candles.length === 0) {
     const now = Date.now();
     const intervalMs = timeframe === '1m' ? 60000 : timeframe === '5m' ? 300000 : 900000;
     const targetSnapshot = snapshots.find((s) => s.symbol === symbol) || snapshots[0];
+    const spreadHistory: number[] = [];
 
     for (let i = 40; i >= 0; i--) {
       const t = now - i * intervalMs;
       const d = new Date(t);
       const noise = (Math.sin(i * 0.7) + Math.cos(i * 0.3)) * 25;
       const close = Math.round(targetSnapshot.lastPrice + noise);
-      const open = Math.round(close - (Math.random() - 0.48) * 20);
-      const high = Math.max(open, close) + Math.round(Math.random() * 15);
-      const low = Math.min(open, close) - Math.round(Math.random() * 15);
+      const open = Math.round(close - (Math.sin(i * 0.5)) * 20);
+      const high = Math.max(open, close) + Math.round(Math.abs(Math.cos(i * 0.4)) * 15);
+      const low = Math.min(open, close) - Math.round(Math.abs(Math.sin(i * 0.6)) * 15);
       const norm = Math.round(((close / currentSpec.quoteBasis) / currentSpec.purityFactor) * 100) / 100;
+
+      const spread = Math.round(((norm - baseRatePerGram) / baseRatePerGram) * 10000) / 100;
+      spreadHistory.push(spread);
+
+      const carry = Math.round((6.5 / 100 * (currentMult.expiryDays / 365)) * 10000) / 100;
+      const residual = Math.round((spread - carry) * 100) / 100;
+
+      let zScore = 0;
+      if (spreadHistory.length >= 5) {
+        const slice = spreadHistory.slice(-20);
+        const mean = slice.reduce((a, b) => a + b, 0) / slice.length;
+        const variance = slice.reduce((a, b) => a + (b - mean) ** 2, 0) / Math.max(1, slice.length - 1);
+        const stdDev = Math.sqrt(variance) || 0.1;
+        zScore = Math.round(((spread - mean) / stdDev) * 100) / 100;
+      }
 
       candles.push({
         timestamp: t,
@@ -343,10 +388,14 @@ export async function GET(request: NextRequest) {
         high,
         low,
         close,
-        volume: Math.round(1200 + Math.random() * 800),
+        volume: Math.round(1200 + Math.abs(Math.sin(i)) * 800),
         openInterest: currentMult.oi,
         normalizedPrice: norm,
-        zScore: Math.round((Math.sin(i / 4) * 2.1) * 100) / 100,
+        spread,
+        expectedCarry: carry,
+        residual,
+        zScore,
+        signal: zScore > 2.0 ? 'AUDIT_PASS' : zScore < -2.0 ? 'BUY' : null,
       });
     }
   }
