@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { Menu, Hexagon, User, Bell, Sparkles, RefreshCw } from 'lucide-react';
 import { TickerRibbon } from './TickerRibbon';
@@ -38,11 +40,11 @@ export function TopHeaderBar({
   isLoading = false,
 }: TopHeaderBarProps) {
   return (
-    <div className="flex flex-col flex-shrink-0 z-20 select-none">
-      {/* ── MOBILE TOP BAR (Only on < 1024px) ── */}
+    <div className="flex flex-col flex-shrink-0 z-20 select-none w-full">
+      {/* ── MOBILE TOP BAR (< 1024px) ── */}
       <header className="h-12 bg-[#11151A] border-b border-[#2B3139] flex lg:hidden items-center justify-between px-3 text-xs">
         {/* Left: Hamburger Button & Status */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
           <button
             onClick={onOpenMobileMenu}
             className="p-2 -ml-1 text-text-secondary hover:text-foreground hover:bg-[#161A1F] rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation"
@@ -50,7 +52,7 @@ export function TopHeaderBar({
           >
             <Menu size={20} className="text-foreground" />
           </button>
-          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#161A1F] border border-[#2B3139]">
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#161A1F] border border-[#2B3139]">
             <span className={`w-2 h-2 rounded-full ${isLiveOnline ? 'bg-buy animate-pulse' : 'bg-gold'}`} />
             <span className="text-[10px] font-mono font-bold text-foreground">
               {isLiveOnline ? 'LIVE' : 'SYNC'}
@@ -71,7 +73,7 @@ export function TopHeaderBar({
           </span>
         </button>
 
-        {/* Right: Refresh, Demo Toggle & User Profile */}
+        {/* Right: Refresh & Profile */}
         <div className="flex items-center gap-1.5">
           {onManualRefresh && (
             <button
@@ -99,7 +101,7 @@ export function TopHeaderBar({
             </button>
           )}
 
-          {onLogout ? (
+          {onLogout && (
             <button
               onClick={onLogout}
               className="p-1.5 bg-[#161A1F] hover:bg-sell/20 text-text-secondary hover:text-sell rounded-lg border border-[#2B3139] transition-colors"
@@ -107,33 +109,31 @@ export function TopHeaderBar({
             >
               <User size={14} />
             </button>
-          ) : (
-            <div className="flex items-center gap-1.5 pl-1.5 border-l border-[#2B3139]">
-              <span className="w-2 h-2 rounded-full bg-buy animate-pulse" title="MCX Live Feed Active" />
-              <div className="w-6 h-6 rounded-full bg-[#161A1F] border border-[#2B3139] flex items-center justify-center text-text-secondary">
-                <User size={12} />
-              </div>
-            </div>
           )}
         </div>
       </header>
 
-      {/* ── DESKTOP TOP BAR & TICKER RIBBON (1024px+) ── */}
-      <header className="hidden lg:flex h-12 bg-[#11151A] border-b border-[#2B3139] items-center justify-between px-4 text-xs">
-        {/* LEFT: 4-Contract Quick Ticker */}
-        <div className="flex-1 overflow-x-auto flex items-center">
-          <TickerRibbon
-            selectedSymbol={selectedSymbol}
-            onSelectSymbol={onSelectSymbol}
-            priceTickers={priceTickers}
-          />
+      {/* ── DESKTOP TOP BAR (1024px+) ── */}
+      <header className="hidden lg:flex h-12 bg-[#11151A] border-b border-[#2B3139] items-center justify-between px-5 text-xs">
+        {/* Left: Terminal Header Title & Live Status */}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-buy animate-pulse" />
+            <span className="font-mono font-bold text-xs text-foreground uppercase tracking-wider">
+              MCX GOLD QUANT TERMINAL
+            </span>
+          </div>
+          <span className="text-muted font-mono text-xs">•</span>
+          <span className="text-text-secondary font-mono text-xs">
+            Multi-Contract Arbitrage Engine
+          </span>
         </div>
 
-        {/* RIGHT: Live Data Feed Status, Notifications & User Desk */}
-        <div className="flex items-center gap-3 pl-3 border-l border-[#2B3139] flex-shrink-0">
+        {/* Right: Live Feed Status, Refresh, Notifications & User Desk */}
+        <div className="flex items-center gap-3">
           {/* Live Data Badge */}
           <div
-            className="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-[#161A1F] border border-[#2B3139] font-mono text-[11px]"
+            className="flex items-center gap-2 px-3 py-1 rounded-xl bg-[#161A1F] border border-[#2B3139] font-mono text-xs"
             title={`Source: ${dataSource}${lastUpdated ? ` • Last sync: ${lastUpdated}` : ''}`}
           >
             <span className="relative flex h-2 w-2">
@@ -144,42 +144,42 @@ export function TopHeaderBar({
               {isLiveOnline ? 'REAL-TIME LIVE' : 'SYNCED FEED'}
             </span>
             {lastUpdated && (
-              <span className="text-[10px] text-muted hidden xl:inline">
+              <span className="text-[11px] text-muted hidden xl:inline">
                 {lastUpdated}
               </span>
             )}
             {onManualRefresh && (
               <button
                 onClick={onManualRefresh}
-                className={`ml-0.5 text-muted hover:text-gold transition-colors ${isLoading ? 'animate-spin text-gold' : ''}`}
+                className={`ml-1 text-muted hover:text-gold transition-colors ${isLoading ? 'animate-spin text-gold' : ''}`}
                 title="Force Refresh Data Now"
               >
-                <RefreshCw size={11} />
+                <RefreshCw size={12} />
               </button>
             )}
           </div>
 
           <button
-            className="relative p-1.5 text-text-secondary hover:text-foreground hover:bg-[#161A1F] rounded-lg transition-colors"
+            className="relative p-2 text-text-secondary hover:text-foreground hover:bg-[#161A1F] rounded-xl border border-[#2B3139] transition-colors"
             title="Notifications"
           >
-            <Bell size={15} />
+            <Bell size={14} />
             <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-sell text-white font-mono font-bold text-[9px] rounded-full flex items-center justify-center">
               1
             </span>
           </button>
 
-          <div className="flex items-center gap-2 bg-[#161A1F] px-2.5 py-1 rounded-xl border border-[#2B3139]">
+          <div className="flex items-center gap-2 bg-[#161A1F] px-3 py-1 rounded-xl border border-[#2B3139]">
             <div className="w-5 h-5 rounded-full bg-gold/20 flex items-center justify-center text-gold font-mono font-bold text-[10px]">
               {userName.charAt(0).toUpperCase()}
             </div>
-            <span className="font-mono text-[11px] text-foreground font-semibold">
+            <span className="font-mono text-xs text-foreground font-semibold">
               {deskId}
             </span>
             {onLogout && (
               <button
                 onClick={onLogout}
-                className="ml-1 text-[10px] text-muted hover:text-sell transition-colors font-mono"
+                className="ml-1 text-xs text-muted hover:text-sell transition-colors font-mono"
                 title="Sign Out"
               >
                 Logout
@@ -189,14 +189,12 @@ export function TopHeaderBar({
         </div>
       </header>
 
-      {/* ── MOBILE HORIZONTAL TICKER RIBBON (Visible below top bar on mobile) ── */}
-      <div className="block lg:hidden">
-        <TickerRibbon
-          selectedSymbol={selectedSymbol}
-          onSelectSymbol={onSelectSymbol}
-          priceTickers={priceTickers}
-        />
-      </div>
+      {/* ── FULL-WIDTH RESPONSIVE TICKER RIBBON (Spans cleanly across entire workspace) ── */}
+      <TickerRibbon
+        selectedSymbol={selectedSymbol}
+        onSelectSymbol={onSelectSymbol}
+        priceTickers={priceTickers}
+      />
     </div>
   );
 }

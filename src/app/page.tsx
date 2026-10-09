@@ -234,9 +234,9 @@ export default function GoldLensApp() {
         />
 
         {/* Dynamic Route View (Scrollable with mobile bottom bar padding) */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden pb-20 lg:pb-8">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden pb-20 lg:pb-8 w-full min-w-0">
           {currentPage === 'dashboard' || currentPage === 'terminal' || currentPage === 'overview' ? (
-            <div className="w-full flex flex-col">
+            <div className="w-full min-w-0 flex flex-col">
               {/* Market Overview Header Banner */}
               <MarketOverviewHeader
                 selectedSymbol={selectedSymbol}

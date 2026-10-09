@@ -16,37 +16,37 @@ export function TickerRibbon({
   const instruments = [
     {
       symbol: 'GOLDM',
-      expiry: '05NOV2026',
-      label: 'Gold Mini (100g)',
+      expiry: '05 NOV',
+      fullName: 'Gold Mini (100g)',
       price: priceTickers['GOLDM']?.price || 149921,
       change: priceTickers['GOLDM']?.change || 1.07,
     },
     {
       symbol: 'GOLDTEN',
-      expiry: '30OCT2026',
-      label: 'Gold Ten (10g)',
+      expiry: '30 OCT',
+      fullName: 'Gold Ten (10g)',
       price: priceTickers['GOLDTEN']?.price || 150279,
       change: priceTickers['GOLDTEN']?.change || 1.07,
     },
     {
       symbol: 'GOLDGUINEA',
-      expiry: '30OCT2026',
-      label: 'Gold Guinea (8g)',
+      expiry: '30 OCT',
+      fullName: 'Gold Guinea (8g)',
       price: priceTickers['GOLDGUINEA']?.price || 120671,
       change: priceTickers['GOLDGUINEA']?.change || 1.05,
     },
     {
       symbol: 'GOLDPETAL',
-      expiry: '30OCT2026',
-      label: 'Gold Petal (1g)',
+      expiry: '30 OCT',
+      fullName: 'Gold Petal (1g)',
       price: priceTickers['GOLDPETAL']?.price || 15083,
       change: priceTickers['GOLDPETAL']?.change || 1.02,
     },
   ];
 
   return (
-    <div className="w-full bg-[#0B0E11] border-b border-[#2B3139] px-2 sm:px-4 py-1.5 flex items-center select-none overflow-x-auto no-scrollbar touch-pan-x text-xs z-20">
-      <div className="flex items-center gap-1.5 sm:gap-3 flex-nowrap min-w-max mx-auto sm:mx-0">
+    <div className="w-full bg-[#0B0E11] border-b border-[#2B3139] px-3 sm:px-5 py-2 select-none">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 w-full">
         {instruments.map((item) => {
           const isSelected = item.symbol === selectedSymbol;
           const isUp = item.change >= 0;
@@ -55,28 +55,30 @@ export function TickerRibbon({
             <button
               key={item.symbol}
               onClick={() => onSelectSymbol(item.symbol)}
-              className={`flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 rounded-xl transition-all flex-shrink-0 touch-manipulation min-h-[40px] text-left ${
+              className={`flex flex-col justify-center px-3 py-1.5 rounded-xl transition-all touch-manipulation min-h-[44px] text-left border ${
                 isSelected
-                  ? 'bg-[#161A1F] border border-gold text-gold shadow-md ring-1 ring-gold/30'
-                  : 'bg-[#11151A]/80 border border-[#2B3139]/80 hover:bg-[#161A1F] hover:border-[#383F48] text-text-secondary hover:text-foreground'
+                  ? 'bg-[#161A1F] border-gold text-gold shadow-md ring-1 ring-gold/30'
+                  : 'bg-[#11151A] border-[#2B3139]/80 hover:bg-[#161A1F] hover:border-[#383F48] text-text-secondary hover:text-foreground'
               }`}
             >
-              <div className="flex items-center gap-1.5 justify-between">
-                <span className={`font-bold font-mono text-[11px] sm:text-xs tracking-wider ${isSelected ? 'text-gold' : 'text-foreground'}`}>
+              {/* Top: Symbol & Expiry */}
+              <div className="flex items-center justify-between gap-1 mb-0.5">
+                <span className={`font-mono font-bold text-xs tracking-wide ${isSelected ? 'text-gold' : 'text-foreground'}`}>
                   {item.symbol}
                 </span>
-                <span className="text-[9px] text-muted font-mono bg-[#0B0E11] px-1 py-0.2 rounded border border-[#2B3139]">
+                <span className="text-[10px] text-muted font-mono bg-[#0B0E11] px-1.5 py-0.2 rounded border border-[#2B3139]">
                   {item.expiry}
                 </span>
               </div>
 
-              <div className="flex items-baseline gap-1.5">
-                <span className="font-mono tabular-nums text-foreground font-bold text-[11px] sm:text-xs">
-                  ₹{item.price.toLocaleString('en-IN')}.00
+              {/* Bottom: Price & Change */}
+              <div className="flex items-baseline justify-between gap-1 font-mono">
+                <span className="tabular-nums text-foreground font-bold text-xs sm:text-sm">
+                  ₹{item.price.toLocaleString('en-IN')}
                 </span>
 
                 <span
-                  className={`font-mono tabular-nums text-[10px] sm:text-[11px] font-bold ${
+                  className={`tabular-nums text-[11px] font-bold ${
                     isUp ? 'text-buy' : 'text-sell'
                   }`}
                 >
