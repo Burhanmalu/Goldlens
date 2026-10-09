@@ -23,7 +23,7 @@ export function MarketOverviewHeader({
 }: MarketOverviewHeaderProps) {
   const spec = CONTRACT_REGISTRY[selectedSymbol] || CONTRACT_REGISTRY['GOLDM'];
   const isUp = (snapshot.change || 0) >= 0;
-  const lastPrice = snapshot.lastPrice || 128411;
+  const lastPrice = snapshot.lastPrice || 149921;
 
   return (
     <div className="bg-[#11151A] border-b border-[#2B3139] px-3 py-2.5 sm:px-5 sm:py-3 select-none flex flex-col gap-2.5">

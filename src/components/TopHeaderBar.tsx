@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, Hexagon, User, Bell, Sparkles } from 'lucide-react';
+import { Menu, Hexagon, User, Bell, Sparkles, RefreshCw } from 'lucide-react';
 import { TickerRibbon } from './TickerRibbon';
 
 interface TopHeaderBarProps {
@@ -13,6 +13,11 @@ interface TopHeaderBarProps {
   onLogout?: () => void;
   userName?: string;
   deskId?: string;
+  isLiveOnline?: boolean;
+  dataSource?: string;
+  lastUpdated?: string;
+  onManualRefresh?: () => void;
+  isLoading?: boolean;
 }
 
 export function TopHeaderBar({
@@ -26,19 +31,32 @@ export function TopHeaderBar({
   onLogout,
   userName = 'Trader',
   deskId = 'QUANT_DESK',
+  isLiveOnline = true,
+  dataSource = 'MCX Low-Latency Feed Engine',
+  lastUpdated = '',
+  onManualRefresh,
+  isLoading = false,
 }: TopHeaderBarProps) {
   return (
     <div className="flex flex-col flex-shrink-0 z-20 select-none">
       {/* ── MOBILE TOP BAR (Only on < 1024px) ── */}
       <header className="h-12 bg-[#11151A] border-b border-[#2B3139] flex lg:hidden items-center justify-between px-3 text-xs">
-        {/* Left: Hamburger Button */}
-        <button
-          onClick={onOpenMobileMenu}
-          className="p-2 -ml-1 text-text-secondary hover:text-foreground hover:bg-[#161A1F] rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation"
-          aria-label="Open Navigation Menu"
-        >
-          <Menu size={20} className="text-foreground" />
-        </button>
+        {/* Left: Hamburger Button & Status */}
+        <div className="flex items-center gap-1">
+          <button
+            onClick={onOpenMobileMenu}
+            className="p-2 -ml-1 text-text-secondary hover:text-foreground hover:bg-[#161A1F] rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation"
+            aria-label="Open Navigation Menu"
+          >
+            <Menu size={20} className="text-foreground" />
+          </button>
+          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#161A1F] border border-[#2B3139]">
+            <span className={`w-2 h-2 rounded-full ${isLiveOnline ? 'bg-buy animate-pulse' : 'bg-gold'}`} />
+            <span className="text-[10px] font-mono font-bold text-foreground">
+              {isLiveOnline ? 'LIVE' : 'SYNC'}
+            </span>
+          </div>
+        </div>
 
         {/* Center: GoldLens Logo */}
         <button
@@ -53,8 +71,20 @@ export function TopHeaderBar({
           </span>
         </button>
 
-        {/* Right: Demo Toggle & User Profile */}
-        <div className="flex items-center gap-2">
+        {/* Right: Refresh, Demo Toggle & User Profile */}
+        <div className="flex items-center gap-1.5">
+          {onManualRefresh && (
+            <button
+              onClick={onManualRefresh}
+              className={`p-1.5 text-text-secondary hover:text-gold hover:bg-[#161A1F] rounded-lg border border-[#2B3139] transition-all ${
+                isLoading ? 'animate-spin text-gold' : ''
+              }`}
+              title="Refresh Live Data"
+            >
+              <RefreshCw size={13} />
+            </button>
+          )}
+
           {onToggleDemo && (
             <button
               onClick={onToggleDemo}
@@ -99,8 +129,36 @@ export function TopHeaderBar({
           />
         </div>
 
-        {/* RIGHT: Notifications & User Desk */}
+        {/* RIGHT: Live Data Feed Status, Notifications & User Desk */}
         <div className="flex items-center gap-3 pl-3 border-l border-[#2B3139] flex-shrink-0">
+          {/* Live Data Badge */}
+          <div
+            className="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-[#161A1F] border border-[#2B3139] font-mono text-[11px]"
+            title={`Source: ${dataSource}${lastUpdated ? ` • Last sync: ${lastUpdated}` : ''}`}
+          >
+            <span className="relative flex h-2 w-2">
+              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${isLiveOnline ? 'bg-buy' : 'bg-gold'} opacity-75`} />
+              <span className={`relative inline-flex rounded-full h-2 w-2 ${isLiveOnline ? 'bg-buy' : 'bg-gold'}`} />
+            </span>
+            <span className="text-foreground font-semibold flex items-center gap-1">
+              {isLiveOnline ? 'REAL-TIME LIVE' : 'SYNCED FEED'}
+            </span>
+            {lastUpdated && (
+              <span className="text-[10px] text-muted hidden xl:inline">
+                {lastUpdated}
+              </span>
+            )}
+            {onManualRefresh && (
+              <button
+                onClick={onManualRefresh}
+                className={`ml-0.5 text-muted hover:text-gold transition-colors ${isLoading ? 'animate-spin text-gold' : ''}`}
+                title="Force Refresh Data Now"
+              >
+                <RefreshCw size={11} />
+              </button>
+            )}
+          </div>
+
           <button
             className="relative p-1.5 text-text-secondary hover:text-foreground hover:bg-[#161A1F] rounded-lg transition-colors"
             title="Notifications"

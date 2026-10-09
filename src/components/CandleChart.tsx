@@ -558,7 +558,7 @@ export function CandleChart({
 
         {/* Quant Metric Highlights */}
         <span className="text-gold ml-auto hidden md:inline">
-          Fine Gold: <span className="font-bold">₹{Math.round(activeCandle?.normalizedPrice || 12842)}/g</span>
+          Fine Gold: <span className="font-bold">₹{Math.round(activeCandle?.normalizedPrice || 15067)}/g</span>
         </span>
         <span className="text-text-secondary hidden lg:inline">
           Residual: <span className="text-foreground font-bold">{activeCandle?.residual || '+0.33'}%</span>
@@ -809,7 +809,7 @@ export function CandleChart({
                 {/* Horizontal Grid Lines */}
                 {[0.15, 0.38, 0.62, 0.85].map((ratio) => {
                   const y = priceChartHeight * ratio;
-                  const priceLevel = Math.round(12880 - ratio * 80);
+                  const priceLevel = Math.round(15120 - ratio * 100);
                   return (
                     <g key={ratio}>
                       <line x1="0" y1={y} x2={plotWidth} y2={y} stroke="#2A3038" strokeDasharray="3 3" />
@@ -823,11 +823,11 @@ export function CandleChart({
                 {/* Right Y-Axis Divider Line */}
                 <line x1={plotWidth} y1="0" x2={plotWidth} y2={priceChartHeight} stroke="#2B3139" strokeWidth="1" />
 
-                {/* Fair Fine Gold Benchmark Line (₹12,842) */}
+                {/* Fair Fine Gold Benchmark Line (₹15,067) */}
                 <line x1="0" y1={priceChartHeight * 0.5} x2={plotWidth} y2={priceChartHeight * 0.5} stroke="#F0B90B" strokeDasharray="4 3" strokeWidth="1.2" opacity="0.6" />
                 <rect x={plotWidth + 1} y={priceChartHeight * 0.5 - 7} width={chartRightMargin - 2} height={14} fill="#F0B90B" opacity="0.2" rx="2" />
                 <text x={plotWidth + 4} y={priceChartHeight * 0.5 + 3} fill="#F0B90B" fontSize="9" fontWeight="bold" textAnchor="start">
-                  ₹12,842
+                  ₹15,067
                 </text>
 
                 {/* Draw 4 contract normalized curves */}

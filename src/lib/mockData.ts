@@ -13,8 +13,8 @@ export function seededRandom(seed: number): () => number {
   };
 }
 
-// Base fine gold price ~ ₹12,850/gram
-export const BASE_FINE_GOLD_PRICE = 12842;
+// Base fine gold price ~ ₹15,067/gram (MCX Gold Futures ~₹1,50,000/10g)
+export const BASE_FINE_GOLD_PRICE = 15067;
 
 // ============================================================
 // Generate Daily Multi-Contract Data (365+ Days)
@@ -373,7 +373,7 @@ export function getDetailedAuditSteps(): AuditDetailedStep[] {
       formula: 'P_norm = P_raw / (QuoteBasis × PurityFactor)',
       status: 'PASSED',
       metricLabel: 'Base Unit',
-      metricValue: '₹12,842.10/g',
+      metricValue: '₹15,067.44/g',
       threshold: 'Exact Conversion',
       verdictNote: 'Eliminates 99.2% of raw nominal price confusion.',
     },
@@ -481,10 +481,18 @@ export function getLatestSnapshots(data: MarketDataPoint[]): ContractSnapshot[] 
     if (point.date === prevDate) previous[point.symbol] = point;
   }
   
+  const exactDefaults: Record<string, { close: number; normalizedPrice: number; volume: number; openInterest: number; expiry: string; daysToExpiry: number; change: number }> = {
+    GOLDM: { close: 149921, normalizedPrice: 15067.44, volume: 48500, openInterest: 24200, expiry: '05NOV2026', daysToExpiry: 27, change: 1.07 },
+    GOLDTEN: { close: 150279, normalizedPrice: 15042.94, volume: 18200, openInterest: 8900, expiry: '30OCT2026', daysToExpiry: 21, change: 1.07 },
+    GOLDGUINEA: { close: 120671, normalizedPrice: 15098.97, volume: 6400, openInterest: 3800, expiry: '30OCT2026', daysToExpiry: 21, change: 1.05 },
+    GOLDPETAL: { close: 15083, normalizedPrice: 15098.10, volume: 19800, openInterest: 11200, expiry: '30OCT2026', daysToExpiry: 21, change: 1.02 },
+  };
+
   return Object.keys(CONTRACT_REGISTRY).map(symbol => {
-    const curr = latest[symbol] || { close: 128420, normalizedPrice: 12842, volume: 15000, openInterest: 8000, expiry: '2026-10-30', daysToExpiry: 23 };
+    const defaultData = exactDefaults[symbol] || { close: 149921, normalizedPrice: 15067.44, volume: 15000, openInterest: 8000, expiry: '30OCT2026', daysToExpiry: 21, change: 1.07 };
+    const curr = latest[symbol] || defaultData;
     const prev = previous[symbol] || curr;
-    const change = prev ? ((curr.normalizedPrice - prev.normalizedPrice) / prev.normalizedPrice) * 100 : 0.42;
+    const change = defaultData.change || (prev ? ((curr.normalizedPrice - prev.normalizedPrice) / prev.normalizedPrice) * 100 : 1.07);
     
     const maxVol = 50000;
     const liquidityScore = Math.min(100, Math.round((curr.volume / maxVol) * 100));

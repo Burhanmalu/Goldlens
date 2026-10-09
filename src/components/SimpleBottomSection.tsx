@@ -3,9 +3,9 @@
 import React, { useState } from 'react';
 import {
   Activity, ShieldCheck, FileText, CheckCircle2,
-  HelpCircle, ArrowRight
+  ArrowRight, ExternalLink, Scale, Clock, Shield
 } from 'lucide-react';
-import { CONTRACT_LIST } from '@/lib/contracts';
+import { CONTRACT_LIST, MCX_BULLION_RULES } from '@/lib/contracts';
 import { AuditDetailedStep } from '@/lib/types';
 
 interface SimpleBottomSectionProps {
@@ -17,7 +17,7 @@ interface SimpleBottomSectionProps {
 export function SimpleBottomSection({
   auditSteps,
   onOpenAnalysis,
-  onOpenOnboarding,
+  /* onOpenOnboarding accepted but unused */
 }: SimpleBottomSectionProps) {
   const [activeTab, setActiveTab] = useState<'activity' | 'validation' | 'contracts'>('activity');
 
@@ -30,7 +30,7 @@ export function SimpleBottomSection({
   ];
 
   return (
-    <div className="bg-[#11151A] border-t border-[#2B3139] p-5 select-none font-sans">
+    <div className="bg-[#11151A] border-t border-[#2B3139] p-4 sm:p-5 select-none font-sans">
       {/* Tabs Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#2B3139] pb-3 mb-4 gap-3">
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar touch-pan-x pb-1 sm:pb-0">
@@ -43,7 +43,7 @@ export function SimpleBottomSection({
             }`}
           >
             <Activity size={14} />
-            <span>Activity</span>
+            <span>Activity Stream</span>
           </button>
 
           <button
@@ -55,7 +55,7 @@ export function SimpleBottomSection({
             }`}
           >
             <ShieldCheck size={14} />
-            <span>Validation</span>
+            <span>8-Step Validation</span>
           </button>
 
           <button
@@ -67,17 +67,30 @@ export function SimpleBottomSection({
             }`}
           >
             <FileText size={14} />
-            <span>Contract Info</span>
+            <span>Official MCX Specs</span>
           </button>
         </div>
 
-        <button
-          onClick={onOpenAnalysis}
-          className="text-xs text-text-secondary hover:text-gold flex items-center gap-1 transition-colors font-medium self-start sm:self-auto py-1"
-        >
-          <span>Open Full Analysis Studio</span>
-          <ArrowRight size={13} />
-        </button>
+        <div className="flex items-center gap-3">
+          <a
+            href="https://www.mcxindia.com/products/bullion/gold"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[11px] text-muted hover:text-gold flex items-center gap-1 transition-colors font-mono"
+            title="Official MCX India Bullion Product Specifications"
+          >
+            <span>mcxindia.com/bullion</span>
+            <ExternalLink size={11} />
+          </a>
+
+          <button
+            onClick={onOpenAnalysis}
+            className="text-xs text-text-secondary hover:text-gold flex items-center gap-1 transition-colors font-medium py-1 font-sans"
+          >
+            <span>Open Studio</span>
+            <ArrowRight size={13} />
+          </button>
+        </div>
       </div>
 
       {/* ── TAB 1: ACTIVITY LOG ── */}
@@ -117,54 +130,55 @@ export function SimpleBottomSection({
         </div>
       )}
 
-      {/* ── TAB 3: CONTRACT COMPARISON & NORMALIZATION ── */}
+      {/* ── TAB 3: OFFICIAL MCX BULLION SPECIFICATIONS ── */}
       {activeTab === 'contracts' && (
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 font-mono text-xs">
-          <div className="w-full lg:w-3/4 overflow-x-auto">
+        <div className="space-y-3 font-mono text-xs">
+          <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
                 <tr className="text-muted text-[11px] border-b border-[#2B3139]">
-                  <th className="py-2 pr-4">CONTRACT</th>
-                  <th className="pr-4">CONTRACT SIZE</th>
-                  <th className="pr-4">PURITY</th>
-                  <th className="pr-4">QUOTATION UNIT</th>
-                  <th>NORMALIZATION FACTOR</th>
+                  <th className="py-2 pr-3">CONTRACT</th>
+                  <th className="pr-3">LOT SIZE</th>
+                  <th className="pr-3">PURITY</th>
+                  <th className="pr-3">EXPIRY SCHEDULE</th>
+                  <th className="pr-3">DELIVERY UNIT</th>
+                  <th className="pr-3">CIRCUIT LIMIT</th>
+                  <th>DELIVERY BASIS</th>
                 </tr>
               </thead>
               <tbody>
                 {CONTRACT_LIST.map((c) => (
-                  <tr key={c.symbol} className="border-b border-[#2B3139]/40">
-                    <td className="py-2 pr-4 font-bold text-foreground flex items-center gap-1.5">
+                  <tr key={c.symbol} className="border-b border-[#2B3139]/40 hover:bg-[#161A1F]/50 transition-colors">
+                    <td className="py-2.5 pr-3 font-bold text-foreground flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full" style={{ backgroundColor: c.color }} />
                       {c.symbol}
                     </td>
-                    <td className="pr-4 text-text-secondary">{c.contractSize} grams</td>
-                    <td className="pr-4 text-gold font-bold">{c.purity} (99.9% fine)</td>
-                    <td className="pr-4 text-text-secondary">{c.quoteUnit}</td>
-                    <td className="text-muted font-mono text-[11px]">
-                      P_raw / ({c.quoteBasis} × {c.purityFactor})
-                    </td>
+                    <td className="pr-3 text-text-secondary">{c.contractSize}g ({c.quoteUnit})</td>
+                    <td className="pr-3 text-gold font-bold">{c.purity} ({c.purity === 995 ? '99.5%' : '99.9%'})</td>
+                    <td className="pr-3 text-foreground font-semibold">{c.expiryRule || 'Standard'}</td>
+                    <td className="pr-3 text-text-secondary">{c.deliveryUnit || 'Standard Bar'}</td>
+                    <td className="pr-3 text-muted text-[11px]">{c.circuitLimit || '3% + 3%'}</td>
+                    <td className="text-buy font-bold">{c.basisCenter || 'Ahmedabad'}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
 
-          <div className="p-4 bg-[#161A1F] rounded-xl border border-gold/30 lg:w-1/4">
-            <div className="text-xs font-bold text-foreground flex items-center gap-1.5 mb-1.5 font-sans">
-              <HelpCircle size={14} className="text-gold" />
-              <span>How We Normalize</span>
+          {/* MCX Rules Pill Footer */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 border-t border-[#2B3139] text-[11px] font-sans">
+            <div className="p-2.5 bg-[#161A1F] rounded-lg border border-[#2B3139] flex items-center gap-2">
+              <Clock size={14} className="text-gold flex-shrink-0" />
+              <span><strong>Trading Hours:</strong> {MCX_BULLION_RULES.tradingHours}</span>
             </div>
-            <p className="text-xs text-text-secondary font-sans leading-relaxed mb-2">
-              Every contract is converted to ₹ per gram of 999 fine gold to enable clean apples-to-apples comparison.
-            </p>
-            <button
-              onClick={onOpenOnboarding}
-              className="text-gold hover:text-gold-hover text-xs font-bold font-sans flex items-center gap-1"
-            >
-              <span>Learn More</span>
-              <ArrowRight size={12} />
-            </button>
+            <div className="p-2.5 bg-[#161A1F] rounded-lg border border-[#2B3139] flex items-center gap-2">
+              <Shield size={14} className="text-buy flex-shrink-0" />
+              <span><strong>SPAN Concession:</strong> {MCX_BULLION_RULES.spanMarginConcession}</span>
+            </div>
+            <div className="p-2.5 bg-[#161A1F] rounded-lg border border-[#2B3139] flex items-center gap-2">
+              <Scale size={14} className="text-blue flex-shrink-0" />
+              <span><strong>Tender Period:</strong> Staggered (5 days prior to expiry)</span>
+            </div>
           </div>
         </div>
       )}

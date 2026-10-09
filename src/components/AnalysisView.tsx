@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ShieldCheck, GitCompareArrows, Layers } from 'lucide-react';
+import { ShieldCheck, GitCompareArrows, Layers, Sparkles } from 'lucide-react';
 import { AlphaAuditView } from './AlphaAuditView';
 import { RelativeValueView } from './RelativeValueView';
 import { MarketDepthPanel } from './MarketDepthPanel';
+import { TradeAdvisorPanel } from './TradeAdvisorPanel';
 import { Opportunity, OrderBookState, ContractSnapshot } from '@/lib/types';
 
 interface AnalysisViewProps {
@@ -24,13 +25,27 @@ export function AnalysisView({
   onSelectSymbol,
   onSelectPair,
 }: AnalysisViewProps) {
-  const [activeTab, setActiveTab] = useState<'audit' | 'relative' | 'depth'>('audit');
+  const [activeTab, setActiveTab] = useState<'advisor' | 'audit' | 'relative' | 'depth'>('advisor');
 
   return (
     <div className="flex-1 bg-[#0B0E11] overflow-y-auto flex flex-col font-sans select-none pb-24 lg:pb-0">
       {/* Sub-Header Tabs */}
       <div className="bg-[#11151A] border-b border-[#2B3139] px-3 sm:px-6 py-2.5 flex items-center justify-between gap-3 flex-shrink-0">
         <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar touch-pan-x w-full sm:w-auto">
+          {/* Tab 1: AI Trade Advisor */}
+          <button
+            onClick={() => setActiveTab('advisor')}
+            className={`px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap flex-shrink-0 min-h-[38px] touch-manipulation ${
+              activeTab === 'advisor'
+                ? 'bg-[#161A1F] text-gold border border-gold/40 shadow-sm ring-1 ring-gold/20 font-black'
+                : 'text-text-secondary hover:text-foreground hover:bg-[#161A1F]/50'
+            }`}
+          >
+            <Sparkles size={14} className="text-gold" />
+            <span>AI Trade Advisor & Sizing</span>
+          </button>
+
+          {/* Tab 2: Alpha Audit */}
           <button
             onClick={() => setActiveTab('audit')}
             className={`px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap flex-shrink-0 min-h-[38px] touch-manipulation ${
@@ -43,6 +58,7 @@ export function AnalysisView({
             <span>Alpha Audit</span>
           </button>
 
+          {/* Tab 3: RV Matrix */}
           <button
             onClick={() => setActiveTab('relative')}
             className={`px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap flex-shrink-0 min-h-[38px] touch-manipulation ${
@@ -55,6 +71,7 @@ export function AnalysisView({
             <span>RV Matrix</span>
           </button>
 
+          {/* Tab 4: Market Depth */}
           <button
             onClick={() => setActiveTab('depth')}
             className={`px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap flex-shrink-0 min-h-[38px] touch-manipulation ${
@@ -73,7 +90,16 @@ export function AnalysisView({
 
       {/* Main Analysis Content */}
       <div className="flex-1 overflow-y-auto">
-        {activeTab === 'audit' ? (
+        {activeTab === 'advisor' ? (
+          <div className="max-w-4xl mx-auto p-4 sm:p-6">
+            <TradeAdvisorPanel
+              selectedSymbol={selectedSymbol}
+              compareSymbol="GOLDTEN"
+              opportunity={opportunities[0]}
+              snapshots={snapshots}
+            />
+          </div>
+        ) : activeTab === 'audit' ? (
           <AlphaAuditView />
         ) : activeTab === 'relative' ? (
           <RelativeValueView

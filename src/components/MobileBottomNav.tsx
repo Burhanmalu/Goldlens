@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import {
   LayoutDashboard, Layers, Zap, MoreHorizontal,
   ShieldCheck, TrendingUp, BookOpen, Maximize2,
-  HelpCircle, Sparkles, X
+  HelpCircle, Sparkles, X, Cpu
 } from 'lucide-react';
 import { PageId } from '@/lib/types';
 
@@ -34,6 +34,7 @@ export function MobileBottomNav({
   ];
 
   const moreItems = [
+    { id: 'execution-hub' as PageId, label: 'Execution & Quant Hub', icon: Cpu, desc: '1-click broker algo, SPAN relief & OU' },
     { id: 'analysis' as PageId, label: 'Analysis & Alpha Audit', icon: ShieldCheck, desc: '8-step signal validation & RV matrix' },
     { id: 'backtest' as PageId, label: 'Walk-Forward Backtest', icon: TrendingUp, desc: 'Out-of-sample statistical simulation' },
     { id: 'research' as PageId, label: 'Research Whitepaper', icon: BookOpen, desc: 'Mathematical normalization formulas' },
@@ -46,6 +47,7 @@ export function MobileBottomNav({
   };
 
   const isMoreActive =
+    currentPage === 'execution-hub' ||
     currentPage === 'analysis' ||
     currentPage === 'alpha-audit' ||
     currentPage === 'relative-value' ||

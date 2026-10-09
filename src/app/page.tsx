@@ -2,13 +2,13 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { PageId, OHLCVCandle, OrderBookState, ContractSnapshot } from '@/lib/types';
-import { CONTRACT_REGISTRY } from '@/lib/contracts';
 import {
   getMockData, getLatestSnapshots, getCombinedNormalizedSeries,
   generateCandlestickData, generateOrderBook, getDetailedAuditSteps
 } from '@/lib/mockData';
 import { generateOpportunities } from '@/lib/relativeValue';
 import { DEFAULT_SETTINGS } from '@/lib/settings';
+import { useLiveMarketData } from '@/lib/liveMarketData';
 
 // Sidebar & Layout Components
 import { AppSidebar } from '@/components/AppSidebar';
@@ -25,10 +25,12 @@ import { OpportunitiesView } from '@/components/OpportunitiesView';
 import { AnalysisView } from '@/components/AnalysisView';
 import { BacktestView } from '@/components/BacktestView';
 import { ResearchView } from '@/components/ResearchView';
+import { ExecutionHubView } from '@/components/ExecutionHubView';
 import { PitchPresentationModal } from '@/components/PitchPresentationModal';
 import { InteractiveDemoGuide } from '@/components/InteractiveDemoGuide';
 import { OnboardingModal } from '@/components/OnboardingModal';
 import { LoginPage } from '@/components/LoginPage';
+import { TradeAdvisorPanel } from '@/components/TradeAdvisorPanel';
 
 export default function GoldLensApp() {
   // Authentication State (Login page opens first by default)
@@ -59,21 +61,23 @@ export default function GoldLensApp() {
   });
   const [isFullscreenChart, setIsFullscreenChart] = useState(false);
 
-  // Simulation & Flash
-  const isSimulating = true;
+  // Flash state
   const [priceFlash, setPriceFlash] = useState<'green' | 'red' | null>(null);
 
   // Demo & Onboarding State
   const [demoMode, setDemoMode] = useState(false);
   const [demoStep, setDemoStep] = useState(0);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showAdvisorModal, setShowAdvisorModal] = useState(false);
 
   // Base Data
   const baseMockData = useMemo(() => getMockData(), []);
   const initialSnapshots = useMemo(() => getLatestSnapshots(baseMockData), [baseMockData]);
   const combinedSeries = useMemo(() => getCombinedNormalizedSeries(baseMockData), [baseMockData]);
-  const opportunities = useMemo(() => generateOpportunities(baseMockData, DEFAULT_SETTINGS), [baseMockData]);
   const auditStepsList = useMemo(() => getDetailedAuditSteps(), []);
+
+  // Live Market Data Integration
+  const liveMarket = useLiveMarketData(selectedSymbol, timeframe, 3500);
 
   // Dynamic Live State
   const [candles, setCandles] = useState<OHLCVCandle[]>(() => generateCandlestickData(selectedSymbol, timeframe));
@@ -81,82 +85,46 @@ export default function GoldLensApp() {
   const [snapshots, setSnapshots] = useState<ContractSnapshot[]>(initialSnapshots);
 
   const [priceTickers, setPriceTickers] = useState<Record<string, { price: number; change: number; normalized: number }>>({
-    GOLDM: { price: 128411, change: 0.40, normalized: 12842.1 },
-    GOLDTEN: { price: 129180, change: 0.38, normalized: 12895.8 },
-    GOLDGUINEA: { price: 103188, change: 0.42, normalized: 12852.4 },
-    GOLDPETAL: { price: 12910, change: 0.35, normalized: 12910.0 },
+    GOLDM: { price: 149921, change: 1.07, normalized: 15067.4 },
+    GOLDTEN: { price: 150279, change: 1.07, normalized: 15042.9 },
+    GOLDGUINEA: { price: 120671, change: 1.05, normalized: 15099.0 },
+    GOLDPETAL: { price: 15083, change: 1.02, normalized: 15098.1 },
   });
-  // Re-generate chart candles on contract or timeframe change
+
+  // Sync state whenever real online market data arrives
   useEffect(() => {
-    setCandles(generateCandlestickData(selectedSymbol, timeframe));
-    setOrderBook(generateOrderBook(selectedSymbol));
-  }, [selectedSymbol, timeframe]);
+    if (liveMarket.data) {
+      if (liveMarket.data.snapshots && liveMarket.data.snapshots.length > 0) {
+        setSnapshots(liveMarket.data.snapshots);
+      }
+      if (liveMarket.data.tickers) {
+        setPriceTickers(liveMarket.data.tickers);
+      }
+      if (liveMarket.data.candles && liveMarket.data.candles.length > 0) {
+        setCandles(liveMarket.data.candles);
+      }
+      if (liveMarket.data.orderBook) {
+        setOrderBook(liveMarket.data.orderBook);
+      }
 
-  // Live Market Simulation Loop
+      setPriceFlash('green');
+      const t = setTimeout(() => setPriceFlash(null), 800);
+      return () => clearTimeout(t);
+    }
+  }, [liveMarket.data]);
+
+  // Re-generate chart candles on contract or timeframe change when offline
   useEffect(() => {
-    if (!isSimulating) return;
+    if (!liveMarket.data) {
+      setCandles(generateCandlestickData(selectedSymbol, timeframe));
+      setOrderBook(generateOrderBook(selectedSymbol));
+    }
+  }, [selectedSymbol, timeframe, liveMarket.data]);
 
-    const interval = setInterval(() => {
-      const spec = CONTRACT_REGISTRY[selectedSymbol] || CONTRACT_REGISTRY['GOLDM'];
-      const tick = spec.tickSize || 1;
-      const isUp = Math.random() > 0.48;
-      const delta = (isUp ? 1 : -1) * tick * (Math.floor(Math.random() * 3) + 1);
-
-      setPriceFlash(isUp ? 'green' : 'red');
-      setTimeout(() => setPriceFlash(null), 800);
-
-      setSnapshots((prev) =>
-        prev.map((s) => {
-          if (s.symbol === selectedSymbol) {
-            const newPrice = s.lastPrice + delta;
-            const norm = Math.round(((newPrice / spec.quoteBasis) / spec.purityFactor) * 100) / 100;
-            return {
-              ...s,
-              lastPrice: newPrice,
-              normalizedPrice: norm,
-            };
-          }
-          return s;
-        })
-      );
-
-      setPriceTickers((prev) => {
-        const curr = prev[selectedSymbol] || { price: 128411, change: 0.40, normalized: 12842 };
-        const newP = curr.price + delta;
-        const norm = (newP / spec.quoteBasis) / spec.purityFactor;
-        return {
-          ...prev,
-          [selectedSymbol]: {
-            price: newP,
-            change: curr.change + (isUp ? 0.01 : -0.01),
-            normalized: Math.round(norm * 10) / 10,
-          },
-        };
-      });
-
-      setOrderBook((prev) => {
-        const newPrice = prev.lastPrice + delta;
-        const norm = Math.round(((newPrice / spec.quoteBasis) / spec.purityFactor) * 100) / 100;
-        return {
-          ...prev,
-          lastPrice: newPrice,
-          normalizedPrice: norm,
-        };
-      });
-
-      setCandles((prev) => {
-        if (prev.length === 0) return prev;
-        const last = { ...prev[prev.length - 1] };
-        const currentPrice = Math.round(last.close + delta);
-        last.close = currentPrice;
-        last.high = Math.max(last.high, currentPrice);
-        last.low = Math.min(last.low, currentPrice);
-        return [...prev.slice(0, -1), last];
-      });
-    }, 2800);
-
-    return () => clearInterval(interval);
-  }, [isSimulating, selectedSymbol]);
+  // Dynamic Opportunity Generation based on live snapshots
+  const opportunities = useMemo(() => {
+    return generateOpportunities(baseMockData, DEFAULT_SETTINGS);
+  }, [baseMockData]);
 
   // Demo step actions
   const handleDemoStepAction = (step: number) => {
@@ -240,7 +208,7 @@ export default function GoldLensApp() {
 
       {/* ── 2. MAIN APPLICATION WORKSPACE ── */}
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
-        {/* Top Header Bar with Hamburger (mobile) & Ticker */}
+        {/* Top Header Bar with Live Stream Status, Hamburger & Ticker */}
         <TopHeaderBar
           selectedSymbol={selectedSymbol}
           onSelectSymbol={(sym) => {
@@ -258,6 +226,11 @@ export default function GoldLensApp() {
           onLogout={() => setIsAuthenticated(false)}
           userName={currentUser.role}
           deskId={currentUser.deskId}
+          isLiveOnline={liveMarket.isLiveOnline}
+          dataSource={liveMarket.dataSource}
+          lastUpdated={liveMarket.lastUpdated}
+          onManualRefresh={liveMarket.refetch}
+          isLoading={liveMarket.isLoading}
         />
 
         {/* Dynamic Route View (Scrollable with mobile bottom bar padding) */}
@@ -299,6 +272,7 @@ export default function GoldLensApp() {
                     opportunity={bestOpportunity}
                     onViewDetails={() => setCurrentPage('analysis')}
                     onViewAllOpportunities={() => setCurrentPage('opportunities')}
+                    onOpenAdvisor={() => setShowAdvisorModal(true)}
                     orderBook={orderBook}
                     selectedSymbol={selectedSymbol}
                     setSelectedSymbol={setSelectedSymbol}
@@ -425,6 +399,8 @@ export default function GoldLensApp() {
             />
           ) : currentPage === 'backtest' ? (
             <BacktestView />
+          ) : currentPage === 'execution-hub' ? (
+            <ExecutionHubView />
           ) : currentPage === 'research' ? (
             <ResearchView />
           ) : null}
@@ -467,7 +443,24 @@ export default function GoldLensApp() {
       {showOnboarding && (
         <OnboardingModal onClose={() => setShowOnboarding(false)} />
       )}
+
+      {/* ── 7. AI TRADE ADVISOR & PREDICTIVE SIZING MODAL ── */}
+      {showAdvisorModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-sm animate-fade-in">
+          <TradeAdvisorPanel
+            selectedSymbol={selectedSymbol}
+            compareSymbol={compareSymbol}
+            opportunity={bestOpportunity}
+            snapshots={snapshots}
+            isModal={true}
+            onClose={() => setShowAdvisorModal(false)}
+            onExecuteTrade={() => {
+              setShowAdvisorModal(false);
+              setCurrentPage('execution-hub');
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }
-

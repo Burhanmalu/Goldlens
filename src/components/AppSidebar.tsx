@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Hexagon, LayoutDashboard, Layers, Zap, ShieldCheck,
   TrendingUp, BookOpen, Sparkles, HelpCircle, Maximize2,
-  ChevronLeft, ChevronRight, LogOut
+  ChevronLeft, ChevronRight, LogOut, Cpu
 } from 'lucide-react';
 import { PageId } from '@/lib/types';
 
@@ -59,6 +59,7 @@ export function AppSidebar({
     { id: 'dashboard' as PageId, label: 'Dashboard', icon: LayoutDashboard },
     { id: 'markets' as PageId, label: 'Markets', icon: Layers },
     { id: 'opportunities' as PageId, label: 'Opportunities', icon: Zap, badge: '1 Hot' },
+    { id: 'execution-hub' as PageId, label: 'Execution & Quant Hub', icon: Cpu, badge: 'New' },
     { id: 'analysis' as PageId, label: 'Analysis & Alpha Audit', icon: ShieldCheck },
     { id: 'backtest' as PageId, label: 'Backtest Station', icon: TrendingUp },
     { id: 'research' as PageId, label: 'Research Whitepaper', icon: BookOpen },

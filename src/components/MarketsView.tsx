@@ -21,9 +21,9 @@ export function MarketsView({
 
   const marketRows = CONTRACT_LIST.map((spec) => {
     const snap = snapshots.find((s) => s.symbol === spec.symbol) || {
-      lastPrice: 128420,
-      normalizedPrice: 12842,
-      change: 0.42,
+      lastPrice: 149921,
+      normalizedPrice: 15067.44,
+      change: 1.07,
       volume: 48000,
       openInterest: 24000,
     };
@@ -79,8 +79,8 @@ export function MarketsView({
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
           <div className="p-3 sm:p-4 bg-panel rounded-xl border border-border">
             <span className="text-[10px] text-muted uppercase block">BENCHMARK FINE GOLD</span>
-            <div className="text-base sm:text-xl font-black text-gold mt-1">₹12,842.10/g</div>
-            <span className="text-[10px] text-buy block mt-0.5">+0.42% (24h)</span>
+            <div className="text-base sm:text-xl font-black text-gold mt-1">₹15,067.44/g</div>
+            <span className="text-[10px] text-buy block mt-0.5">+1.07% (24h)</span>
           </div>
 
           <div className="p-3 sm:p-4 bg-panel rounded-xl border border-border">

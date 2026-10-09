@@ -14,6 +14,12 @@ export interface ContractSpec {
   lotValue: string;
   launchDate: string;
   color: string;
+  expiryRule?: string;       // e.g., "5th of expiry month" or "Last trading day"
+  deliveryUnit?: string;     // e.g., "100g Bar", "10g Coin/Bar"
+  basisCenter?: string;      // "Ahmedabad"
+  deliveryCenters?: string[]; // ["Ahmedabad", "Mumbai", "Delhi", "Chennai", "Kolkata"]
+  circuitLimit?: string;     // "3% + 3% (15-min cooling)"
+  tenderPeriod?: string;     // "Staggered (Starts 5 days prior to expiry)"
 }
 
 export interface MarketDataPoint {
@@ -271,6 +277,7 @@ export type PageId =
   | 'analysis'
   | 'backtest'
   | 'research'
+  | 'execution-hub'
   | 'terminal'
   | 'overview'
   | 'relative-value'

@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import {
   ArrowRight, CheckCircle2,
-  HelpCircle, Layers, Sliders
+  HelpCircle, Layers, Sliders, Sparkles
 } from 'lucide-react';
 import { Opportunity, OrderBookState, ContractSnapshot } from '@/lib/types';
 
@@ -20,6 +20,7 @@ interface BestOpportunityCardProps {
   compareSnapshot?: ContractSnapshot;
   normDiffPercent?: string;
   onViewSpreadOnChart?: () => void;
+  onOpenAdvisor?: () => void;
 }
 
 export function BestOpportunityCard({
@@ -31,10 +32,10 @@ export function BestOpportunityCard({
   setSelectedSymbol,
   compareSymbol = 'GOLDTEN',
   setCompareSymbol,
-  selectedSnapshot,
-  compareSnapshot,
+  /* selectedSnapshot and compareSnapshot accepted but unused */
   normDiffPercent = '+0.33',
   onViewSpreadOnChart,
+  onOpenAdvisor,
 }: BestOpportunityCardProps) {
   const [activeTab, setActiveTab] = useState<'why' | 'compare' | 'depth'>('why');
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -112,14 +113,29 @@ export function BestOpportunityCard({
           </div>
         </div>
 
-        {/* View Details & Audit Button */}
-        <button
-          onClick={() => setShowDetailsModal(true)}
-          className="w-full py-2.5 bg-gold hover:bg-gold-hover text-background font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-2 shadow-md min-h-[38px] touch-manipulation mb-3"
-        >
-          <span>VIEW DETAILS & AUDIT</span>
-          <ArrowRight size={14} />
-        </button>
+        {/* Action Buttons: Advisor & View Details */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
+          {onOpenAdvisor && (
+            <button
+              onClick={onOpenAdvisor}
+              className="w-full py-2.5 bg-gold/15 hover:bg-gold/25 border border-gold/40 text-gold font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-1.5 min-h-[38px] touch-manipulation font-mono shadow-sm"
+              title="Get AI Buy/Sell Advice, Capital Sizing & Forecast"
+            >
+              <Sparkles size={14} className="text-gold" />
+              <span>AI ADVISOR</span>
+            </button>
+          )}
+
+          <button
+            onClick={() => setShowDetailsModal(true)}
+            className={`w-full py-2.5 bg-gold hover:bg-gold-hover text-background font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-md min-h-[38px] touch-manipulation ${
+              !onOpenAdvisor ? 'sm:col-span-2' : ''
+            }`}
+          >
+            <span>AUDIT SPECS</span>
+            <ArrowRight size={14} />
+          </button>
+        </div>
       </div>
 
       {/* ── BOTTOM TABBED TOOLBAR (Why | Comparator | Depth) ── */}
