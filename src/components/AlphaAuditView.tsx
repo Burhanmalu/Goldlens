@@ -124,22 +124,22 @@ export function AlphaAuditView() {
               <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
                 {steps.map((s, idx) => (
                   <button
-                    key={s.stepNumber}
+                    key={s.id}
                     onClick={() => setSelectedStep(s)}
                     className={`p-2.5 rounded-xl border text-left transition-all ${
-                      selectedStep.stepNumber === s.stepNumber
+                      selectedStep.id === s.id
                         ? 'bg-[#161A1F] text-gold border-gold/50 shadow-sm'
                         : 'bg-[#161A1F]/60 text-muted border-[#2B3139] hover:text-foreground'
                     }`}
                   >
                     <div className="text-[10px] uppercase">Step 0{idx + 1}</div>
-                    <div className="font-bold text-xs truncate mt-0.5">{s.title}</div>
+                    <div className="font-bold text-xs truncate mt-0.5">{s.name}</div>
                   </button>
                 ))}
               </div>
 
               <div className="p-4 bg-[#161A1F] rounded-xl border border-[#2B3139] space-y-2">
-                <div className="text-sm font-bold text-foreground">{selectedStep.title}</div>
+                <div className="text-sm font-bold text-foreground">{selectedStep.name}</div>
                 <div className="text-xs text-text-secondary font-sans leading-relaxed">{selectedStep.description}</div>
                 <div className="p-2.5 bg-[#11151A] rounded-lg border border-[#2B3139] text-gold font-mono text-xs">
                   {selectedStep.formula}
