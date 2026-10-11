@@ -56,7 +56,7 @@ export function TodayDecisionView({ onNavigate }: TodayDecisionViewProps) {
         <div className="flex items-center justify-between gap-4 mb-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1C222C] border border-[#303846] text-xs font-mono font-bold text-muted">
             <span className="w-2 h-2 rounded-full bg-muted" />
-            <span>TODAY'S VERDICT</span>
+            <span>TODAY&apos;S VERDICT</span>
           </div>
 
           <span className="px-3 py-1 rounded-full bg-[#2B3139]/50 text-muted border border-[#3A424D] text-xs font-mono font-bold">
@@ -84,7 +84,7 @@ export function TodayDecisionView({ onNavigate }: TodayDecisionViewProps) {
           </div>
 
           <div className="p-3.5 bg-[#0C0F14] rounded-xl border border-[#1E2530]">
-            <span className="text-[11px] font-mono text-muted block mb-1">Today's Residual Gap</span>
+            <span className="text-[11px] font-mono text-muted block mb-1">Today&apos;s Residual Gap</span>
             <span className="text-lg font-bold font-mono text-gold">
               +{decision.todays_biggest_gap_pct}%
             </span>
@@ -184,7 +184,7 @@ export function TodayDecisionView({ onNavigate }: TodayDecisionViewProps) {
       <div className="p-4 rounded-xl bg-[#0D1014] border border-[#1E2530] text-[11px] text-[#848E9C] flex items-start gap-3">
         <ShieldAlert size={16} className="text-gold flex-shrink-0 mt-0.5" />
         <p className="leading-relaxed">
-          <strong className="text-foreground">Honest Framing:</strong> GoldLens is a settlement-data analytics and decision-support product. It is NOT a live feed, NOT an execution platform, and does NOT promise profit. "No edge survives costs" is an explicitly valid outcome, ensuring traders avoid taking negative-expectation trades.
+          <strong className="text-foreground">Honest Framing:</strong> GoldLens is a settlement-data analytics and decision-support product. It is NOT a live feed, NOT an execution platform, and does NOT promise profit. &quot;No edge survives costs&quot; is an explicitly valid outcome, ensuring traders avoid taking negative-expectation trades.
         </p>
       </div>
 

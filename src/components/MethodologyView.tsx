@@ -119,7 +119,7 @@ export function MethodologyView({ onNavigate }: MethodologyViewProps) {
           onClick={() => onNavigate('today')}
           className="px-4 py-2.5 rounded-xl bg-gold hover:bg-gold-hover text-[#07090C] text-xs font-bold transition-all shadow flex items-center gap-1.5 cursor-pointer"
         >
-          <span>Return to Today's Dashboard</span>
+          <span>Return to Today&apos;s Dashboard</span>
           <ArrowRight size={14} />
         </button>
 
