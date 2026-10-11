@@ -1,0 +1,31 @@
+{
+  "as_of_date": "2026-04-03",
+  "state": "NO_TRADE",
+  "headline": "No trade today. The biggest gap is 0.07%. It costs about 0.09% to trade it. Nothing to capture.",
+  "subheadline": "Cross-contract spreads are compressed tightly inside the CTT and slippage transaction hurdle.",
+  "pair": "GOLDM-MAY26 vs GOLDTEN-MAY26",
+  "legs": [
+    {
+      "contract": "GOLDTEN-MAY26",
+      "side": "BUY",
+      "lots": 20,
+      "grams": 200
+    },
+    {
+      "contract": "GOLDM-MAY26",
+      "side": "SELL",
+      "lots": 2,
+      "grams": 200
+    }
+  ],
+  "benchmark_price_per_g": 15067.44,
+  "gap_pct": 0.07,
+  "cost_band_pct": 0.09,
+  "expected_net_pct": -0.02,
+  "expected_net_inr_per_lakh": -20,
+  "exit_rules": "Target mean reversion within 5 settlement days or exit at 1.5x friction stop-loss.",
+  "worst_case_inr_per_lakh": -420,
+  "verdict": "NO_EDGE",
+  "evidence_url": "/app/proof",
+  "sample": true
+}

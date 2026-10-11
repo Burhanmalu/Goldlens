@@ -1,0 +1,46 @@
+{
+  "as_of_date": "2026-04-03",
+  "contracts": [
+    {
+      "symbol": "GOLDM",
+      "quoted": 149921,
+      "quote_basis_g": 10,
+      "purity": 0.995,
+      "per_gram": 15067.44,
+      "diff_vs_benchmark_pct": 0.0,
+      "liquidity": "GOOD",
+      "expiry": "2026-05-05"
+    },
+    {
+      "symbol": "GOLDTEN",
+      "quoted": 150279,
+      "quote_basis_g": 10,
+      "purity": 0.999,
+      "per_gram": 15042.94,
+      "diff_vs_benchmark_pct": -0.16,
+      "liquidity": "GOOD",
+      "expiry": "2026-05-05"
+    },
+    {
+      "symbol": "GOLDGUINEA",
+      "quoted": 120671,
+      "quote_basis_g": 8,
+      "purity": 0.999,
+      "per_gram": 15099.00,
+      "diff_vs_benchmark_pct": 0.21,
+      "liquidity": "THIN",
+      "expiry": "2026-04-30"
+    },
+    {
+      "symbol": "GOLDPETAL",
+      "quoted": 15083,
+      "quote_basis_g": 1,
+      "purity": 0.999,
+      "per_gram": 15098.10,
+      "diff_vs_benchmark_pct": 0.20,
+      "liquidity": "VERY_THIN",
+      "expiry": "2026-04-30"
+    }
+  ],
+  "sample": true
+}
