@@ -306,6 +306,7 @@ export interface DecisionObject {
 // ============================================================
 
 export type PageId = 
+  | 'landing'
   | 'today'
   | 'compare'
   | 'playbooks'
