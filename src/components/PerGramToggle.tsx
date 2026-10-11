@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { CinematicVideoBackdrop } from '@/components/CinematicVideoBackdrop';
+import { CinematicAssetBackdrop } from '@/components/CinematicAssetBackdrop';
 
 export function PerGramToggle() {
   const [mode, setMode] = useState<'quoted' | 'normalized'>('quoted');
@@ -52,7 +53,8 @@ export function PerGramToggle() {
 
   return (
     <section id="problem" className="relative py-28 px-6 max-w-7xl mx-auto border-b border-border overflow-hidden">
-      <CinematicVideoBackdrop type="bullion_vault" opacity={0.4} />
+      <CinematicAssetBackdrop asset="monolith_card" opacity={0.3} parallaxSpeed={50} scaleRange={[1, 1.1]} />
+      <CinematicVideoBackdrop type="bullion_vault" opacity={0.3} />
       <div className="max-w-3xl mb-12">
         <div className="text-xs uppercase tracking-[0.12em] font-mono text-gold mb-3">
           01 — THE PROBLEM

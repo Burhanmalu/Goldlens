@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 
 import { CinematicCanvas } from '@/components/CinematicCanvas';
 import { CinematicVideoBackdrop } from '@/components/CinematicVideoBackdrop';
+import { CinematicAssetBackdrop } from '@/components/CinematicAssetBackdrop';
 
 interface ConvergeHeroProps {
   settlementDate: string;
@@ -30,9 +31,10 @@ export function ConvergeHero({ settlementDate, onOpenApp }: ConvergeHeroProps) {
 
   return (
     <section className="relative min-h-screen flex flex-col justify-between pt-28 pb-12 px-6 max-w-7xl mx-auto overflow-hidden">
-      {/* Background Volumetric Backdrops and Canvas Particles */}
-      <CinematicCanvas intensity={1.2} mode="hero" />
-      <CinematicVideoBackdrop type="molten_gold" opacity={0.35} />
+      {/* Background Cinematic Convergence Clip & Particle Shaders */}
+      <CinematicAssetBackdrop asset="hero_convergence" opacity={0.42} parallaxSpeed={80} scaleRange={[1, 1.15]} />
+      <CinematicCanvas intensity={0.9} mode="hero" />
+      <CinematicVideoBackdrop type="molten_gold" opacity={0.25} />
 
       <div className="flex flex-col items-center text-center space-y-6 pt-8 sm:pt-16 max-w-4xl mx-auto">
         {/* Eyebrow */}
