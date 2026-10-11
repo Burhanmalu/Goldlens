@@ -30,7 +30,7 @@ export function CinematicAssetBackdrop({
   const scale = useTransform(scrollYProgress, [0, 1], scaleRange);
   const y = useTransform(scrollYProgress, [0, 1], [-parallaxSpeed, parallaxSpeed]);
 
-  const assetSrc = `/assets/cinematic/${asset}.jpg`;
+  const assetSrc = `/assets/cinematic/${asset}.webp`;
 
   return (
     <div
@@ -43,8 +43,9 @@ export function CinematicAssetBackdrop({
       >
         <Image
           src={assetSrc}
-          alt="Cinematic background animation visual"
+          alt="Cinematic motion clip background"
           fill
+          unoptimized
           priority={asset === 'hero_convergence'}
           className={`object-cover object-center filter contrast-125 brightness-95 ${
             blendMode === 'screen' ? 'mix-blend-screen' : ''
