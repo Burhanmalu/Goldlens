@@ -15,11 +15,11 @@ interface CinematicAssetBackdropProps {
 
 export function CinematicAssetBackdrop({
   asset,
-  opacity = 0.35,
-  parallaxSpeed = 60,
-  scaleRange = [1, 1.12],
+  opacity = 0.65,
+  parallaxSpeed = 90,
+  scaleRange = [1, 1.18],
   className = '',
-  blendMode = 'screen',
+  blendMode = 'normal',
 }: CinematicAssetBackdropProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const { scrollYProgress } = useScroll({
@@ -47,18 +47,18 @@ export function CinematicAssetBackdrop({
           fill
           unoptimized
           priority={asset === 'hero_convergence'}
-          className={`object-cover object-center filter contrast-125 brightness-95 ${
+          className={`object-cover object-center filter contrast-110 brightness-90 ${
             blendMode === 'screen' ? 'mix-blend-screen' : ''
           }`}
         />
         {/* Subtle breathing ambient bloom */}
-        <div className="absolute inset-0 bg-radial-gradient from-gold/10 via-transparent to-transparent animate-pulse-slow pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0A0A0B]/40 to-[#0A0A0B]/80 pointer-events-none" />
       </motion.div>
 
       {/* Deep smooth vignette masks for seamless integration with #0A0A0B canvas */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0B] via-transparent to-[#0A0A0B]" />
-      <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A0B] via-transparent to-[#0A0A0B]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_40%,#0A0A0B_95%)]" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0B] via-transparent to-[#0A0A0B]/80" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A0B]/60 via-transparent to-[#0A0A0B]/60" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_30%,#0A0A0B_95%)]" />
     </div>
   );
 }

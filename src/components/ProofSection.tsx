@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { CinematicAssetBackdrop } from '@/components/CinematicAssetBackdrop';
 
 interface ProofSectionProps {
   onOpenMethod: () => void;
@@ -27,7 +28,8 @@ export function ProofSection({ onOpenMethod }: ProofSectionProps) {
   ];
 
   return (
-    <section id="proof" className="py-28 px-6 max-w-7xl mx-auto border-b border-border">
+    <section id="proof" className="relative py-28 px-6 max-w-7xl mx-auto border-b border-border overflow-hidden">
+      <CinematicAssetBackdrop asset="monolith_card" opacity={0.35} parallaxSpeed={90} scaleRange={[1, 1.15]} />
       <div className="max-w-3xl mb-12">
         <div className="text-xs uppercase tracking-[0.12em] font-mono text-gold mb-3">
           05 — PROOF

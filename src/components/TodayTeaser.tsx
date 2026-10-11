@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 
+import { CinematicAssetBackdrop } from '@/components/CinematicAssetBackdrop';
+
 export function TodayTeaser() {
   const [activeTab, setActiveTab] = useState<'no_trade' | 'watching' | 'opportunity'>('no_trade');
 
@@ -38,7 +40,8 @@ export function TodayTeaser() {
   const curr = states[activeTab];
 
   return (
-    <section className="py-28 px-6 max-w-7xl mx-auto border-b border-border">
+    <section className="relative py-28 px-6 max-w-7xl mx-auto border-b border-border overflow-hidden">
+      <CinematicAssetBackdrop asset="hero_convergence" opacity={0.35} parallaxSpeed={80} scaleRange={[1, 1.15]} />
       <div className="max-w-3xl mb-12">
         <div className="text-xs uppercase tracking-[0.12em] font-mono text-gold mb-3">
           03 — THE ANSWER FIRST
