@@ -55,14 +55,13 @@ export function AppSidebar({
     return () => clearInterval(interval);
   }, []);
 
-  const navItems = [
-    { id: 'dashboard' as PageId, label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'markets' as PageId, label: 'Markets', icon: Layers },
-    { id: 'opportunities' as PageId, label: 'Opportunities', icon: Zap, badge: '1 Hot' },
-    { id: 'execution-hub' as PageId, label: 'Execution & Quant Hub', icon: Cpu, badge: 'New' },
-    { id: 'analysis' as PageId, label: 'Analysis & Alpha Audit', icon: ShieldCheck },
-    { id: 'backtest' as PageId, label: 'Backtest Station', icon: TrendingUp },
-    { id: 'research' as PageId, label: 'Research Whitepaper', icon: BookOpen },
+  const navItems: { id: PageId; label: string; icon: any; badge?: string }[] = [
+    { id: 'today' as PageId, label: 'Today (Decision)', icon: LayoutDashboard },
+    { id: 'compare' as PageId, label: 'Compare (Per Gram)', icon: Layers },
+    { id: 'playbooks' as PageId, label: 'Playbooks & Sizing', icon: Zap },
+    { id: 'proof' as PageId, label: 'Proof & Audit', icon: ShieldCheck },
+    { id: 'method' as PageId, label: 'Methodology & Terms', icon: BookOpen },
+    { id: 'markets' as PageId, label: 'Full Settlement Data', icon: TrendingUp },
   ];
 
   const handleSelectPage = (id: PageId) => {
