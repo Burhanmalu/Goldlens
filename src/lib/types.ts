@@ -266,11 +266,51 @@ export interface ResearchSettings {
   kMultiplier: number;       // signal threshold multiplier
 }
 
+export type VerdictStatus = 'EDGE_SURVIVES' | 'GROSS_ONLY' | 'NO_EDGE' | 'INSUFFICIENT_DATA';
+
+export interface DecisionLeg {
+  contract: string;
+  side: 'BUY' | 'SELL';
+  lots: number;
+  grams: number;
+}
+
+export interface DecisionObject {
+  as_of_date: string;
+  source_file_hash: string;
+  code_version: string;
+  state: 'NO_TRADE' | 'WATCHING' | 'OPPORTUNITY';
+  headline: string;
+  subheadline: string;
+  pair: string;
+  benchmark_price_per_g: number;
+  todays_biggest_gap_pct: number;
+  cost_band_pct: number;
+  expected_net_pct: number;
+  expected_net_inr_per_lakh: number;
+  legs: DecisionLeg[];
+  exit_rules: {
+    converge: boolean;
+    max_days: number;
+    stop_pct: number;
+    hard_exit_before_expiry_days: number;
+  };
+  worst_case_inr_per_lakh: number;
+  verdict: VerdictStatus;
+  evidence_url: string;
+  unmatched_grams: number;
+}
+
 // ============================================================
 // Navigation Types
 // ============================================================
 
 export type PageId = 
+  | 'today'
+  | 'compare'
+  | 'playbooks'
+  | 'proof'
+  | 'method'
   | 'dashboard'
   | 'markets'
   | 'opportunities'

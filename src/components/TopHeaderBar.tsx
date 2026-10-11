@@ -20,6 +20,7 @@ interface TopHeaderBarProps {
   lastUpdated?: string;
   onManualRefresh?: () => void;
   isLoading?: boolean;
+  onOpenAiAssistant?: () => void;
 }
 
 export function TopHeaderBar({
@@ -38,6 +39,7 @@ export function TopHeaderBar({
   lastUpdated = '',
   onManualRefresh,
   isLoading = false,
+  onOpenAiAssistant,
 }: TopHeaderBarProps) {
   return (
     <div className="flex flex-col flex-shrink-0 z-20 select-none w-full">
@@ -53,9 +55,9 @@ export function TopHeaderBar({
             <Menu size={20} className="text-foreground" />
           </button>
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#161A1F] border border-[#2B3139]">
-            <span className={`w-2 h-2 rounded-full ${isLiveOnline ? 'bg-buy animate-pulse' : 'bg-gold'}`} />
+            <span className="w-2 h-2 rounded-full bg-gold" />
             <span className="text-[10px] font-mono font-bold text-foreground">
-              {isLiveOnline ? 'LIVE' : 'SYNC'}
+              MCX SETTLEMENT
             </span>
           </div>
         </div>
@@ -73,31 +75,15 @@ export function TopHeaderBar({
           </span>
         </button>
 
-        {/* Right: Refresh & Profile */}
+        {/* Right: AI Assistant & Profile */}
         <div className="flex items-center gap-1.5">
-          {onManualRefresh && (
+          {onOpenAiAssistant && (
             <button
-              onClick={onManualRefresh}
-              className={`p-1.5 text-text-secondary hover:text-gold hover:bg-[#161A1F] rounded-lg border border-[#2B3139] transition-all ${
-                isLoading ? 'animate-spin text-gold' : ''
-              }`}
-              title="Refresh Live Data"
+              onClick={onOpenAiAssistant}
+              className="px-2 py-1 rounded-lg bg-gold/15 text-gold border border-gold/30 flex items-center gap-1 text-[11px] font-bold"
             >
-              <RefreshCw size={13} />
-            </button>
-          )}
-
-          {onToggleDemo && (
-            <button
-              onClick={onToggleDemo}
-              className={`p-1.5 rounded-lg text-xs font-bold transition-all min-h-[36px] flex items-center gap-1 ${
-                demoMode
-                  ? 'bg-gold/20 text-gold border border-gold/40'
-                  : 'text-text-secondary hover:text-foreground'
-              }`}
-              title={demoMode ? 'Exit Demo' : 'Start Demo'}
-            >
-              <Sparkles size={14} className={demoMode ? 'text-gold' : 'text-text-secondary'} />
+              <Sparkles size={12} />
+              <span>AI</span>
             </button>
           )}
 
@@ -115,49 +101,43 @@ export function TopHeaderBar({
 
       {/* ── DESKTOP TOP BAR (1024px+) ── */}
       <header className="hidden lg:flex h-12 bg-[#11151A] border-b border-[#2B3139] items-center justify-between px-5 text-xs">
-        {/* Left: Terminal Header Title & Live Status */}
+        {/* Left: Terminal Header Title & Honest Settlement Status */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-buy animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-gold" />
             <span className="font-mono font-bold text-xs text-foreground uppercase tracking-wider">
-              MCX GOLD QUANT TERMINAL
+              MCX GOLD SETTLEMENT ANALYTICS
             </span>
           </div>
           <span className="text-muted font-mono text-xs">•</span>
           <span className="text-text-secondary font-mono text-xs">
-            Multi-Contract Arbitrage Engine
+            Based on MCX settlement of 09 Oct 2026
           </span>
         </div>
 
-        {/* Right: Live Feed Status, Refresh, Notifications & User Desk */}
+        {/* Right: Settlement Data Badge, AI Quant Assistant & User Desk */}
         <div className="flex items-center gap-3">
-          {/* Live Data Badge */}
+          {/* Settlement Badge */}
           <div
             className="flex items-center gap-2 px-3 py-1 rounded-xl bg-[#161A1F] border border-[#2B3139] font-mono text-xs"
-            title={`Source: ${dataSource}${lastUpdated ? ` • Last sync: ${lastUpdated}` : ''}`}
+            title="Data source: Official MCX Bhavcopy End-of-Day Settlement"
           >
-            <span className="relative flex h-2 w-2">
-              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${isLiveOnline ? 'bg-buy' : 'bg-gold'} opacity-75`} />
-              <span className={`relative inline-flex rounded-full h-2 w-2 ${isLiveOnline ? 'bg-buy' : 'bg-gold'}`} />
+            <span className="w-2 h-2 rounded-full bg-buy" />
+            <span className="text-foreground font-semibold">
+              SETTLEMENT DATA (09-OCT-2026)
             </span>
-            <span className="text-foreground font-semibold flex items-center gap-1">
-              {isLiveOnline ? 'REAL-TIME LIVE' : 'SYNCED FEED'}
-            </span>
-            {lastUpdated && (
-              <span className="text-[11px] text-muted hidden xl:inline">
-                {lastUpdated}
-              </span>
-            )}
-            {onManualRefresh && (
-              <button
-                onClick={onManualRefresh}
-                className={`ml-1 text-muted hover:text-gold transition-colors ${isLoading ? 'animate-spin text-gold' : ''}`}
-                title="Force Refresh Data Now"
-              >
-                <RefreshCw size={12} />
-              </button>
-            )}
           </div>
+
+          {/* AI Quant Assistant Trigger Button */}
+          {onOpenAiAssistant && (
+            <button
+              onClick={onOpenAiAssistant}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gold/15 hover:bg-gold/25 text-gold border border-gold/40 text-xs font-bold transition-all shadow-sm cursor-pointer"
+            >
+              <Sparkles size={13} className="text-gold" />
+              <span>AI Quant Analyst</span>
+            </button>
+          )}
 
           <button
             className="relative p-2 text-text-secondary hover:text-foreground hover:bg-[#161A1F] rounded-xl border border-[#2B3139] transition-colors"
