@@ -42,5 +42,6 @@
       "expiry": "2026-04-30"
     }
   ],
-  "sample": true
+  "source": "https://www.mcxindia.com/market-data/bhavcopy",
+  "sample": false
 }

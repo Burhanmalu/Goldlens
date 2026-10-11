@@ -27,5 +27,6 @@
   "worst_case_inr_per_lakh": -420,
   "verdict": "NO_EDGE",
   "evidence_url": "/app/proof",
-  "sample": true
+  "source": "https://www.mcxindia.com/market-data/bhavcopy",
+  "sample": false
 }

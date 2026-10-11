@@ -26,13 +26,7 @@ export function MarqueeStrip({ settlementDate }: MarqueeStripProps) {
 
   return (
     <div className="w-full border-y border-border py-3 bg-surface/50 overflow-hidden relative flex items-center marquee-container">
-      <div className="absolute left-4 z-10 hidden sm:block">
-        <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-caution/15 text-caution font-medium border border-caution/30 shadow-sm">
-          Sample data
-        </span>
-      </div>
-
-      <div className="flex w-max animate-marquee gap-8 pl-8 select-none">
+      <div className="flex w-max animate-marquee gap-8 select-none">
         {content}
         {content}
         {content}

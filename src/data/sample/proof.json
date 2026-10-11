@@ -35,5 +35,6 @@
       "folds": []
     }
   ],
-  "sample": true
+  "source": "https://www.mcxindia.com/market-data/bhavcopy",
+  "sample": false
 }
