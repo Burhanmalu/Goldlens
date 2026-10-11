@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { CinematicVideoBackdrop } from '@/components/CinematicVideoBackdrop';
 
 export function PerGramToggle() {
   const [mode, setMode] = useState<'quoted' | 'normalized'>('quoted');
@@ -50,7 +51,8 @@ export function PerGramToggle() {
   const maxNormalized = 15200;
 
   return (
-    <section id="problem" className="py-28 px-6 max-w-7xl mx-auto border-b border-border">
+    <section id="problem" className="relative py-28 px-6 max-w-7xl mx-auto border-b border-border overflow-hidden">
+      <CinematicVideoBackdrop type="bullion_vault" opacity={0.4} />
       <div className="max-w-3xl mb-12">
         <div className="text-xs uppercase tracking-[0.12em] font-mono text-gold mb-3">
           01 — THE PROBLEM

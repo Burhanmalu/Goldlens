@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { CinematicCanvas } from '@/components/CinematicCanvas';
+import { CinematicVideoBackdrop } from '@/components/CinematicVideoBackdrop';
 
 export function StickySteps() {
   const [activeStep, setActiveStep] = useState<number>(0);
@@ -38,7 +40,9 @@ export function StickySteps() {
   ];
 
   return (
-    <section id="how-it-works" className="py-28 px-6 max-w-7xl mx-auto border-b border-border">
+    <section id="how-it-works" className="relative py-28 px-6 max-w-7xl mx-auto border-b border-border overflow-hidden">
+      <CinematicCanvas intensity={0.8} mode="waves" />
+      <CinematicVideoBackdrop type="geometry" opacity={0.25} />
       <div className="max-w-3xl mb-12">
         <div className="text-xs uppercase tracking-[0.12em] font-mono text-gold mb-3">
           02 — HOW IT WORKS

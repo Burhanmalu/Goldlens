@@ -11,6 +11,8 @@ import { ProofSection } from '@/components/ProofSection';
 import { FaqAccordion } from '@/components/FaqAccordion';
 import { Footer } from '@/components/Footer';
 import { AuthSheet } from '@/components/AuthSheet';
+import { SmoothScrollProvider } from '@/components/SmoothScrollProvider';
+import { CinematicVideoBackdrop } from '@/components/CinematicVideoBackdrop';
 
 interface LandingViewProps {
   settlementDate: string;
@@ -30,9 +32,10 @@ export function LandingView({
   const [legalModal, setLegalModal] = useState<'terms' | 'privacy' | null>(null);
 
   return (
-    <div className="relative min-h-screen bg-[#0A0A0B] text-[#F5F2EA] overflow-x-hidden selection:bg-gold/20 selection:text-gold">
-      {/* 0. STICKY NAV */}
-      <nav className="fixed top-0 left-0 right-0 z-40 px-6 py-4 transition-all glass-panel border-b border-border">
+    <SmoothScrollProvider>
+      <div className="relative min-h-screen bg-[#0A0A0B] text-[#F5F2EA] overflow-x-hidden selection:bg-gold/20 selection:text-gold">
+        {/* 0. STICKY NAV */}
+        <nav className="fixed top-0 left-0 right-0 z-40 px-6 py-4 transition-all glass-panel border-b border-border">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           {/* Brand Wordmark */}
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
@@ -102,7 +105,8 @@ export function LandingView({
       <FaqAccordion />
 
       {/* 9. FINAL CTA */}
-      <section className="py-28 px-6 text-center max-w-4xl mx-auto space-y-6">
+      <section className="relative py-28 px-6 text-center max-w-4xl mx-auto space-y-6 overflow-hidden">
+        <CinematicVideoBackdrop type="molten_gold" opacity={0.3} />
         <h2 className="text-4xl sm:text-6xl font-display font-black uppercase tracking-tight text-text-primary">
           Know the price. Skip the noise.
         </h2>
@@ -158,6 +162,7 @@ export function LandingView({
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </SmoothScrollProvider>
   );
 }

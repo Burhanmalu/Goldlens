@@ -3,6 +3,9 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 
+import { CinematicCanvas } from '@/components/CinematicCanvas';
+import { CinematicVideoBackdrop } from '@/components/CinematicVideoBackdrop';
+
 interface ConvergeHeroProps {
   settlementDate: string;
   onOpenApp: () => void;
@@ -27,10 +30,9 @@ export function ConvergeHero({ settlementDate, onOpenApp }: ConvergeHeroProps) {
 
   return (
     <section className="relative min-h-screen flex flex-col justify-between pt-28 pb-12 px-6 max-w-7xl mx-auto overflow-hidden">
-      {/* Background Vignette and Code-driven lines */}
-      <div className="absolute inset-0 pointer-events-none -z-10 flex items-center justify-center">
-        <div className="w-[120%] h-[120%] bg-[radial-gradient(circle_at_center,rgba(214,178,106,0.04)_0%,transparent_70%)]" />
-      </div>
+      {/* Background Volumetric Backdrops and Canvas Particles */}
+      <CinematicCanvas intensity={1.2} mode="hero" />
+      <CinematicVideoBackdrop type="molten_gold" opacity={0.35} />
 
       <div className="flex flex-col items-center text-center space-y-6 pt-8 sm:pt-16 max-w-4xl mx-auto">
         {/* Eyebrow */}
