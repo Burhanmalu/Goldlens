@@ -31,18 +31,24 @@ import { InteractiveDemoGuide } from '@/components/InteractiveDemoGuide';
 import { OnboardingModal } from '@/components/OnboardingModal';
 import { LoginPage } from '@/components/LoginPage';
 import { TradeAdvisorPanel } from '@/components/TradeAdvisorPanel';
+import { TodayDecisionView } from '@/components/TodayDecisionView';
+import { CompareContractsView } from '@/components/CompareContractsView';
+import { PlaybooksView } from '@/components/PlaybooksView';
+import { ProofAndAuditView } from '@/components/ProofAndAuditView';
+import { MethodologyView } from '@/components/MethodologyView';
+import { QuantAssistantDrawer } from '@/components/QuantAssistantDrawer';
 
 export default function GoldLensApp() {
-  // Authentication State (Login page opens first by default)
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  // Authentication State: Open straight to the product (D14), optional login toggle
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
   const [currentUser, setCurrentUser] = useState<{ email: string; deskId: string; role: string }>({
     email: 'desk.alpha@goldlens.quant',
     deskId: 'QUANT_DESK_ALPHA',
     role: 'Senior Arbitrage Quant',
   });
 
-  // Navigation & Active States
-  const [currentPage, setCurrentPage] = useState<PageId>('dashboard');
+  // Navigation & Active States: Default to decision-first TODAY screen (B3 & B4)
+  const [currentPage, setCurrentPage] = useState<PageId>('today');
   const [selectedSymbol, setSelectedSymbol] = useState<string>('GOLDM');
   const [compareSymbol, setCompareSymbol] = useState<string>('GOLDTEN');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -70,6 +76,7 @@ export default function GoldLensApp() {
   const [demoStep, setDemoStep] = useState(0);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showAdvisorModal, setShowAdvisorModal] = useState(false);
+  const [showAiDrawer, setShowAiDrawer] = useState(false);
 
   // Base Data
   const baseMockData = useMemo(() => getMockData(), []);
@@ -230,6 +237,7 @@ export default function GoldLensApp() {
           lastUpdated={liveMarket.lastUpdated}
           onManualRefresh={liveMarket.refetch}
           isLoading={liveMarket.isLoading}
+          onOpenAiAssistant={() => setShowAiDrawer(true)}
         />
 
         {/* Dynamic Route View (Scrollable with mobile bottom bar padding) */}
@@ -369,6 +377,26 @@ export default function GoldLensApp() {
                 onOpenOnboarding={() => setShowOnboarding(true)}
               />
             </div>
+          ) : currentPage === 'today' ? (
+            <div className="p-4 sm:p-6">
+              <TodayDecisionView onNavigate={(p) => setCurrentPage(p)} />
+            </div>
+          ) : currentPage === 'compare' ? (
+            <div className="p-4 sm:p-6">
+              <CompareContractsView onNavigate={(p) => setCurrentPage(p)} />
+            </div>
+          ) : currentPage === 'playbooks' ? (
+            <div className="p-4 sm:p-6">
+              <PlaybooksView onNavigate={(p) => setCurrentPage(p)} />
+            </div>
+          ) : currentPage === 'proof' ? (
+            <div className="p-4 sm:p-6">
+              <ProofAndAuditView onNavigate={(p) => setCurrentPage(p)} />
+            </div>
+          ) : currentPage === 'method' ? (
+            <div className="p-4 sm:p-6">
+              <MethodologyView onNavigate={(p) => setCurrentPage(p)} />
+            </div>
           ) : currentPage === 'markets' ? (
             <MarketsView
               snapshots={snapshots}
@@ -462,6 +490,12 @@ export default function GoldLensApp() {
           />
         </div>
       )}
+
+      {/* ── 8. QUANT AI DECISION-SUPPORT DRAWER ── */}
+      <QuantAssistantDrawer
+        isOpen={showAiDrawer}
+        onClose={() => setShowAiDrawer(false)}
+      />
     </div>
   );
 }

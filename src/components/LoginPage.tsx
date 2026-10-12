@@ -1,13 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Hexagon, Lock, Mail, Eye, EyeOff,
   ArrowRight, Sparkles, CheckCircle2, AlertCircle,
-  Terminal, Zap, Shield, KeyRound,
+  Terminal, Shield, KeyRound,
   X, Check, Building2, User, RefreshCw,
-  TrendingUp, Radio, Cpu, Activity,
-  LockKeyhole
+  TrendingUp, Cpu
 } from 'lucide-react';
 
 interface LoginPageProps {
@@ -39,18 +38,6 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
   const [reqFullName, setReqFullName] = useState('');
   const [reqInstitution, setReqInstitution] = useState('');
   const [reqEmail, setReqEmail] = useState('');
-
-  // Live Simulated Clock
-  const [timeString, setTimeString] = useState('');
-  useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      setTimeString(now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' IST');
-    };
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
-    return () => clearInterval(interval);
-  }, []);
 
   // Handle Standard Institutional Login
   const handleInstitutionalSubmit = (e: React.FormEvent) => {
@@ -242,8 +229,8 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
         </svg>
       </div>
 
-      {/* ── TOP LIVE TELEMETRY HEADER ── */}
-      <header className="relative z-10 w-full border-b border-[#21262D]/90 bg-[#0A0D11]/90 backdrop-blur-md px-4 sm:px-8 py-2.5 flex items-center justify-between">
+      {/* ── TOP HEADER ── */}
+      <header className="relative z-10 w-full border-b border-[#21262D]/90 bg-[#0A0D11]/90 backdrop-blur-md px-4 sm:px-8 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#F0B90B] via-[#D4AF37] to-[#996515] flex items-center justify-center text-[#07090C] font-black shadow-md shadow-[#F0B90B]/20">
             <Hexagon size={18} className="fill-[#07090C] stroke-[#07090C]" />
@@ -258,25 +245,6 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
               </span>
             </div>
             <p className="text-[10px] font-mono text-muted hidden md:block">MCX Multi-Contract Arbitrage & Carry Execution</p>
-          </div>
-        </div>
-
-        {/* Header Telemetry Status */}
-        <div className="flex items-center gap-3 sm:gap-5 font-mono text-xs">
-          <div className="hidden lg:flex items-center gap-1.5 text-muted text-[11px]">
-            <Radio size={12} className="text-gold" />
-            <span>TIME: <strong className="text-foreground">{timeString || '16:05:00 IST'}</strong></span>
-          </div>
-
-          <div className="flex items-center gap-1.5 text-buy bg-buy/10 px-2.5 py-1 rounded-full border border-buy/25 text-[11px]">
-            <span className="w-2 h-2 rounded-full bg-buy animate-pulse" />
-            <span className="text-muted hidden sm:inline">FEED:</span>
-            <span className="font-bold">MCX LIVE (0.012ms)</span>
-          </div>
-
-          <div className="hidden md:flex items-center gap-1.5 text-gold bg-gold/10 px-2.5 py-1 rounded-full border border-gold/30 text-[11px] font-bold">
-            <Zap size={12} />
-            <span>DISLOCATION ACTIVE (+2.41σ)</span>
           </div>
         </div>
       </header>
@@ -316,11 +284,11 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
                   <span>DISLOCATION</span>
                   <span className="w-1.5 h-1.5 rounded-full bg-buy animate-pulse" />
                 </div>
-                <div className="text-xl font-mono font-bold text-buy flex items-baseline gap-1">
-                  <span>+2.41σ</span>
+                <div className="text-sm font-mono font-bold text-buy flex items-baseline gap-1">
+                  <span>ACTIVE SCAN</span>
                 </div>
                 <div className="text-[10px] text-[#848E9C] font-mono mt-1">
-                  GOLDM vs GOLDTEN (₹184 Edge)
+                  Cross-Contract Pair Scanner
                 </div>
               </div>
 
@@ -330,9 +298,8 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
                   <span>ANN. CARRY</span>
                   <TrendingUp size={12} className="text-gold" />
                 </div>
-                <div className="text-xl font-mono font-bold text-gold flex items-baseline gap-1">
-                  <span>11.84%</span>
-                  <span className="text-[10px] text-muted font-normal">APR</span>
+                <div className="text-sm font-mono font-bold text-gold flex items-baseline gap-1">
+                  <span>MONITORED</span>
                 </div>
                 <div className="text-[10px] text-[#848E9C] font-mono mt-1">
                   Synthetic Cash & Carry Edge
@@ -345,73 +312,14 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
                   <span>LATENCY</span>
                   <Cpu size={12} className="text-blue" />
                 </div>
-                <div className="text-xl font-mono font-bold text-foreground flex items-baseline gap-1">
-                  <span>0.012</span>
-                  <span className="text-[10px] text-muted font-normal">ms</span>
+                <div className="text-sm font-mono font-bold text-foreground flex items-baseline gap-1">
+                  <span>ULTRA-LOW</span>
                 </div>
                 <div className="text-[10px] text-[#848E9C] font-mono mt-1">
-                  MCX Direct Multicast Engine
+                  Direct Multicast Feed Engine
                 </div>
               </div>
 
-            </div>
-
-            {/* Live Visual Spread Curve Preview */}
-            <div className="p-4 rounded-2xl bg-gradient-to-br from-[#10141B]/90 via-[#0D1016]/90 to-[#10141B]/90 border border-[#212833] backdrop-blur-md relative overflow-hidden">
-              <div className="flex items-center justify-between mb-3 text-xs">
-                <div className="flex items-center gap-2">
-                  <Activity size={14} className="text-gold" />
-                  <span className="font-bold text-foreground font-mono">LIVE ARBITRAGE RADAR</span>
-                </div>
-                <span className="text-[10px] font-mono text-buy bg-buy/10 px-2 py-0.5 rounded border border-buy/20">
-                  SURVIVES FRICTION (100% AUDIT)
-                </span>
-              </div>
-
-              {/* Mini SVG Radar Diagram */}
-              <div className="h-20 w-full relative flex items-end">
-                <svg className="w-full h-full" viewBox="0 0 400 80" preserveAspectRatio="none">
-                  {/* Mean Line (0σ) */}
-                  <line x1="0" y1="40" x2="400" y2="40" stroke="#2B3139" strokeWidth="1" strokeDasharray="3 3" />
-                  {/* Upper Bound (+2σ) */}
-                  <line x1="0" y1="18" x2="400" y2="18" stroke="#F6465D" strokeOpacity="0.4" strokeWidth="1" strokeDasharray="2 2" />
-                  {/* Lower Bound (-2σ) */}
-                  <line x1="0" y1="62" x2="400" y2="62" stroke="#0ECB81" strokeOpacity="0.4" strokeWidth="1" strokeDasharray="2 2" />
-
-                  {/* Dynamic Dislocation Curve */}
-                  <path
-                    d="M 0 45 Q 60 48 120 38 T 240 22 T 320 16 T 400 12"
-                    fill="none"
-                    stroke="#F0B90B"
-                    strokeWidth="2.5"
-                  />
-
-                  {/* Glow point on current dislocation */}
-                  <circle cx="395" cy="12" r="4" fill="#F0B90B" className="animate-ping" />
-                  <circle cx="395" cy="12" r="3.5" fill="#F0B90B" />
-                </svg>
-              </div>
-
-              <div className="flex items-center justify-between text-[10px] font-mono text-muted pt-2 border-t border-[#1C222B]">
-                <span>T-30m Spread Baseline</span>
-                <span className="text-gold font-bold">CURRENT: +2.41σ (ENTER LONG ARBITRAGE SPREAD)</span>
-                <span>Real-Time MCX</span>
-              </div>
-            </div>
-
-            {/* Regulatory & Institutional Badges */}
-            <div className="flex items-center gap-5 text-[11px] text-muted font-mono pt-1">
-              <span className="flex items-center gap-1.5">
-                <CheckCircle2 size={13} className="text-buy" />
-                <span>Zero Hallucination Audit Engine</span>
-              </span>
-              <span>•</span>
-              <span className="flex items-center gap-1.5">
-                <LockKeyhole size={13} className="text-gold" />
-                <span>256-Bit HSM Key Encryption</span>
-              </span>
-              <span>•</span>
-              <span>MCX Compliant</span>
             </div>
 
           </div>
@@ -514,12 +422,12 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
                       <span className="text-gold font-bold">Institutional Guest Trader</span>
                     </div>
                     <div className="flex items-center justify-between text-xs font-mono">
-                      <span className="text-muted uppercase">LIVE MARGIN</span>
-                      <span className="text-buy font-bold">₹10,00,00,000 (Simulated)</span>
+                      <span className="text-muted uppercase">TRADING MODE</span>
+                      <span className="text-buy font-bold">Risk-Free Sandbox</span>
                     </div>
                     <div className="flex items-center justify-between text-xs font-mono">
-                      <span className="text-muted uppercase">FEEDS INCLUDED</span>
-                      <span className="text-foreground">All MCX Gold Contracts + Spread Engine</span>
+                      <span className="text-muted uppercase">COVERAGE</span>
+                      <span className="text-foreground">MCX Gold Contracts + Spread Engine</span>
                     </div>
                   </div>
 
@@ -687,40 +595,6 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
         </div>
       </main>
-
-      {/* ── FOOTER LIVE MARKET TICKER STRIP ── */}
-      <footer className="relative z-10 w-full border-t border-[#21262D]/90 bg-[#0A0D11]/95 backdrop-blur-md px-4 py-2 font-mono text-[10.5px] text-muted flex flex-col sm:flex-row items-center justify-between gap-2">
-        <div className="flex items-center gap-3 sm:gap-4 overflow-x-auto no-scrollbar w-full sm:w-auto justify-center sm:justify-start">
-          <div className="flex items-center gap-1.5 whitespace-nowrap">
-            <span className="font-bold text-foreground">GOLDM:</span>
-            <span className="text-buy font-semibold">₹1,28,411 (+0.43%)</span>
-          </div>
-          <span className="text-[#2B3139]">|</span>
-          <div className="flex items-center gap-1.5 whitespace-nowrap">
-            <span className="font-bold text-foreground">GOLDTEN:</span>
-            <span className="text-buy font-semibold">₹1,29,180 (+0.38%)</span>
-          </div>
-          <span className="text-[#2B3139]">|</span>
-          <div className="flex items-center gap-1.5 whitespace-nowrap">
-            <span className="font-bold text-foreground">GOLDPETAL:</span>
-            <span className="text-buy font-semibold">₹12,890 (+0.41%)</span>
-          </div>
-          <span className="text-[#2B3139] hidden md:inline">|</span>
-          <div className="hidden md:flex items-center gap-1.5 whitespace-nowrap">
-            <span className="font-bold text-gold">SPREAD DISLOCATION:</span>
-            <span className="text-buy font-bold">+0.33% (Survives Friction)</span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3 text-[10px] text-[#848E9C] flex-shrink-0">
-          <span className="flex items-center gap-1">
-            <CheckCircle2 size={11} className="text-buy" />
-            <span>Audit Validated</span>
-          </span>
-          <span>•</span>
-          <span>MCX Regulatory Compliant</span>
-        </div>
-      </footer>
 
       {/* ── FORGOT KEY RECOVERY MODAL ── */}
       {showForgotKeyModal && (

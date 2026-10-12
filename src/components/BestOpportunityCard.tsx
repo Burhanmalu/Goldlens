@@ -101,7 +101,7 @@ export function BestOpportunityCard({
         <div className="space-y-1 mb-3 text-[11px] text-text-secondary">
           <div className="flex items-center gap-2 text-foreground font-medium">
             <CheckCircle2 size={13} className="text-buy flex-shrink-0" />
-            <span>Survives all transaction costs & STT</span>
+            <span>Survives all transaction costs & CTT (Commodities Transaction Tax)</span>
           </div>
           <div className="flex items-center gap-2 text-foreground font-medium">
             <CheckCircle2 size={13} className="text-buy flex-shrink-0" />
