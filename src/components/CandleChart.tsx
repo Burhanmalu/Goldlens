@@ -15,6 +15,8 @@ interface CandleChartProps {
   multiContractData?: Record<string, number | string>[];
   timeframe: string;
   setTimeframe: (tf: string) => void;
+  range?: string;
+  setRange?: (rg: string) => void;
   chartMode: 'candles' | 'normalized' | 'spread' | 'residual' | 'zscore' | 'line' | 'area';
   setChartMode: (mode: 'candles' | 'normalized' | 'spread' | 'residual' | 'zscore' | 'line' | 'area') => void;
   indicators: {
@@ -43,6 +45,8 @@ export function CandleChart({
   candles,
   timeframe,
   setTimeframe,
+  range = '1M',
+  setRange,
   chartMode,
   setChartMode,
   indicators,
@@ -70,6 +74,41 @@ export function CandleChart({
   const handleResetZoom = () => {
     setZoomCount(48);
     setPanOffset(0);
+  };
+
+  // Timeframes list
+  const timeframes = ['1m', '5m', '15m', '1H', '4H', '1D', '1W'];
+  const ranges = ['1M', '3M', '6M', '1Y', 'MAX'];
+
+  const handleSelectTimeframe = (tf: string) => {
+    setTimeframe(tf);
+    setPanOffset(0);
+    setHoverIndex(null);
+    if (tf === '1m' || tf === '5m') setZoomCount(36);
+    else if (tf === '15m' || tf === '1H') setZoomCount(48);
+    else setZoomCount(60);
+  };
+
+  const handleSelectRange = (rg: string) => {
+    if (setRange) setRange(rg);
+    setPanOffset(0);
+    setHoverIndex(null);
+    if (rg === '1M') {
+      setTimeframe('15m');
+      setZoomCount(48);
+    } else if (rg === '3M') {
+      setTimeframe('1H');
+      setZoomCount(54);
+    } else if (rg === '6M') {
+      setTimeframe('4H');
+      setZoomCount(60);
+    } else if (rg === '1Y') {
+      setTimeframe('1D');
+      setZoomCount(70);
+    } else if (rg === 'MAX') {
+      setTimeframe('1W');
+      setZoomCount(80);
+    }
   };
 
   // Zoom & Pan Events: Wheel on Desktop, 2-Finger Pinch on Mobile, 1-Finger Natural Scroll
@@ -143,11 +182,6 @@ export function CandleChart({
     };
   }, [candles.length]);
 
-  // Timeframes list
-  const timeframes = ['1m', '5m', '15m', '1H', '4H', '1D', '1W'];
-  const ranges = ['1M', '3M', '6M', '1Y', 'MAX'];
-  const [selectedRange, setSelectedRange] = useState('1M');
-
   // Calculate Moving Average & Bollinger Bands
   const enrichedCandles = useMemo(() => {
     if (!candles || candles.length === 0) return [];
@@ -218,6 +252,24 @@ export function CandleChart({
     return { minPrice: Math.max(0, min - padding), maxPrice: max + padding, maxVol: vMax || 1 };
   }, [visibleCandles, indicators]);
 
+  // Bottom X-Axis Time Ticks
+  const timeTicks = useMemo(() => {
+    if (!visibleCandles || visibleCandles.length === 0) return [];
+    const count = 5;
+    const ticks: string[] = [];
+    const step = Math.max(1, Math.floor((visibleCandles.length - 1) / (count - 1)));
+    for (let i = 0; i < visibleCandles.length; i += step) {
+      if (ticks.length < count && visibleCandles[i]) {
+        ticks.push(visibleCandles[i].timeStr || visibleCandles[i].time || '');
+      }
+    }
+    const lastTime = visibleCandles[visibleCandles.length - 1]?.timeStr || visibleCandles[visibleCandles.length - 1]?.time || '';
+    if (ticks.length > 0 && ticks[ticks.length - 1] !== lastTime) {
+      ticks[ticks.length - 1] = lastTime;
+    }
+    return ticks;
+  }, [visibleCandles]);
+
   // Coordinate mapping helpers (Compact height matching side card)
   const svgWidth = 900;
   const priceChartHeight = 220;
@@ -228,8 +280,8 @@ export function CandleChart({
   const candleBodyWidth = Math.max(3, candleSlotWidth * 0.65);
 
   const getY = (price: number) => {
-    const range = maxPrice - minPrice || 1;
-    return priceChartHeight - ((price - minPrice) / range) * (priceChartHeight - 26) - 13;
+    const rangeVal = maxPrice - minPrice || 1;
+    return priceChartHeight - ((price - minPrice) / rangeVal) * (priceChartHeight - 26) - 13;
   };
 
   return (
@@ -299,11 +351,11 @@ export function CandleChart({
             {timeframes.map((tf) => (
               <button
                 key={tf}
-                onClick={() => setTimeframe(tf)}
-                className={`px-1.5 sm:px-2 py-0.5 rounded text-[11px] font-mono font-bold transition-colors ${
+                onClick={() => handleSelectTimeframe(tf)}
+                className={`px-1.5 sm:px-2 py-0.5 rounded text-[11px] font-mono font-bold transition-all ${
                   timeframe === tf
-                    ? 'bg-[#11151A] text-gold border border-gold/40 shadow-sm'
-                    : 'text-text-secondary hover:text-foreground'
+                    ? 'bg-gold text-background shadow-md font-black scale-105'
+                    : 'text-text-secondary hover:text-foreground hover:bg-[#1C2128]'
                 }`}
               >
                 {tf}
@@ -316,11 +368,11 @@ export function CandleChart({
             {ranges.map((rg) => (
               <button
                 key={rg}
-                onClick={() => setSelectedRange(rg)}
-                className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold transition-colors ${
-                  selectedRange === rg
-                    ? 'bg-[#11151A] text-foreground font-bold border border-[#383F48]'
-                    : 'text-muted hover:text-text-secondary'
+                onClick={() => handleSelectRange(rg)}
+                className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold transition-all ${
+                  (range || '1M') === rg
+                    ? 'bg-[#2B3139] text-gold font-bold border border-gold/40 shadow-sm'
+                    : 'text-muted hover:text-text-secondary hover:bg-[#1C2128]'
                 }`}
               >
                 {rg}
@@ -423,8 +475,15 @@ export function CandleChart({
 
       {/* ── HOVER STATS BAR / CROSSHAIR READOUT ── */}
       <div className="h-7 bg-[#11151A] px-3 border-b border-[#2B3139]/60 flex items-center gap-3 text-[10px] sm:text-[11px] font-mono select-none overflow-x-auto no-scrollbar">
-        <span className="text-foreground font-bold">{symbol}</span>
-        <span className="text-muted">{activeCandle?.timeStr || '10:30'}</span>
+        <div className="flex items-center gap-1.5 bg-gold/15 border border-gold/40 px-1.5 py-0.5 rounded text-[10px] text-gold font-black flex-shrink-0">
+          <span>{symbol}</span>
+          <span className="text-muted">|</span>
+          <span>{timeframe}</span>
+          <span className="text-muted">•</span>
+          <span className="text-foreground">{range}</span>
+        </div>
+
+        <span className="text-muted font-semibold">{activeCandle?.timeStr || '10:30'}</span>
 
         <span className="text-muted">
           O: <span className="text-foreground font-semibold">₹{activeCandle?.open.toLocaleString('en-IN')}</span>
@@ -646,7 +705,7 @@ export function CandleChart({
             </div>
 
             {/* Volume Panel Below Price Chart */}
-            <div className="h-[46px] sm:h-[50px] border-t border-border/50 pt-0.5 relative flex-shrink-0 overflow-hidden">
+            <div className="h-[42px] sm:h-[46px] border-t border-border/50 pt-0.5 relative flex-shrink-0 overflow-hidden">
               <span className="absolute top-0.5 left-2 text-[8px] sm:text-[9px] font-mono text-muted uppercase">
                 VOLUME / OI
               </span>
@@ -667,6 +726,18 @@ export function CandleChart({
                   );
                 })}
               </svg>
+            </div>
+
+            {/* Bottom X-Axis Time / Date Ticks Bar */}
+            <div className="h-5 flex items-center justify-between px-2 text-[9px] font-mono text-text-secondary border-t border-[#2B3139]/60 select-none bg-[#11151A]/80 flex-shrink-0">
+              {timeTicks.map((tick, idx) => (
+                <span key={idx} className={idx === 0 || idx === timeTicks.length - 1 ? 'text-muted font-bold' : 'text-text-secondary'}>
+                  {tick}
+                </span>
+              ))}
+              <span className="text-gold font-bold ml-2 pl-2 border-l border-[#2B3139]">
+                {timeframe} • {range}
+              </span>
             </div>
           </div>
         )}
@@ -730,8 +801,8 @@ export function CandleChart({
               </div>
 
               {/* Multi-Line Normalized Chart SVG Canvas */}
-              <div className="flex-1 w-full min-h-0 relative bg-[#11151A] rounded-xl border border-[#2B3139] p-2 overflow-hidden">
-                <svg className="w-full h-full overflow-hidden cursor-crosshair" viewBox={`0 0 ${svgWidth} ${priceChartHeight}`} preserveAspectRatio="none">
+              <div className="flex-1 w-full min-h-0 relative bg-[#11151A] rounded-xl border border-[#2B3139] p-2 overflow-hidden flex flex-col">
+                <svg className="w-full flex-1 min-h-0 overflow-hidden cursor-crosshair" viewBox={`0 0 ${svgWidth} ${priceChartHeight}`} preserveAspectRatio="none">
                   {/* Horizontal Grid Lines */}
                   {[0.15, 0.38, 0.62, 0.85].map((ratio) => {
                     const y = priceChartHeight * ratio;
@@ -808,6 +879,13 @@ export function CandleChart({
                     );
                   })}
                 </svg>
+
+                {/* Bottom X-Axis Time Strip */}
+                <div className="h-4 flex items-center justify-between px-1 text-[8px] font-mono text-muted border-t border-[#2B3139]/40 mt-1">
+                  {timeTicks.map((tick, idx) => (
+                    <span key={idx}>{tick}</span>
+                  ))}
+                </div>
               </div>
 
               {/* Compact Bottom Summary */}
@@ -868,8 +946,8 @@ export function CandleChart({
               </div>
 
               {/* Spread and Residual Curves Canvas */}
-              <div className="flex-1 w-full min-h-0 relative bg-[#11151A] rounded-xl border border-[#2B3139] p-2 overflow-hidden">
-                <svg className="w-full h-full overflow-hidden cursor-crosshair" viewBox={`0 0 ${svgWidth} ${priceChartHeight}`} preserveAspectRatio="none">
+              <div className="flex-1 w-full min-h-0 relative bg-[#11151A] rounded-xl border border-[#2B3139] p-2 overflow-hidden flex flex-col">
+                <svg className="w-full flex-1 min-h-0 overflow-hidden cursor-crosshair" viewBox={`0 0 ${svgWidth} ${priceChartHeight}`} preserveAspectRatio="none">
                   {/* Upper Statistical Hurdle Barrier (+0.40%) */}
                   <line x1="0" y1={getSpY(0.40)} x2={plotWidth} y2={getSpY(0.40)} stroke="#F0B90B" strokeDasharray="4 3" strokeWidth="1.2" opacity="0.8" />
                   <text x={plotWidth + 6} y={getSpY(0.40) + 3} fill="#F0B90B" fontSize="9" fontWeight="bold" textAnchor="start">+0.40%</text>
@@ -938,6 +1016,13 @@ export function CandleChart({
                   {/* Latest Residual Dot */}
                   <circle cx={plotWidth} cy={getSpY(currentResidual)} r="4" fill="#3861FB" className="animate-pulse" />
                 </svg>
+
+                {/* Bottom X-Axis Time Strip */}
+                <div className="h-4 flex items-center justify-between px-1 text-[8px] font-mono text-muted border-t border-[#2B3139]/40 mt-1">
+                  {timeTicks.map((tick, idx) => (
+                    <span key={idx}>{tick}</span>
+                  ))}
+                </div>
               </div>
 
               {/* Compact Bottom Summary */}
@@ -986,8 +1071,8 @@ export function CandleChart({
               </div>
 
               {/* Z-Score Canvas */}
-              <div className="flex-1 w-full min-h-0 relative bg-[#11151A] rounded-xl border border-[#2B3139] p-2 overflow-hidden">
-                <svg className="w-full h-full overflow-hidden cursor-crosshair" viewBox={`0 0 ${svgWidth} ${priceChartHeight}`} preserveAspectRatio="none">
+              <div className="flex-1 w-full min-h-0 relative bg-[#11151A] rounded-xl border border-[#2B3139] p-2 overflow-hidden flex flex-col">
+                <svg className="w-full flex-1 min-h-0 overflow-hidden cursor-crosshair" viewBox={`0 0 ${svgWidth} ${priceChartHeight}`} preserveAspectRatio="none">
                   {/* Overbought Shading (+2σ to top) */}
                   <rect x="0" y="0" width={plotWidth} height={Math.max(0, getZY(2.0))} fill="rgba(246, 70, 93, 0.08)" />
 
@@ -1027,6 +1112,13 @@ export function CandleChart({
                   {/* Latest Z-Score Indicator Dot */}
                   <circle cx={plotWidth} cy={getZY(latestZ)} r="4" fill="#F0B90B" className="animate-pulse" />
                 </svg>
+
+                {/* Bottom X-Axis Time Strip */}
+                <div className="h-4 flex items-center justify-between px-1 text-[8px] font-mono text-muted border-t border-[#2B3139]/40 mt-1">
+                  {timeTicks.map((tick, idx) => (
+                    <span key={idx}>{tick}</span>
+                  ))}
+                </div>
               </div>
 
               {/* Compact Bottom Summary */}

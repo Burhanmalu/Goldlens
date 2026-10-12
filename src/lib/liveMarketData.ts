@@ -18,6 +18,7 @@ export interface MarketDataApiResponse {
 export function useLiveMarketData(
   selectedSymbol: string,
   timeframe: string,
+  range: string = '1M',
   autoRefreshIntervalMs: number = 4000
 ) {
   const [data, setData] = useState<MarketDataApiResponse | null>(null);
@@ -30,7 +31,7 @@ export function useLiveMarketData(
 
   const fetchLatestData = useCallback(async () => {
     try {
-      const res = await fetch(`/api/market-data?symbol=${selectedSymbol}&timeframe=${timeframe}`, {
+      const res = await fetch(`/api/market-data?symbol=${selectedSymbol}&timeframe=${timeframe}&range=${range}`, {
         cache: 'no-store',
       });
       if (!res.ok) {
@@ -50,7 +51,7 @@ export function useLiveMarketData(
     } finally {
       setIsLoading(false);
     }
-  }, [selectedSymbol, timeframe]);
+  }, [selectedSymbol, timeframe, range]);
 
   // Initial and on-change fetch
   useEffect(() => {

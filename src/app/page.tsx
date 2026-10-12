@@ -50,6 +50,7 @@ export default function GoldLensApp() {
 
   // Chart States
   const [timeframe, setTimeframe] = useState<string>('15m');
+  const [range, setRange] = useState<string>('1M');
   const [chartMode, setChartMode] = useState<'candles' | 'normalized' | 'spread' | 'residual' | 'zscore' | 'line' | 'area'>('candles');
   const [indicators, setIndicators] = useState({
     ma: true,
@@ -77,10 +78,10 @@ export default function GoldLensApp() {
   const auditStepsList = useMemo(() => getDetailedAuditSteps(), []);
 
   // Live Market Data Integration
-  const liveMarket = useLiveMarketData(selectedSymbol, timeframe, 3500);
+  const liveMarket = useLiveMarketData(selectedSymbol, timeframe, range, 3500);
 
   // Dynamic Live State
-  const [candles, setCandles] = useState<OHLCVCandle[]>(() => generateCandlestickData(selectedSymbol, timeframe));
+  const [candles, setCandles] = useState<OHLCVCandle[]>(() => generateCandlestickData(selectedSymbol, timeframe, range));
   const [orderBook, setOrderBook] = useState<OrderBookState>(() => generateOrderBook(selectedSymbol));
   const [snapshots, setSnapshots] = useState<ContractSnapshot[]>(initialSnapshots);
 
@@ -113,13 +114,11 @@ export default function GoldLensApp() {
     }
   }, [liveMarket.data]);
 
-  // Re-generate chart candles on contract or timeframe change when offline
+  // Instantly re-generate chart candles on contract, timeframe, or range change
   useEffect(() => {
-    if (!liveMarket.data) {
-      setCandles(generateCandlestickData(selectedSymbol, timeframe));
-      setOrderBook(generateOrderBook(selectedSymbol));
-    }
-  }, [selectedSymbol, timeframe, liveMarket.data]);
+    setCandles(generateCandlestickData(selectedSymbol, timeframe, range));
+    setOrderBook(generateOrderBook(selectedSymbol));
+  }, [selectedSymbol, timeframe, range]);
 
   // Dynamic Opportunity Generation based on live snapshots
   const opportunities = useMemo(() => {
@@ -256,6 +255,8 @@ export default function GoldLensApp() {
                     multiContractData={combinedSeries}
                     timeframe={timeframe}
                     setTimeframe={setTimeframe}
+                    range={range}
+                    setRange={setRange}
                     chartMode={chartMode}
                     setChartMode={setChartMode}
                     indicators={indicators}
