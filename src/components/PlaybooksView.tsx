@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import {
   SETTLEMENT_CONTRACTS,
   BENCHMARK_FINE_GOLD_PER_G,
-  MCX_SETTLEMENT_DATE,
 } from '@/lib/singleSourceOfTruth';
 import { PageId } from '@/lib/types';
 import {
@@ -12,15 +11,13 @@ import {
   ShieldCheck,
   RefreshCw,
   MinusCircle,
-  HelpCircle,
-  ArrowRight
 } from 'lucide-react';
 
 interface PlaybooksViewProps {
   onNavigate: (page: PageId) => void;
 }
 
-export function PlaybooksView({ onNavigate }: PlaybooksViewProps) {
+export function PlaybooksView({ onNavigate: _onNavigate }: PlaybooksViewProps) {
   // Calculator state: user enters grams of exposure needed
   const [targetGrams, setTargetGrams] = useState<number>(200);
 
@@ -81,7 +78,6 @@ export function PlaybooksView({ onNavigate }: PlaybooksViewProps) {
             const lotsNeeded = Math.floor(targetGrams / c.lotGrams);
             const coveredGrams = lotsNeeded * c.lotGrams;
             const unmatchedGrams = targetGrams - coveredGrams;
-            const notionalLakh = (coveredGrams * c.pricePerGramFine) / 1e5;
             const isBest = c.symbol === 'GOLDTEN';
 
             return (

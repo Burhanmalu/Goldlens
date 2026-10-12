@@ -8,9 +8,6 @@ import {
 } from '@/lib/singleSourceOfTruth';
 import { PageId } from '@/lib/types';
 import {
-  CheckCircle2,
-  XCircle,
-  AlertTriangle,
   HelpCircle,
   ChevronDown,
   ChevronUp,
@@ -228,7 +225,7 @@ export function ProofAndAuditView({ onNavigate }: ProofAndAuditViewProps) {
           onClick={() => onNavigate('today')}
           className="text-xs text-gold hover:underline font-mono cursor-pointer"
         >
-          ← Return to Today's Verdict
+          ← Return to Today&apos;s Verdict
         </button>
       </div>
 

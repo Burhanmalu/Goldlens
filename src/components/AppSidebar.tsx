@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Hexagon, LayoutDashboard, Layers, Zap, ShieldCheck,
   TrendingUp, BookOpen, Sparkles, HelpCircle, Maximize2,
-  ChevronLeft, ChevronRight, LogOut, Cpu
+  ChevronLeft, ChevronRight, LogOut, LucideIcon
 } from 'lucide-react';
 import { PageId } from '@/lib/types';
 
@@ -55,7 +55,7 @@ export function AppSidebar({
     return () => clearInterval(interval);
   }, []);
 
-  const navItems: { id: PageId; label: string; icon: any; badge?: string }[] = [
+  const navItems: { id: PageId; label: string; icon: LucideIcon; badge?: string }[] = [
     { id: 'today' as PageId, label: 'Today (Decision)', icon: LayoutDashboard },
     { id: 'compare' as PageId, label: 'Compare (Per Gram)', icon: Layers },
     { id: 'playbooks' as PageId, label: 'Playbooks & Sizing', icon: Zap },

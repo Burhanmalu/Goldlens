@@ -260,10 +260,10 @@ export function CandleChart({
     const step = Math.max(1, Math.floor((visibleCandles.length - 1) / (count - 1)));
     for (let i = 0; i < visibleCandles.length; i += step) {
       if (ticks.length < count && visibleCandles[i]) {
-        ticks.push(visibleCandles[i].timeStr || visibleCandles[i].time || '');
+        ticks.push(visibleCandles[i].timeStr || '');
       }
     }
-    const lastTime = visibleCandles[visibleCandles.length - 1]?.timeStr || visibleCandles[visibleCandles.length - 1]?.time || '';
+    const lastTime = visibleCandles[visibleCandles.length - 1]?.timeStr || '';
     if (ticks.length > 0 && ticks[ticks.length - 1] !== lastTime) {
       ticks[ticks.length - 1] = lastTime;
     }

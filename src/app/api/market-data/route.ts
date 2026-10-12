@@ -104,7 +104,7 @@ async function fetchMCXIndiaDirect(): Promise<{
         }
       }
     }
-  } catch (_e) {
+  } catch {
     // Graceful fallback to Yahoo gateway
   }
 
@@ -245,7 +245,7 @@ async function fetchYahooQuotes(timeframe: string = '15m', rangeParam: string = 
       isRealLive,
       sourceName: isRealLive ? 'MCX / Commodity Live Gateway (mcxindia.com + Proxy)' : 'MCX Benchmark Engine (Cached)',
     };
-  } catch (_err) {
+  } catch {
     return {
       goldUsd: 2785,
       usdInr: 86.8,

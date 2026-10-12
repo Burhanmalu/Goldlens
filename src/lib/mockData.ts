@@ -114,7 +114,7 @@ export function generateCandlestickData(
 ): OHLCVCandle[] {
   // Unique seed per symbol + timeframe + range
   const tfHash = (timeframe || '15m').split('').reduce((acc, c, i) => acc + c.charCodeAt(0) * Math.pow(31, i + 1), 0);
-  const rgHash = (range || '1M').split('').reduce((acc, c, i) => acc + c.charCodeAt(0) * 17, 0);
+  const rgHash = (range || '1M').split('').reduce((acc, c, _i) => acc + c.charCodeAt(0) * 17, 0);
   const rng = seededRandom(symbol.charCodeAt(0) * 8191 + tfHash * 43 + rgHash * 101);
   
   const spec = CONTRACT_REGISTRY[symbol] || CONTRACT_REGISTRY['GOLDM'];
