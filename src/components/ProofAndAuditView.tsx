@@ -8,9 +8,6 @@ import {
 } from '@/lib/singleSourceOfTruth';
 import { PageId } from '@/lib/types';
 import {
-  CheckCircle2,
-  XCircle,
-  AlertTriangle,
   HelpCircle,
   ChevronDown,
   ChevronUp,

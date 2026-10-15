@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import {
-  Sparkles,
   Bot,
   Send,
   X,
@@ -10,7 +9,6 @@ import {
   Key,
   ShieldCheck,
   RefreshCw,
-  Cpu
 } from 'lucide-react';
 import { TODAY_DECISION, BENCHMARK_FINE_GOLD_PER_G } from '@/lib/singleSourceOfTruth';
 
@@ -61,8 +59,8 @@ export function QuantAssistantDrawer({ isOpen, onClose }: QuantAssistantDrawerPr
 
       setResponse(data.analysis);
       setProvider(data.provider);
-    } catch (err: any) {
-      setError(err?.message || 'Network error occurred.');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Network error occurred.');
     } finally {
       setIsLoading(false);
     }

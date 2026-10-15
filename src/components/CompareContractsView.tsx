@@ -5,10 +5,9 @@ import {
   SETTLEMENT_CONTRACTS,
   BENCHMARK_FINE_GOLD_PER_G,
   MCX_SETTLEMENT_DATE,
-  SOURCE_FILE_HASH,
 } from '@/lib/singleSourceOfTruth';
 import { PageId } from '@/lib/types';
-import { ArrowRight, Info, AlertTriangle, Layers, Calendar, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, Info, Calendar } from 'lucide-react';
 
 interface CompareContractsViewProps {
   onNavigate: (page: PageId) => void;

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { PageId } from '@/lib/types';
-import { BookOpen, CheckCircle2, AlertTriangle, ArrowRight, ShieldCheck, Terminal } from 'lucide-react';
+import { BookOpen, AlertTriangle, ArrowRight, ShieldCheck } from 'lucide-react';
 
 interface MethodologyViewProps {
   onNavigate: (page: PageId) => void;

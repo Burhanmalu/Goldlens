@@ -104,28 +104,84 @@ export function generateMockData(): MarketDataPoint[] {
 }
 
 // ============================================================
-// Generate High-Density Candlestick Series (500+ Candles)
+// Generate High-Density Candlestick Series (Dynamically adapted to Timeframe & Range)
 // ============================================================
 
-export function generateCandlestickData(symbol: string = 'GOLDM', timeframe: string = '15m'): OHLCVCandle[] {
-  const rng = seededRandom(symbol.charCodeAt(0) * 17 + timeframe.length);
+export function generateCandlestickData(
+  symbol: string = 'GOLDM',
+  timeframe: string = '15m',
+  range: string = '1M'
+): OHLCVCandle[] {
+  // Unique seed per symbol + timeframe + range
+  const tfHash = (timeframe || '15m').split('').reduce((acc, c, i) => acc + c.charCodeAt(0) * Math.pow(31, i + 1), 0);
+  const rgHash = (range || '1M').split('').reduce((acc, c, _i) => acc + c.charCodeAt(0) * 17, 0);
+  const rng = seededRandom(symbol.charCodeAt(0) * 8191 + tfHash * 43 + rgHash * 101);
+  
   const spec = CONTRACT_REGISTRY[symbol] || CONTRACT_REGISTRY['GOLDM'];
   const candles: OHLCVCandle[] = [];
   
-  const count = 300;
-  const now = Date.now();
-  
   let stepMs = 15 * 60 * 1000;
-  if (timeframe === '1m') stepMs = 60 * 1000;
-  if (timeframe === '5m') stepMs = 5 * 60 * 1000;
-  if (timeframe === '15m') stepMs = 15 * 60 * 1000;
-  if (timeframe === '1H') stepMs = 60 * 60 * 1000;
-  if (timeframe === '4H') stepMs = 4 * 60 * 60 * 1000;
-  if (timeframe === '1D') stepMs = 24 * 60 * 60 * 1000;
-  if (timeframe === '1W') stepMs = 7 * 24 * 60 * 60 * 1000;
+  let count = 160;
+  let vol = 0.0018;
+  let noiseLevel = 0.0018;
+
+  switch (timeframe) {
+    case '1m':
+      stepMs = 60 * 1000;
+      count = 120;
+      vol = 0.0004;
+      noiseLevel = 0.0006;
+      break;
+    case '5m':
+      stepMs = 5 * 60 * 1000;
+      count = 140;
+      vol = 0.0008;
+      noiseLevel = 0.0011;
+      break;
+    case '15m':
+      stepMs = 15 * 60 * 1000;
+      count = 160;
+      vol = 0.0016;
+      noiseLevel = 0.0018;
+      break;
+    case '1H':
+      stepMs = 60 * 60 * 1000;
+      count = 180;
+      vol = 0.0035;
+      noiseLevel = 0.0032;
+      break;
+    case '4H':
+      stepMs = 4 * 60 * 60 * 1000;
+      count = 180;
+      vol = 0.0075;
+      noiseLevel = 0.0060;
+      break;
+    case '1D':
+      stepMs = 24 * 60 * 60 * 1000;
+      count = 200;
+      vol = 0.0150;
+      noiseLevel = 0.0110;
+      break;
+    case '1W':
+      stepMs = 7 * 24 * 60 * 60 * 1000;
+      count = 200;
+      vol = 0.0320;
+      noiseLevel = 0.0220;
+      break;
+    default:
+      stepMs = 15 * 60 * 1000;
+      count = 160;
+      vol = 0.0016;
+      noiseLevel = 0.0018;
+      break;
+  }
   
+  const now = Date.now();
   const startTime = now - count * stepMs;
-  let currentFineGold = BASE_FINE_GOLD_PRICE;
+  
+  // Starting baseline gold price with structural trend cycle
+  const baseDrift = Math.sin(tfHash % 7) * 450;
+  let currentFineGold = BASE_FINE_GOLD_PRICE + baseDrift;
   
   // Historical spread buffer for Z-Score
   const spreadHistory: number[] = [];
@@ -133,20 +189,30 @@ export function generateCandlestickData(symbol: string = 'GOLDM', timeframe: str
   for (let i = 0; i < count; i++) {
     const ts = startTime + i * stepMs;
     const d = new Date(ts);
-    const timeStr = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false });
+    
+    // Time & Date format per timeframe
+    let timeStr = '';
+    if (timeframe === '1m' || timeframe === '5m' || timeframe === '15m') {
+      timeStr = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false });
+    } else if (timeframe === '1H' || timeframe === '4H') {
+      timeStr = `${d.getDate()} ${d.toLocaleString('en-US', { month: 'short' })} ${d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false })}`;
+    } else {
+      timeStr = `${d.getDate()} ${d.toLocaleString('en-US', { month: 'short' })} ${d.getFullYear()}`;
+    }
     const dateStr = d.toISOString().split('T')[0];
     
-    // Intraday micro-volatility
-    const vol = timeframe === '1m' || timeframe === '5m' ? 0.0008 : 0.0025;
-    const delta = (rng() - 0.495) * vol;
-    currentFineGold = currentFineGold * (1 + delta);
+    // Wave & Random Walk Delta
+    const wave = Math.sin((i / count) * Math.PI * 4 + (tfHash % 5)) * (vol * 0.7);
+    const noise = (rng() - 0.492) * vol;
+    const delta = wave + noise;
+    currentFineGold = Math.max(12000, currentFineGold * (1 + delta));
     
     const fairRaw = Math.round(currentFineGold * spec.quoteBasis * spec.purityFactor);
-    const candleNoise = (rng() - 0.5) * (fairRaw * 0.0015);
+    const candleNoise = (rng() - 0.5) * (fairRaw * noiseLevel);
     
     const open = Math.round(fairRaw + candleNoise);
-    const high = Math.round(Math.max(open, open + rng() * fairRaw * 0.0025));
-    const low = Math.round(Math.min(open, open - rng() * fairRaw * 0.0025));
+    const high = Math.round(Math.max(open, open + rng() * fairRaw * (noiseLevel * 1.5)));
+    const low = Math.round(Math.min(open, open - rng() * fairRaw * (noiseLevel * 1.5)));
     const close = Math.round(low + rng() * (high - low));
     
     const normalizedPrice = Math.round(((close / spec.quoteBasis) / spec.purityFactor) * 100) / 100;
@@ -154,25 +220,25 @@ export function generateCandlestickData(symbol: string = 'GOLDM', timeframe: str
     const spread = Math.round(((normalizedPrice - theoreticalBasket) / theoreticalBasket) * 10000) / 100;
     spreadHistory.push(spread);
     
-    const carry = Math.round((6.5 / 100 * (18 / 365)) * 10000) / 100; // ~0.09%
+    const carry = Math.round((6.5 / 100 * (18 / 365)) * 10000) / 100;
     const residual = Math.round((spread - carry) * 100) / 100;
     
     // Dynamic rolling Z-score
     let zScore = 0;
-    if (spreadHistory.length > 20) {
-      const slice = spreadHistory.slice(-40);
+    if (spreadHistory.length > 10) {
+      const slice = spreadHistory.slice(-30);
       const mean = slice.reduce((a, b) => a + b, 0) / slice.length;
-      const variance = slice.reduce((a, b) => a + (b - mean) ** 2, 0) / (slice.length - 1);
+      const variance = slice.reduce((a, b) => a + (b - mean) ** 2, 0) / Math.max(1, slice.length - 1);
       const stdDev = Math.sqrt(variance) || 0.1;
       zScore = Math.round(((spread - mean) / stdDev) * 100) / 100;
     }
     
     let signal: 'BUY' | 'SELL' | 'AUDIT_PASS' | null = null;
-    if (zScore > 2.2) signal = 'AUDIT_PASS';
-    else if (zScore < -2.2) signal = 'BUY';
+    if (zScore > 2.0) signal = 'AUDIT_PASS';
+    else if (zScore < -2.0) signal = 'BUY';
     
-    const volume = Math.round(500 + rng() * 3200);
-    const openInterest = Math.round(18000 + (i * 12) + rng() * 500);
+    const volume = Math.round(800 + rng() * 4500 * (timeframe === '1D' || timeframe === '1W' ? 5 : 1));
+    const openInterest = Math.round(18000 + (i * 15) + rng() * 600);
     
     candles.push({
       timestamp: ts,

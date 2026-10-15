@@ -3,15 +3,11 @@
 import React, { useState } from 'react';
 import {
   TODAY_DECISION,
-  MCX_SETTLEMENT_DATE,
-  SOURCE_FILE_HASH,
-  CODE_VERSION,
 } from '@/lib/singleSourceOfTruth';
 import { PageId } from '@/lib/types';
 import {
   ShieldAlert,
   ArrowRight,
-  TrendingDown,
   Layers,
   HelpCircle,
   Clock,

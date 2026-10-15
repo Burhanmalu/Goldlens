@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { CONTRACT_REGISTRY } from '@/lib/contracts';
 import { OHLCVCandle, ContractSnapshot, OrderBookState } from '@/lib/types';
+import { generateCandlestickData } from '@/lib/mockData';
 
 interface YahooChartResponse {
   chart?: {
@@ -51,7 +52,6 @@ async function fetchMCXIndiaDirect(): Promise<{
       'X-Requested-With': 'XMLHttpRequest',
     };
 
-    // Attempt 1: MCX India MarketWatch endpoint
     const res = await fetch('https://www.mcxindia.com/backpage.aspx/GetMarketWatch', {
       method: 'POST',
       headers: {
@@ -98,24 +98,27 @@ async function fetchMCXIndiaDirect(): Promise<{
         if (Object.keys(contractQuotes).length > 0) {
           return {
             success: true,
-            sourceName: 'Official MCX India Live (mcxindia.com)',
+            sourceName: 'Official MCX India Live Stream (mcxindia.com)',
             contractQuotes,
           };
         }
       }
     }
-  } catch (_err) {
-    // Graceful fallback to proxy engine
+  } catch {
+    // Graceful fallback to Yahoo gateway
   }
 
   return {
     success: false,
-    sourceName: 'MCX Feed via Live Gateway',
+    sourceName: '',
     contractQuotes: {},
   };
 }
 
-async function fetchYahooQuotes(): Promise<{
+/**
+ * Fetch live commodity prices from Yahoo Finance API with dynamic interval/range
+ */
+async function fetchYahooQuotes(timeframe: string = '15m', rangeParam: string = '1M'): Promise<{
   goldUsd: number;
   usdInr: number;
   goldBeesInr: number;
@@ -128,11 +131,54 @@ async function fetchYahooQuotes(): Promise<{
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     };
 
+    // Map timeframe to Yahoo Finance API parameters
+    let interval = '15m';
+    let yRange = '5d';
+
+    switch (timeframe) {
+      case '1m':
+        interval = '1m';
+        yRange = '1d';
+        break;
+      case '5m':
+        interval = '5m';
+        yRange = '5d';
+        break;
+      case '15m':
+        interval = '15m';
+        yRange = '5d';
+        break;
+      case '1H':
+        interval = '60m';
+        yRange = '1mo';
+        break;
+      case '4H':
+        interval = '60m';
+        yRange = '3mo';
+        break;
+      case '1D':
+        interval = '1d';
+        yRange = '1y';
+        break;
+      case '1W':
+        interval = '1wk';
+        yRange = '5y';
+        break;
+      default:
+        interval = '15m';
+        yRange = '5d';
+    }
+
+    if (rangeParam === '3M') yRange = '3mo';
+    if (rangeParam === '6M') yRange = '6mo';
+    if (rangeParam === '1Y') yRange = '1y';
+    if (rangeParam === 'MAX') yRange = '5y';
+
     // Parallel fetch for Gold Futures (GC=F), USD/INR (INR=X), and Indian Gold ETF (GOLDBEES.NS)
     const [goldRes, inrRes, goldBeesRes] = await Promise.allSettled([
-      fetch('https://query1.finance.yahoo.com/v8/finance/chart/GC=F?interval=15m&range=5d', { headers, next: { revalidate: 10 } }),
+      fetch(`https://query1.finance.yahoo.com/v8/finance/chart/GC=F?interval=${interval}&range=${yRange}`, { headers, next: { revalidate: 10 } }),
       fetch('https://query1.finance.yahoo.com/v8/finance/chart/INR=X?interval=15m&range=1d', { headers, next: { revalidate: 30 } }),
-      fetch('https://query1.finance.yahoo.com/v8/finance/chart/GOLDBEES.NS?interval=15m&range=5d', { headers, next: { revalidate: 30 } }),
+      fetch(`https://query1.finance.yahoo.com/v8/finance/chart/GOLDBEES.NS?interval=${interval}&range=${yRange}`, { headers, next: { revalidate: 30 } }),
     ]);
 
     let goldUsd = 2780;
@@ -199,7 +245,7 @@ async function fetchYahooQuotes(): Promise<{
       isRealLive,
       sourceName: isRealLive ? 'MCX / Commodity Live Gateway (mcxindia.com + Proxy)' : 'MCX Benchmark Engine (Cached)',
     };
-  } catch (_err) {
+  } catch {
     return {
       goldUsd: 2785,
       usdInr: 86.8,
@@ -215,12 +261,13 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const symbol = searchParams.get('symbol') || 'GOLDM';
   const timeframe = searchParams.get('timeframe') || '15m';
+  const range = searchParams.get('range') || '1M';
 
   // 1. Try fetching directly from mcxindia.com first
   const mcxDirect = await fetchMCXIndiaDirect();
 
-  // 2. Fetch live commodity benchmark stream
-  const marketData = await fetchYahooQuotes();
+  // 2. Fetch live commodity benchmark stream with timeframe & range
+  const marketData = await fetchYahooQuotes(timeframe, range);
 
   const finalSource = mcxDirect.success
     ? 'Official MCX India Live (mcxindia.com)'
@@ -289,7 +336,7 @@ export async function GET(request: NextRequest) {
   let candles: OHLCVCandle[] = [];
 
   if (marketData.candlesRaw.length > 0) {
-    const rawSlice = marketData.candlesRaw.slice(-60);
+    const rawSlice = marketData.candlesRaw.slice(-180);
     const spreadHistory: number[] = [];
 
     candles = rawSlice.map((c) => {
@@ -303,7 +350,12 @@ export async function GET(request: NextRequest) {
       const rawLow = Math.round(((c.low * ratio) * currentSpec.quoteBasis * currentSpec.purityFactor));
 
       const d = new Date(c.time);
-      const timeStr = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false });
+      let timeStr = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false });
+      if (timeframe === '1H' || timeframe === '4H') {
+        timeStr = `${d.getDate()} ${d.toLocaleString('en-US', { month: 'short' })} ${timeStr}`;
+      } else if (timeframe === '1D' || timeframe === '1W') {
+        timeStr = `${d.getDate()} ${d.toLocaleString('en-US', { month: 'short' })} ${d.getFullYear()}`;
+      }
       const dateStr = d.toISOString().split('T')[0];
 
       // Relative spread & carry vs baseline
@@ -348,56 +400,9 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  // Fallback candles (Generated with strict relative value physics)
+  // Fallback / Enhanced candles (Generated dynamically according to requested timeframe and range)
   if (candles.length === 0) {
-    const now = Date.now();
-    const intervalMs = timeframe === '1m' ? 60000 : timeframe === '5m' ? 300000 : 900000;
-    const targetSnapshot = snapshots.find((s) => s.symbol === symbol) || snapshots[0];
-    const spreadHistory: number[] = [];
-
-    for (let i = 40; i >= 0; i--) {
-      const t = now - i * intervalMs;
-      const d = new Date(t);
-      const noise = (Math.sin(i * 0.7) + Math.cos(i * 0.3)) * 25;
-      const close = Math.round(targetSnapshot.lastPrice + noise);
-      const open = Math.round(close - (Math.sin(i * 0.5)) * 20);
-      const high = Math.max(open, close) + Math.round(Math.abs(Math.cos(i * 0.4)) * 15);
-      const low = Math.min(open, close) - Math.round(Math.abs(Math.sin(i * 0.6)) * 15);
-      const norm = Math.round(((close / currentSpec.quoteBasis) / currentSpec.purityFactor) * 100) / 100;
-
-      const spread = Math.round(((norm - baseRatePerGram) / baseRatePerGram) * 10000) / 100;
-      spreadHistory.push(spread);
-
-      const carry = Math.round((6.5 / 100 * (currentMult.expiryDays / 365)) * 10000) / 100;
-      const residual = Math.round((spread - carry) * 100) / 100;
-
-      let zScore = 0;
-      if (spreadHistory.length >= 5) {
-        const slice = spreadHistory.slice(-20);
-        const mean = slice.reduce((a, b) => a + b, 0) / slice.length;
-        const variance = slice.reduce((a, b) => a + (b - mean) ** 2, 0) / Math.max(1, slice.length - 1);
-        const stdDev = Math.sqrt(variance) || 0.1;
-        zScore = Math.round(((spread - mean) / stdDev) * 100) / 100;
-      }
-
-      candles.push({
-        timestamp: t,
-        timeStr: d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false }),
-        date: d.toISOString().split('T')[0],
-        open,
-        high,
-        low,
-        close,
-        volume: Math.round(1200 + Math.abs(Math.sin(i)) * 800),
-        openInterest: currentMult.oi,
-        normalizedPrice: norm,
-        spread,
-        expectedCarry: carry,
-        residual,
-        zScore,
-        signal: zScore > 2.0 ? 'AUDIT_PASS' : zScore < -2.0 ? 'BUY' : null,
-      });
-    }
+    candles = generateCandlestickData(symbol, timeframe, range);
   }
 
   // Order book

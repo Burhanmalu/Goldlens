@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Menu, Hexagon, User, Bell, Sparkles, RefreshCw } from 'lucide-react';
+import { Menu, Hexagon, User, Bell, Sparkles } from 'lucide-react';
 import { TickerRibbon } from './TickerRibbon';
 
 interface TopHeaderBarProps {
@@ -28,17 +28,17 @@ export function TopHeaderBar({
   onSelectSymbol,
   priceTickers,
   onOpenMobileMenu,
-  demoMode = false,
-  onToggleDemo,
+  demoMode: _demoMode = false,
+  onToggleDemo: _onToggleDemo,
   onNavigateHome,
   onLogout,
   userName = 'Trader',
   deskId = 'QUANT_DESK',
-  isLiveOnline = true,
-  dataSource = 'MCX Low-Latency Feed Engine',
-  lastUpdated = '',
-  onManualRefresh,
-  isLoading = false,
+  isLiveOnline: _isLiveOnline = true,
+  dataSource: _dataSource = 'MCX Low-Latency Feed Engine',
+  lastUpdated: _lastUpdated = '',
+  onManualRefresh: _onManualRefresh,
+  isLoading: _isLoading = false,
   onOpenAiAssistant,
 }: TopHeaderBarProps) {
   return (
