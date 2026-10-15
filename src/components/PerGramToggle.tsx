@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { CinematicVideoBackdrop } from '@/components/CinematicVideoBackdrop';
 import { CinematicAssetBackdrop } from '@/components/CinematicAssetBackdrop';
+import { CinematicFilamentsVideo } from '@/components/CinematicFilamentsVideo';
 
 export function PerGramToggle() {
   const [mode, setMode] = useState<'quoted' | 'normalized'>('quoted');
@@ -52,9 +52,13 @@ export function PerGramToggle() {
   const maxNormalized = 15200;
 
   return (
-    <section id="problem" className="relative py-28 px-6 max-w-7xl mx-auto border-b border-border overflow-hidden">
-      <CinematicAssetBackdrop asset="monolith_card" opacity={0.3} parallaxSpeed={50} scaleRange={[1, 1.1]} />
-      <CinematicVideoBackdrop type="bullion_vault" opacity={0.3} />
+    <section id="problem" className="relative py-28 border-b border-white/[0.06] overflow-hidden">
+      {/* monolith_card.webp backdrop */}
+      <CinematicAssetBackdrop asset="monolith_card" opacity={0.40} parallaxPx={50} />
+      {/* Drifting gold filaments video */}
+      <CinematicFilamentsVideo opacity={0.25} />
+
+      <div className="relative z-10 max-w-7xl mx-auto px-6">
       <div className="max-w-3xl mb-12">
         <div className="text-xs uppercase tracking-[0.12em] font-mono text-gold mb-3">
           01 — THE PROBLEM
@@ -146,6 +150,7 @@ export function PerGramToggle() {
         <div className="mt-8 pt-6 border-t border-border flex items-center justify-between text-xs font-mono text-text-secondary">
           <span>What is left is the real question: is the difference bigger than the cost of trading it?</span>
         </div>
+      </div>
       </div>
     </section>
   );

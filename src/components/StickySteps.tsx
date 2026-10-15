@@ -3,8 +3,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CinematicCanvas } from '@/components/CinematicCanvas';
-import { CinematicVideoBackdrop } from '@/components/CinematicVideoBackdrop';
 import { CinematicAssetBackdrop } from '@/components/CinematicAssetBackdrop';
+import { CinematicFilamentsVideo } from '@/components/CinematicFilamentsVideo';
 
 export function StickySteps() {
   const [activeStep, setActiveStep] = useState<number>(0);
@@ -41,10 +41,14 @@ export function StickySteps() {
   ];
 
   return (
-    <section id="how-it-works" className="relative py-28 px-6 max-w-7xl mx-auto border-b border-border overflow-hidden">
-      <CinematicAssetBackdrop asset="gold_waves" opacity={0.35} parallaxSpeed={70} scaleRange={[1, 1.15]} />
-      <CinematicCanvas intensity={0.6} mode="waves" />
-      <CinematicVideoBackdrop type="geometry" opacity={0.2} />
+    <section id="how-it-works" className="relative py-28 border-b border-white/[0.06] overflow-hidden">
+      {/* gold_waves.webp backdrop */}
+      <CinematicAssetBackdrop asset="gold_waves" opacity={0.42} parallaxPx={60} />
+      {/* Drifting gold filaments video */}
+      <CinematicFilamentsVideo opacity={0.28} />
+      <CinematicCanvas intensity={0.5} mode="waves" />
+
+      <div className="relative z-10 max-w-7xl mx-auto px-6">
       <div className="max-w-3xl mb-12">
         <div className="text-xs uppercase tracking-[0.12em] font-mono text-gold mb-3">
           02 — HOW IT WORKS
@@ -122,6 +126,7 @@ export function StickySteps() {
             <span>Zero optimistic fill assumptions</span>
           </div>
         </div>
+      </div>
       </div>
     </section>
   );

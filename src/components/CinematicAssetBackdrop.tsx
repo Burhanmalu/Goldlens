@@ -1,64 +1,80 @@
 'use client';
 
+/**
+ * CinematicAssetBackdrop
+ * ──────────────────────────────────────────────────────────────────────────
+ * Renders one of the three cinematic still images as a full-bleed,
+ * always-visible background with a gentle scroll-driven parallax.
+ *
+ * Place this as the first child of a `relative overflow-hidden` section.
+ */
+
 import React, { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import Image from 'next/image';
 
-interface CinematicAssetBackdropProps {
-  asset: 'hero_convergence' | 'gold_waves' | 'monolith_card';
+type Asset = 'hero_convergence' | 'gold_waves' | 'monolith_card';
+
+interface Props {
+  asset: Asset;
+  /** Visible opacity of the image (0–1). Default 0.5. */
   opacity?: number;
-  parallaxSpeed?: number;
-  scaleRange?: [number, number];
+  /** Pixels to shift vertically at full scroll extent. Default 60. */
+  parallaxPx?: number;
+  priority?: boolean;
   className?: string;
-  blendMode?: 'screen' | 'lighten' | 'normal' | 'soft-light';
 }
 
 export function CinematicAssetBackdrop({
   asset,
-  opacity = 0.65,
-  parallaxSpeed = 90,
-  scaleRange = [1, 1.18],
+  opacity = 0.5,
+  parallaxPx = 60,
+  priority = false,
   className = '',
-  blendMode = 'normal',
-}: CinematicAssetBackdropProps) {
-  const containerRef = useRef<HTMLDivElement | null>(null);
+}: Props) {
+  const sectionRef = useRef<HTMLDivElement>(null);
+
+  /* useScroll targeting the *parent* element (the section) */
   const { scrollYProgress } = useScroll({
-    target: containerRef,
+    target: sectionRef,
     offset: ['start end', 'end start'],
   });
 
-  const scale = useTransform(scrollYProgress, [0, 1], scaleRange);
-  const y = useTransform(scrollYProgress, [0, 1], [-parallaxSpeed, parallaxSpeed]);
-
-  const assetSrc = `/assets/cinematic/${asset}.webp`;
+  /* Simple parallax — no opacity animation so the image is always visible */
+  const y = useTransform(scrollYProgress, [0, 1], [`-${parallaxPx}px`, `${parallaxPx}px`]);
 
   return (
     <div
-      ref={containerRef}
-      className={`absolute inset-0 overflow-hidden pointer-events-none -z-10 ${className}`}
+      ref={sectionRef}
+      aria-hidden="true"
+      className={`absolute inset-0 overflow-hidden pointer-events-none select-none ${className}`}
+      style={{ zIndex: 0 }}
     >
       <motion.div
-        style={{ scale, y, opacity }}
-        className="relative w-full h-full will-change-transform"
+        style={{ y }}
+        className="absolute inset-[-8%] will-change-transform"
       >
         <Image
-          src={assetSrc}
-          alt="Cinematic motion clip background"
+          src={`/assets/cinematic/${asset}.webp`}
+          alt=""
           fill
           unoptimized
-          priority={asset === 'hero_convergence'}
-          className={`object-cover object-center filter contrast-110 brightness-90 ${
-            blendMode === 'screen' ? 'mix-blend-screen' : ''
-          }`}
+          priority={priority}
+          style={{ opacity }}
+          className="object-cover object-center"
         />
-        {/* Subtle breathing ambient bloom */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0A0A0B]/40 to-[#0A0A0B]/80 pointer-events-none" />
       </motion.div>
 
-      {/* Deep smooth vignette masks for seamless integration with #0A0A0B canvas */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0B] via-transparent to-[#0A0A0B]/80" />
-      <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A0B]/60 via-transparent to-[#0A0A0B]/60" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_30%,#0A0A0B_95%)]" />
+      {/* ── Gradient vignettes ── */}
+      <div className="absolute inset-0 bg-gradient-to-t  from-[#0A0A0B] via-[#0A0A0B]/10 to-[#0A0A0B]/70" />
+      <div className="absolute inset-0 bg-gradient-to-r  from-[#0A0A0B]/60 via-transparent to-[#0A0A0B]/60" />
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            'radial-gradient(ellipse 80% 70% at 50% 50%, transparent 25%, #0A0A0B 95%)',
+        }}
+      />
     </div>
   );
 }

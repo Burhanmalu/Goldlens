@@ -28,8 +28,11 @@ export function ProofSection({ onOpenMethod }: ProofSectionProps) {
   ];
 
   return (
-    <section id="proof" className="relative py-28 px-6 max-w-7xl mx-auto border-b border-border overflow-hidden">
-      <CinematicAssetBackdrop asset="monolith_card" opacity={0.35} parallaxSpeed={90} scaleRange={[1, 1.15]} />
+    <section id="proof" className="relative py-28 border-b border-white/[0.06] overflow-hidden">
+      {/* monolith_card.webp backdrop */}
+      <CinematicAssetBackdrop asset="monolith_card" opacity={0.42} parallaxPx={80} />
+
+      <div className="relative z-10 max-w-7xl mx-auto px-6">
       <div className="max-w-3xl mb-12">
         <div className="text-xs uppercase tracking-[0.12em] font-mono text-gold mb-3">
           05 — PROOF
@@ -93,6 +96,7 @@ export function ProofSection({ onOpenMethod }: ProofSectionProps) {
             View the code
           </a>
         </div>
+      </div>
       </div>
     </section>
   );

@@ -12,7 +12,10 @@ import { FaqAccordion } from '@/components/FaqAccordion';
 import { Footer } from '@/components/Footer';
 import { AuthSheet } from '@/components/AuthSheet';
 import { SmoothScrollProvider } from '@/components/SmoothScrollProvider';
-import { CinematicVideoBackdrop } from '@/components/CinematicVideoBackdrop';
+
+
+import { CinematicFilamentsVideo } from '@/components/CinematicFilamentsVideo';
+import { CinematicAssetBackdrop } from '@/components/CinematicAssetBackdrop';
 
 interface LandingViewProps {
   settlementDate: string;
@@ -104,24 +107,35 @@ export function LandingView({
       {/* 8. FAQ */}
       <FaqAccordion />
 
-      {/* 9. FINAL CTA */}
-      <section className="relative py-28 px-6 text-center max-w-4xl mx-auto space-y-6 overflow-hidden">
-        <CinematicVideoBackdrop type="molten_gold" opacity={0.3} />
-        <h2 className="text-4xl sm:text-6xl font-display font-black uppercase tracking-tight text-text-primary">
-          Know the price. Skip the noise.
-        </h2>
-        <p className="text-base sm:text-lg text-text-secondary font-mono max-w-lg mx-auto">
-          Every MCX contract converted to ₹ per gram of fine gold with an honest verdict.
-        </p>
-        <div className="pt-2">
-          <button
-            onClick={onOpenLogin}
-            className="px-8 py-3.5 rounded-pill bg-gold hover:opacity-90 text-[#0A0A0B] font-display font-bold text-sm tracking-wide transition-all shadow-[0_0_24px_rgba(214,178,106,0.3)] cursor-pointer"
-          >
-            Open GoldLens
-          </button>
+      {/* 9. FINAL CTA WITH CINEMATIC FILAMENTS */}
+      <section className="relative py-40 overflow-hidden border-y border-white/[0.06]">
+        {/* Drifting gold filaments video */}
+        <CinematicFilamentsVideo opacity={0.55} />
+        {/* monolith_card.webp */}
+        <CinematicAssetBackdrop asset="monolith_card" opacity={0.45} parallaxPx={50} />
+
+        <div className="relative z-10 max-w-4xl mx-auto px-6 text-center space-y-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-[#D6B26A]/30 text-xs uppercase tracking-[0.12em] font-mono text-[#D6B26A]">
+            <span>READY TO AUDIT YOUR SPREADS</span>
+          </div>
+          <h2 className="text-4xl sm:text-6xl font-display font-black uppercase tracking-tight text-[#F5F2EA]">
+            Know the price. Skip the noise.
+          </h2>
+          <p className="text-base sm:text-lg text-[#A29C8E] font-mono max-w-lg mx-auto">
+            Every MCX contract converted to ₹ per gram of fine gold with an honest verdict.
+          </p>
+          <div className="pt-4 flex justify-center gap-4">
+            <button
+              onClick={onOpenLogin}
+              className="px-8 py-3.5 rounded-full bg-[#D6B26A] hover:opacity-90 text-[#0A0A0B] font-display font-bold text-sm tracking-wide transition-all shadow-[0_0_32px_rgba(214,178,106,0.45)] cursor-pointer"
+            >
+              Open GoldLens
+            </button>
+          </div>
         </div>
       </section>
+
+
 
       {/* 10. FOOTER */}
       <Footer
