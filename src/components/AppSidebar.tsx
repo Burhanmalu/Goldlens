@@ -227,12 +227,22 @@ export function AppSidebar({
           </button>
         )}
 
-        {/* Live Feed Status Pill */}
+        {/* Home / Landing Navigation */}
+        <button
+          onClick={() => handleSelectPage('landing')}
+          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-text-secondary hover:text-gold hover:bg-[#161A1F] transition-colors min-h-[40px] touch-manipulation cursor-pointer"
+          title="Return to Landing Page"
+        >
+          <Hexagon size={16} className="text-gold flex-shrink-0" />
+          {(!isCollapsed || isMobile) && <span>Landing Home</span>}
+        </button>
+
+        {/* Settlement Data Status Pill */}
         {(!isCollapsed || isMobile) && (
           <div className="pt-2 border-t border-[#2B3139]/60 px-2 py-1 text-[11px] font-mono text-muted flex items-center justify-between">
             <div className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-buy animate-pulse" />
-              <span className="text-buy font-bold">MCX Live</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-gold" />
+              <span className="text-text-secondary font-bold">MCX Settlement</span>
             </div>
             <span>{timeStr} IST</span>
           </div>

@@ -1,0 +1,40 @@
+{
+  "strategies": [
+    {
+      "name": "GOLDM vs GOLDTEN Calendar Carry Spread",
+      "verdict": "GROSS_ONLY",
+      "net_pct": -0.04,
+      "hit_rate": 58.2,
+      "gold_beta": 0.02,
+      "placebo_p": 0.14,
+      "folds": [
+        { "fold": 1, "in_sample_sharpe": 1.42, "out_sample_net": -0.01 },
+        { "fold": 2, "in_sample_sharpe": 1.18, "out_sample_net": -0.05 },
+        { "fold": 3, "in_sample_sharpe": 0.95, "out_sample_net": -0.06 }
+      ]
+    },
+    {
+      "name": "GOLDM vs GOLDGUINEA Liquidity Arbitrage",
+      "verdict": "NO_EDGE",
+      "net_pct": -0.22,
+      "hit_rate": 44.1,
+      "gold_beta": 0.05,
+      "placebo_p": 0.38,
+      "folds": [
+        { "fold": 1, "in_sample_sharpe": 0.88, "out_sample_net": -0.19 },
+        { "fold": 2, "in_sample_sharpe": 0.65, "out_sample_net": -0.25 }
+      ]
+    },
+    {
+      "name": "GOLDPETAL Premium Mean-Reversion",
+      "verdict": "INSUFFICIENT_DATA",
+      "net_pct": 0.0,
+      "hit_rate": 50.0,
+      "gold_beta": 0.01,
+      "placebo_p": 0.49,
+      "folds": []
+    }
+  ],
+  "source": "https://www.mcxindia.com/market-data/bhavcopy",
+  "sample": false
+}

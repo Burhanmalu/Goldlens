@@ -37,18 +37,19 @@ import { PlaybooksView } from '@/components/PlaybooksView';
 import { ProofAndAuditView } from '@/components/ProofAndAuditView';
 import { MethodologyView } from '@/components/MethodologyView';
 import { QuantAssistantDrawer } from '@/components/QuantAssistantDrawer';
+import { LandingView } from '@/components/LandingView';
 
 export default function GoldLensApp() {
-  // Authentication State: Require login first on opening the app
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  // Navigation & Active States: Default to Landing Page (/)
+  const [currentPage, setCurrentPage] = useState<PageId>('landing');
+  const [isLoginSheetOpen, setIsLoginSheetOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
   const [currentUser, setCurrentUser] = useState<{ email: string; deskId: string; role: string }>({
     email: 'desk.alpha@goldlens.quant',
     deskId: 'QUANT_DESK_ALPHA',
     role: 'Senior Arbitrage Quant',
   });
 
-  // Navigation & Active States: Default to decision-first TODAY screen (B3 & B4)
-  const [currentPage, setCurrentPage] = useState<PageId>('today');
   const [selectedSymbol, setSelectedSymbol] = useState<string>('GOLDM');
   const [compareSymbol, setCompareSymbol] = useState<string>('GOLDTEN');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -178,6 +179,21 @@ export default function GoldLensApp() {
     return (((pA - pB) / pB) * 100).toFixed(2);
   }, [selectedSnapshot, compareSnapshot]);
 
+  // If on Landing Page, render the Moto/CRED style public landing experience
+  if (currentPage === 'landing') {
+    return (
+      <LandingView
+        settlementDate="2026-04-03"
+        onOpenApp={(tab) => {
+          setCurrentPage(tab || 'today');
+        }}
+        onOpenLogin={() => setIsLoginSheetOpen(true)}
+        isLoginOpen={isLoginSheetOpen}
+        onCloseLogin={() => setIsLoginSheetOpen(false)}
+      />
+    );
+  }
+
   if (!isAuthenticated) {
     return (
       <LoginPage
@@ -190,7 +206,7 @@ export default function GoldLensApp() {
   }
 
   return (
-    <div className="h-screen w-full min-h-screen overflow-hidden bg-[#0B0E11] text-[#EAECEF] flex select-none font-sans">
+    <div className="h-screen w-full min-h-screen overflow-hidden bg-[#0A0A0B] text-[#F5F2EA] flex select-none font-sans">
       {/* ── 1. MODERN LEFT SIDEBAR / MOBILE DRAWER ── */}
       <AppSidebar
         currentPage={currentPage}
