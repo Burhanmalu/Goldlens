@@ -39,8 +39,8 @@ import { MethodologyView } from '@/components/MethodologyView';
 import { QuantAssistantDrawer } from '@/components/QuantAssistantDrawer';
 
 export default function GoldLensApp() {
-  // Authentication State: Open straight to the product (D14), optional login toggle
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
+  // Authentication State: Require login first on opening the app
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [currentUser, setCurrentUser] = useState<{ email: string; deskId: string; role: string }>({
     email: 'desk.alpha@goldlens.quant',
     deskId: 'QUANT_DESK_ALPHA',
